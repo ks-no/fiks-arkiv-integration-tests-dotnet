@@ -10,7 +10,12 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers
 {
     public class MeldingHelper
     {
-        public static async Task<List<PayloadFile>> GetPayloads(MottattMeldingArgs mottattMeldingArgs)
+        public static async Task<PayloadFile> GetDecryptedMessagePayload(MottattMeldingArgs mottattMeldingArgs)
+        {
+            return GetDecryptedPayloads(mottattMeldingArgs).Result[0];
+        }
+        
+        public static async Task<List<PayloadFile>> GetDecryptedPayloads(MottattMeldingArgs mottattMeldingArgs)
         {
             var payloadFiles = new List<PayloadFile>();
             

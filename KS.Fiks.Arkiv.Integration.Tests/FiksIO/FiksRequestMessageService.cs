@@ -22,10 +22,11 @@ namespace KS.Fiks.Arkiv.Integration.Tests.FiksIO
             _senderId = config.KontoConfiguration.KontoId;
         }
 
-        public Guid Send(Guid mottakerKontoId, string meldingsType, string payloadContent, string payloadFilename, List<KeyValuePair<string, FileStream>> attachments )
+        public Guid Send(Guid mottakerKontoId, string meldingsType, string payloadContent, string payloadFilename, List<KeyValuePair<string, FileStream>> attachments, string testSessionId)
         {
+            var headere = new Dictionary<string, string>() { { "testSessionId", testSessionId } };
             var ttl = new TimeSpan(0, TTLMinutes, 0);
-            var messageRequest = new MeldingRequest(_senderId, mottakerKontoId, meldingsType, ttl);
+            var messageRequest = new MeldingRequest(_senderId, mottakerKontoId, meldingsType, ttl, headere: headere);
 
             var payloads = new List<IPayload>();
 

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using KS.Fiks.Arkiv.Integration.Tests.FiksIO;
+using KS.Fiks.Arkiv.Integration.Tests.Library;
 using KS.Fiks.IO.Arkiv.Client.Models;
+using KS.Fiks.IO.Arkiv.Client.Models.Innsyn.Hent;
 using KS.Fiks.IO.Client;
 using KS.Fiks.IO.Client.Models;
 using KS.Fiks.IO.Client.Models.Feilmelding;
@@ -38,25 +40,21 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests
         [Test]
         public void Verify_NyJournalpost_Then_Verify_JournalpostHent_By_SystemID()
         {
-            var nyJournalpost = MeldingFactory.CreateNyJournalpostMelding();
+            var testSessionId = Guid.NewGuid().ToString();
+            
+            var arkivmelding = MeldingGenerator.CreateNyJournalpostMelding();
 
-            var nyJournalpostAsString = ArkivmeldingSerializeHelper.Serialize(nyJournalpost);
+            var nyJournalpostAsString = ArkiveringSerializeHelper.Serialize(arkivmelding);
             var validator = new SimpleXsdValidator(Directory.GetCurrentDirectory());
             
             // Valider arkivmelding
             validator.ValidateArkivmelding(nyJournalpostAsString);
 
             // Send melding
-            var nyJournalpostMeldingId = _fiksRequestService.Send(_mottakerKontoId, ArkivintegrasjonMeldingTypeV1.Arkivmelding, nyJournalpostAsString, "arkivmelding.xml", null);
+            var nyJournalpostMeldingId = _fiksRequestService.Send(_mottakerKontoId, ArkivintegrasjonMeldingTypeV1.Arkivmelding, nyJournalpostAsString, "arkivmelding.xml", null, testSessionId);
             
             // Vent på 2 første response meldinger (mottatt og kvittering)
-            var counter = 0;
-            while(_mottatMeldingArgsList.Count <= 2 && counter < 10)
-            {
-                Thread.Sleep(400);
-                counter++;
-            }
-
+            VentPaSvar(2, 10);
             Assert.True(_mottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
 
             // Verifiser at man får mottatt melding
@@ -65,41 +63,59 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests
             // Verifiser at man får arkivmeldingKvittering melding
             var arkivmeldingKvitteringMelding = GetAndVerifyByMeldingstype(_mottatMeldingArgsList, nyJournalpostMeldingId, ArkivintegrasjonMeldingTypeV1.ArkivmeldingKvittering);
             
-            var payloads = MeldingHelper.GetPayloads(arkivmeldingKvitteringMelding).Result;
-
-            var arkivmeldingKvitteringPayload = payloads[0];
+            var arkivmeldingKvitteringPayload = MeldingHelper.GetDecryptedMessagePayload(arkivmeldingKvitteringMelding).Result;
             Assert.True(arkivmeldingKvitteringPayload.Filename == "arkivmelding-kvittering.xml", "Filnavn ikke som forventet arkivmelding-kvittering.xml");
     
-            // Valider arkivmeldingKvittering innhold (xml)
+            // Valider innhold (xml)
             validator.ValidateArkivmeldingKvittering(arkivmeldingKvitteringPayload.PayloadAsString);
             
-            var arkivmeldingKvittering = ArkivmeldingSerializeHelper.DeSerializeArkivmeldingKvittering(arkivmeldingKvitteringPayload.PayloadAsString);
-            var systemId = arkivmeldingKvittering.RegistreringKvittering[0].SystemID;
+            var arkivmeldingKvittering = ArkiveringSerializeHelper.DeSerializeArkivmeldingKvittering(arkivmeldingKvitteringPayload.PayloadAsString);
+            var systemId = arkivmeldingKvittering.RegistreringKvittering[0].SystemID; // Bruk SystemID som man fikk i kvittering
 
-            var journalpostHent = MeldingFactory.CreateJournalpostHent(systemId);
+            var journalpostHent = MeldingGenerator.CreateJournalpostHent(systemId);
             
-            var journalpostHentAsString = ArkivmeldingSerializeHelper.Serialize(journalpostHent);
+            var journalpostHentAsString = ArkiveringSerializeHelper.Serialize(journalpostHent);
             
-            // Valider journalpostHent innhold (xml)
+            // Valider innhold (xml)
             validator.ValidateJournalpostHent(nyJournalpostAsString);
             
+            // Nullstill meldingsliste
+            _mottatMeldingArgsList.Clear();
+            
             // Send melding
-            var journalpostHentMeldingId = _fiksRequestService.Send(_mottakerKontoId, ArkivintegrasjonMeldingTypeV1.JournalpostHent, journalpostHentAsString, "arkivmelding.xml", null);
+            var journalpostHentMeldingId = _fiksRequestService.Send(_mottakerKontoId, ArkivintegrasjonMeldingTypeV1.JournalpostHent, journalpostHentAsString, "arkivmelding.xml", null, testSessionId);
 
-            // Vent på 2 første response meldinger (mottatt og resultat)
-            counter = 0;
-            while(_mottatMeldingArgsList.Count <= 2 && counter < 10)
-            {
-                Thread.Sleep(400);
-                counter++;
-            }
+            // Vent på 1 respons meldinger 
+            VentPaSvar(1, 10);
 
             Assert.True(_mottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
             
-            // Verifiser at man får arkivmeldingKvittering melding
-            var journalpostHentResultat = GetAndVerifyByMeldingstype(_mottatMeldingArgsList, journalpostHentMeldingId, ArkivintegrasjonMeldingTypeV1.JournalpostHentResultat);
+            // Verifiser at man får journalpostHentResultat melding
+            var journalpostHentResultatMelding = GetAndVerifyByMeldingstype(_mottatMeldingArgsList, journalpostHentMeldingId, ArkivintegrasjonMeldingTypeV1.JournalpostHentResultat);
 
-            Assert.IsNotNull(journalpostHentResultat);
+            Assert.IsNotNull(journalpostHentResultatMelding);
+            
+            var journalpostHentResultatPayload = MeldingHelper.GetDecryptedMessagePayload(journalpostHentResultatMelding).Result;
+            
+            // Valider innhold (xml)
+            validator.ValidateJournalpostHentResultat(journalpostHentResultatPayload.PayloadAsString);
+
+            var journalpostHentResultat = ArkiveringSerializeHelper.DeSerializeXml<JournalpostHentResultat>(journalpostHentResultatPayload.PayloadAsString);
+            
+            Assert.AreEqual(journalpostHentResultat.Journalpost.SystemID.Value, systemId.Value);
+            Assert.AreEqual(journalpostHentResultat.Journalpost.Tittel, arkivmelding.Registrering[0].Tittel);
+            Assert.AreEqual(journalpostHentResultat.Journalpost.ReferanseEksternNoekkel.Fagsystem, arkivmelding.Registrering[0].ReferanseEksternNoekkel.Fagsystem);
+            Assert.AreEqual(journalpostHentResultat.Journalpost.ReferanseEksternNoekkel.Noekkel, arkivmelding.Registrering[0].ReferanseEksternNoekkel.Noekkel);
+        }
+
+        private static void VentPaSvar(int antallForventet, int antallVenter)
+        {
+            var counter = 0;
+            while (_mottatMeldingArgsList.Count <= antallForventet && counter < antallVenter)
+            {
+                Thread.Sleep(500);
+                counter++;
+            }
         }
 
         private static async void OnMottattMelding(object sender, MottattMeldingArgs mottattMeldingArgs)

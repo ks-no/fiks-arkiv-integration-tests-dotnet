@@ -64,6 +64,18 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Validation
             Validate(payload, xmlReaderSettings);
         }
         
+        public void ValidateJournalpostHentResultat(string payload)
+        {
+            var xmlReaderSettings = new XmlReaderSettings();
+            xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/journalpost/hent/resultat/v2",
+                Path.Combine(baseDirectory, "Schema/journalpostHentResultat.xsd"));
+            xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/arkivmelding/v2",
+                Path.Combine(baseDirectory, "Schema/arkivmelding.xsd"));
+            xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/metadatakatalog/v2",
+                Path.Combine(baseDirectory, "Schema/metadatakatalog.xsd"));
+            Validate(payload, xmlReaderSettings);
+        }
+        
         public void ValidateArkivmeldingKvittering(string payload)
         {
             var xmlReaderSettings = new XmlReaderSettings();
