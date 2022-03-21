@@ -32,9 +32,9 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
             };
         }
 
-        public static Arkivmelding CreateNyJournalpostMelding(string referanseEksternNoekkelNoekkel = null)
+        public static Arkivmelding CreateArkivmeldingMedNyJournalpost(string referanseEksternNoekkelNoekkel = null)
          {
-             var nyJournalpost = new Arkivmelding()
+             var arkivmelding = new Arkivmelding()
              {
                  System = "Fagsystem X",
                  MeldingId = Guid.NewGuid().ToString(),
@@ -45,7 +45,38 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
                  }
              };
              
-             return nyJournalpost;
+             return arkivmelding;
          }
+
+        public static Arkivmelding CreateArkivmeldingMedNyJournalpost(IO.Arkiv.Client.Models.Arkivering.Arkivmelding.EksternNoekkel referanseEksternNoekkelNoekkel)
+        {
+            var journalpost = ArkivmeldingDataGenerator.CreateJournalpost();
+            journalpost.ReferanseEksternNoekkel = referanseEksternNoekkelNoekkel;
+            
+            var arkivmelding = new Arkivmelding()
+            {
+                System = "Fagsystem X",
+                MeldingId = Guid.NewGuid().ToString(),
+                AntallFiler = 1,
+                Registrering =
+                {
+                    journalpost
+                }
+            };
+             
+            return arkivmelding;
+        }
+
+        public static JournalpostHent CreateJournalpostHent(IO.Arkiv.Client.Models.Arkivering.Arkivmelding.EksternNoekkel referanseEksternNoekkel)
+        {
+            return new JournalpostHent()
+            {
+                ReferanseEksternNoekkel = new IO.Arkiv.Client.Models.Innsyn.Hent.EksternNoekkel()
+                {
+                    Fagsystem = referanseEksternNoekkel.Fagsystem,
+                    Noekkel = referanseEksternNoekkel.Noekkel
+                }
+            };
+        }
     }
 }
