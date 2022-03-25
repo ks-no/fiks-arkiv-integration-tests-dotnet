@@ -34,7 +34,7 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers
                         {
                             var streamReader = new StreamReader(entryStream);
                             var xml = streamReader.ReadToEndAsync().Result;
-                            payloadFiles.Add(new PayloadFile() { Filename = asiceReadEntry.FileName, PayloadAsString = xml });
+                            payloadFiles.Add(new PayloadFile(asiceReadEntry.FileName, xml ));
                         }
                     }
                 }

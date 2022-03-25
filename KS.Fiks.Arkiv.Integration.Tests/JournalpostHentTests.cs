@@ -1,22 +1,22 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading;
 using KS.Fiks.Arkiv.Integration.Tests.FiksIO;
 using KS.Fiks.Arkiv.Integration.Tests.Library;
 using KS.Fiks.IO.Arkiv.Client.Models;
-using KS.Fiks.IO.Arkiv.Client.Models.Innsyn.Hent;
+using KS.Fiks.IO.Arkiv.Client.Models.Innsyn.Hent.Journalpost;
 using KS.Fiks.IO.Client;
 using KS.Fiks.IO.Client.Models;
-using KS.Fiks.IO.Client.Models.Feilmelding;
+using KS.FiksProtokollValidator.Tests.IntegrationTests;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Validation;
 using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
+using EksternNoekkel = KS.Fiks.IO.Arkiv.Client.Models.Arkivering.Arkivmelding.EksternNoekkel;
 
-namespace KS.FiksProtokollValidator.Tests.IntegrationTests
+namespace KS.Fiks.Arkiv.Integration.Tests
 {
-    public class ArkiveringTests : IntegrationTestsBase
+    public class JournalpostHentTests : IntegrationTestsBase
     {
         //private static List<MottattMeldingArgs> _mottatMeldingArgsList;
         private IFiksIOClient _client;
@@ -38,8 +38,9 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests
         }
         
         [Test]
-        public void Verify_NyJournalpost_Then_Verify_JournalpostHent_By_SystemID()
+        public void Verify_Arkivmelding_With_Journalpost_Then_Verify_JournalpostHent_By_SystemID()
         {
+            // Denne id'en gjør at Arkiv-simulatoren ser hvilke meldinger som hører sammen
             var testSessionId = Guid.NewGuid().ToString();
             
             var arkivmelding = MeldingGenerator.CreateArkivmeldingMedNyJournalpost();
@@ -109,11 +110,12 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests
         }
         
         [Test]
-        public void Verify_NyJournalpost_Then_Verify_JournalpostHent_By_EksternNoekkel()
+        public void Verify_Arkivmelding_With_Journalpost_Then_Verify_JournalpostHent_By_EksternNoekkel()
         {
+            // Denne id'en gjør at Arkiv-simulatoren ser hvilke meldinger som henger sammen
             var testSessionId = Guid.NewGuid().ToString();
 
-            var referanseEksternNoekkel = new Fiks.IO.Arkiv.Client.Models.Arkivering.Arkivmelding.EksternNoekkel()
+            var referanseEksternNoekkel = new EksternNoekkel()
             {
                 Fagsystem = "Integrasjonstest med eksternnoekkel",
                 Noekkel = Guid.NewGuid().ToString()
@@ -149,14 +151,12 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests
             // Valider innhold (xml)
             validator.ValidateArkivmeldingKvittering(arkivmeldingKvitteringPayload.PayloadAsString);
             
-            //var arkivmeldingKvittering = ArkiveringSerializeHelper.DeSerializeArkivmeldingKvittering(arkivmeldingKvitteringPayload.PayloadAsString);
-
             var journalpostHent = MeldingGenerator.CreateJournalpostHent(referanseEksternNoekkel);
             
             var journalpostHentAsString = ArkiveringSerializeHelper.Serialize(journalpostHent);
             
             // Valider innhold (xml)
-            validator.ValidateJournalpostHent(nyJournalpostAsString);
+            validator.ValidateJournalpostHent(journalpostHentAsString);
             
             // Nullstill meldingsliste
             _mottatMeldingArgsList.Clear();

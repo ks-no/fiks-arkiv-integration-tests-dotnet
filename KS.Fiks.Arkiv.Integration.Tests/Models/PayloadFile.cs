@@ -5,9 +5,13 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Models
 {
     public class PayloadFile
     {
-        public string Filename { get; set; }
+        public PayloadFile(string filename, string payloadAsString)
+        {
+            Filename = filename;
+            PayloadAsString = payloadAsString;
+        }
 
-        public Stream PayloadStream { get; set; }
+        public string Filename { get; set; }
         public string  PayloadAsString { get; set; }
     }
 }

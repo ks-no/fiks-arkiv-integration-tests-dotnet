@@ -1,6 +1,8 @@
 using System;
 using KS.Fiks.IO.Arkiv.Client.Models.Arkivering.Arkivmelding;
+using KS.Fiks.IO.Arkiv.Client.Models.Arkivering.Arkivmelding.Oppdatering;
 using KS.Fiks.IO.Arkiv.Client.Models.Innsyn.Hent;
+using KS.Fiks.IO.Arkiv.Client.Models.Innsyn.Hent.Journalpost;
 using KS.Fiks.IO.Arkiv.Client.Models.Metadatakatalog;
 using EksternNoekkel = KS.Fiks.IO.Arkiv.Client.Models.Arkivering.Arkivmeldingkvittering.EksternNoekkel;
 
@@ -12,7 +14,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
         {
              return new JournalpostHent()
              {
-                 ReferanseEksternNoekkel = new Fiks.IO.Arkiv.Client.Models.Innsyn.Hent.EksternNoekkel()
+                 ReferanseEksternNoekkel = new Fiks.IO.Arkiv.Client.Models.Innsyn.Hent.Journalpost.EksternNoekkel()
                  {
                      Fagsystem = referanseEksternNoekkel.Fagsystem,
                      Noekkel = referanseEksternNoekkel.Noekkel
@@ -71,10 +73,27 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
         {
             return new JournalpostHent()
             {
-                ReferanseEksternNoekkel = new IO.Arkiv.Client.Models.Innsyn.Hent.EksternNoekkel()
+                ReferanseEksternNoekkel = new IO.Arkiv.Client.Models.Innsyn.Hent.Journalpost.EksternNoekkel()
                 {
                     Fagsystem = referanseEksternNoekkel.Fagsystem,
                     Noekkel = referanseEksternNoekkel.Noekkel
+                }
+            };
+        }
+
+        public static ArkivmeldingOppdatering CreateArkivmeldingOppdatering(IO.Arkiv.Client.Models.Arkivering.Arkivmelding.EksternNoekkel referanseEksternNoekkel, string nyTittel)
+        {
+            return new ArkivmeldingOppdatering()
+            {
+                MeldingId = Guid.NewGuid().ToString(),
+                Tidspunkt = DateTime.Now,
+                RegistreringOppdateringer =
+                {
+                    new RegistreringOppdatering()
+                    {
+                        Tittel = nyTittel,
+                        ReferanseEksternNoekkel = referanseEksternNoekkel
+                    }
                 }
             };
         }

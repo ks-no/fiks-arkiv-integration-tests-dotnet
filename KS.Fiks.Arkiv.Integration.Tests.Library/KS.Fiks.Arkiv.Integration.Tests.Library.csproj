@@ -6,7 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="KS.Fiks.IO.Arkiv.Client" Version="2.0.12" />
+      <PackageReference Include="KS.Fiks.IO.Arkiv.Client" Version="2.0.16-build.20220324103323447" />
     </ItemGroup>
 
 </Project>
