@@ -3,7 +3,7 @@ Integrasjonstester for Fiks-Arkiv protokollen.
 Disse testene er stort sett mer avanserte enn de testen man kan kjøre i [Fiks-Protokoll-Validator](https://forvaltning.fiks.test.ks.no/fiks-validator/#/).
 Det vil si at integrasjonstestene skal f.eks. bevise at man kan først arkivere en journalpost for så å oppdatere den og til slutt hente den og bevise at endringen har blitt gjennomført samt mottat- og kvitteringsmeldinger ser korrekt ut. 
 
-Fiks-Protokoll-Validator tester enkeltvis meldinger som f.eks. at man kan arkivere en journalpost og at kvitteringsmelding ser korrekt ut. Stegvise meldingsutvekslinger skal skrives som ntegrasjonstester.  
+Fiks-Protokoll-Validator tester enkeltvis meldinger som f.eks. at man kan arkivere en journalpost og at kvitteringsmelding ser korrekt ut. Stegvise meldingsutvekslinger skal skrives som integrasjonstester.  
 
 ## Oppsett
 For å kunne kjøre testene må man ha satt opp en Fiks-Protokoll konto som igjen er en FIks-IO konto. Se gjerne dokumentasjon [her](https://ks-no.github.io/fiks-plattform/tjenester/fiksio/) for nærmere forklaring rundt Fiks-Protokoller, Fiks-Arkiv, Fiks-IO og hvordan det henger sammen.
