@@ -29,7 +29,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests
             //TODO En annen lokal lagring som kjørte for disse testene hadde vært stilig i stedet for en liste. 
             _mottatMeldingArgsList = new List<MottattMeldingArgs>();
             var config = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.Development.json")
+                .AddJsonFile("appsettings.Local.json")
                 .Build();
             _client = new FiksIOClient(FiksIOConfigurationBuilder.CreateFiksIOConfiguration(config));
             _client.NewSubscription(OnMottattMelding);

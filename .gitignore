@@ -384,8 +384,9 @@ MigrationBackup/
 *.pem
 *.cer
 fiks-io-config.json
-appsettings.development.json
+appsettings.Development.json
 appsettings.Test.json
+appsettings.Local.json
 
 # App build folders
 published-app
