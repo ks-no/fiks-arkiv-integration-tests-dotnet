@@ -45,13 +45,14 @@ namespace KS.Fiks.Arkiv.Integration.Tests
 
             var referanseEksternNoekkel = new Fiks.IO.Arkiv.Client.Models.Arkivering.Arkivmelding.EksternNoekkel()
             {
-                Fagsystem = "Integrasjonstest med eksternnoekkel",
+                Fagsystem = "Integrasjonstest for arkivmeldingoppdatering med eksternnoekkel",
                 Noekkel = Guid.NewGuid().ToString()
             };
 
             Console.Out.WriteLine(
                 $"Sender arkivmelding med ny journalpost med EksternNoekkel fagsystem {referanseEksternNoekkel.Fagsystem} og noekkel {referanseEksternNoekkel.Noekkel}");
             
+            // STEG 1: Opprett arkivmelding og send inn
             var arkivmelding = MeldingGenerator.CreateArkivmeldingMedNyJournalpost(referanseEksternNoekkel);
 
             var nyJournalpostAsString = ArkiveringSerializeHelper.Serialize(arkivmelding);
@@ -79,6 +80,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests
             // Valider innhold (xml)
             validator.ValidateArkivmeldingKvittering(arkivmeldingKvitteringPayload.PayloadAsString);
 
+            // STEG 2: Send oppdatering av journalpost
             string nyTittel = "En helt ny tittel";
             var arkivmeldingOppdatering = MeldingGenerator.CreateArkivmeldingOppdatering(referanseEksternNoekkel, nyTittel);
             
@@ -90,7 +92,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests
             // Nullstill meldingsliste
             _mottatMeldingArgsList.Clear();
             
-            // Send melding
+            // Send oppdater melding
             var arkivmeldingOppdaterMeldingId = _fiksRequestService.Send(_mottakerKontoId, ArkivintegrasjonMeldingTypeV1.ArkivmeldingOppdater, arkivmeldingOppdateringAsString, "arkivmelding.xml", null, testSessionId);
 
             // Vent på 2 respons meldinger. Mottat og kvittering 
@@ -106,14 +108,38 @@ namespace KS.Fiks.Arkiv.Integration.Tests
 
             Assert.IsNotNull(arkivmeldingOppdaterKvittering);
             
-            var journalpostHentResultatPayload = MeldingHelper.GetDecryptedMessagePayload(arkivmeldingOppdaterKvittering).Result;
+            // STEG 3: Henting av journalpost
+            var journalpostHent = MeldingGenerator.CreateJournalpostHent(referanseEksternNoekkel);
+            
+            var journalpostHentAsString = ArkiveringSerializeHelper.Serialize(journalpostHent);
+            
+            // Valider innhold (xml)
+            validator.ValidateJournalpostHent(journalpostHentAsString);
+            
+            // Nullstill meldingsliste
+            _mottatMeldingArgsList.Clear();
+            
+            // Send hent melding
+            var journalpostHentMeldingId = _fiksRequestService.Send(_mottakerKontoId, ArkivintegrasjonMeldingTypeV1.JournalpostHent, journalpostHentAsString, "arkivmelding.xml", null, testSessionId);
+
+            // Vent på 1 respons meldinger 
+            VentPaSvar(1, 10);
+
+            Assert.True(_mottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
+            
+            // Verifiser at man får journalpostHentResultat melding
+            var journalpostHentResultatMelding = GetAndVerifyByMeldingstype(_mottatMeldingArgsList, journalpostHentMeldingId, ArkivintegrasjonMeldingTypeV1.JournalpostHentResultat);
+
+            Assert.IsNotNull(journalpostHentResultatMelding);
+            
+            var journalpostHentResultatPayload = MeldingHelper.GetDecryptedMessagePayload(journalpostHentResultatMelding).Result;
             
             // Valider innhold (xml)
             validator.ValidateJournalpostHentResultat(journalpostHentResultatPayload.PayloadAsString);
 
             var journalpostHentResultat = ArkiveringSerializeHelper.DeSerializeXml<JournalpostHentResultat>(journalpostHentResultatPayload.PayloadAsString);
-            
-            Assert.AreEqual(journalpostHentResultat.Journalpost.Tittel, arkivmelding.Registrering[0].Tittel);
+
+            Assert.AreEqual(nyTittel, journalpostHentResultat.Journalpost.Tittel);
             Assert.AreEqual(journalpostHentResultat.Journalpost.ReferanseEksternNoekkel.Fagsystem, arkivmelding.Registrering[0].ReferanseEksternNoekkel.Fagsystem);
             Assert.AreEqual(journalpostHentResultat.Journalpost.ReferanseEksternNoekkel.Noekkel, arkivmelding.Registrering[0].ReferanseEksternNoekkel.Noekkel);
         }

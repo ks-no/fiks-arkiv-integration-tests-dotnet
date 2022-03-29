@@ -43,6 +43,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests
             // Denne id'en gjør at Arkiv-simulatoren ser hvilke meldinger som hører sammen
             var testSessionId = Guid.NewGuid().ToString();
             
+            // STEG 1: Opprett arkivmelding og send inn
             var arkivmelding = MeldingGenerator.CreateArkivmeldingMedNyJournalpost();
 
             var nyJournalpostAsString = ArkiveringSerializeHelper.Serialize(arkivmelding);
@@ -51,7 +52,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests
             // Valider arkivmelding
             validator.ValidateArkivmelding(nyJournalpostAsString);
 
-            // Send melding
+            // Send arkiver melding
             var nyJournalpostMeldingId = _fiksRequestService.Send(_mottakerKontoId, ArkivintegrasjonMeldingTypeV1.Arkivmelding, nyJournalpostAsString, "arkivmelding.xml", null, testSessionId);
             
             // Vent på 2 første response meldinger (mottatt og kvittering)
@@ -73,6 +74,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests
             var arkivmeldingKvittering = ArkiveringSerializeHelper.DeSerializeArkivmeldingKvittering(arkivmeldingKvitteringPayload.PayloadAsString);
             var systemId = arkivmeldingKvittering.RegistreringKvittering[0].SystemID; // Bruk SystemID som man fikk i kvittering
 
+            // STEG 2: Henting av journalpost
             var journalpostHent = MeldingGenerator.CreateJournalpostHent(systemId);
             
             var journalpostHentAsString = ArkiveringSerializeHelper.Serialize(journalpostHent);
@@ -83,7 +85,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests
             // Nullstill meldingsliste
             _mottatMeldingArgsList.Clear();
             
-            // Send melding
+            // Send hent melding
             var journalpostHentMeldingId = _fiksRequestService.Send(_mottakerKontoId, ArkivintegrasjonMeldingTypeV1.JournalpostHent, journalpostHentAsString, "arkivmelding.xml", null, testSessionId);
 
             // Vent på 1 respons meldinger 
@@ -124,6 +126,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests
             Console.Out.WriteLine(
                 $"Sender arkivmelding med ny journalpost med EksternNoekkel fagsystem {referanseEksternNoekkel.Fagsystem} og noekkel {referanseEksternNoekkel.Noekkel}");
             
+            // STEG 1: Opprett arkivmelding og send inn
             var arkivmelding = MeldingGenerator.CreateArkivmeldingMedNyJournalpost(referanseEksternNoekkel);
 
             var nyJournalpostAsString = ArkiveringSerializeHelper.Serialize(arkivmelding);
@@ -132,7 +135,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests
             // Valider arkivmelding
             validator.ValidateArkivmelding(nyJournalpostAsString);
 
-            // Send melding
+            // Send arkivering melding
             var nyJournalpostMeldingId = _fiksRequestService.Send(_mottakerKontoId, ArkivintegrasjonMeldingTypeV1.Arkivmelding, nyJournalpostAsString, "arkivmelding.xml", null, testSessionId);
             
             // Vent på 2 første response meldinger (mottatt og kvittering)
@@ -151,6 +154,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests
             // Valider innhold (xml)
             validator.ValidateArkivmeldingKvittering(arkivmeldingKvitteringPayload.PayloadAsString);
             
+            // STEG 2: Henting av journalpost
             var journalpostHent = MeldingGenerator.CreateJournalpostHent(referanseEksternNoekkel);
             
             var journalpostHentAsString = ArkiveringSerializeHelper.Serialize(journalpostHent);
@@ -161,7 +165,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests
             // Nullstill meldingsliste
             _mottatMeldingArgsList.Clear();
             
-            // Send melding
+            // Send hent melding
             var journalpostHentMeldingId = _fiksRequestService.Send(_mottakerKontoId, ArkivintegrasjonMeldingTypeV1.JournalpostHent, journalpostHentAsString, "arkivmelding.xml", null, testSessionId);
 
             // Vent på 1 respons meldinger 
