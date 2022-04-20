@@ -1,6 +1,6 @@
 using System;
-using KS.Fiks.IO.Arkiv.Client.Models.Arkivering.Arkivmelding;
-using KS.Fiks.IO.Arkiv.Client.Models.Metadatakatalog;
+using KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding;
+using KS.Fiks.Arkiv.Models.V1.Metadatakatalog;
 
 namespace KS.Fiks.Arkiv.Integration.Tests.Library
 {

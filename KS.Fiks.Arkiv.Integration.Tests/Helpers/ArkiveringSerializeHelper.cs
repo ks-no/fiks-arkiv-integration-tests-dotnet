@@ -1,11 +1,8 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Text;
-using System.Text.Unicode;
 using System.Xml.Serialization;
-using KS.Fiks.IO.Arkiv.Client.Models.Arkivering.Arkivmelding;
-using KS.Fiks.IO.Arkiv.Client.Models.Arkivering.Arkivmeldingkvittering;
-using KS.Fiks.IO.Arkiv.Client.Models.Innsyn.Hent;
+using KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding;
+using KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmeldingkvittering;
 
 namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers
 {
