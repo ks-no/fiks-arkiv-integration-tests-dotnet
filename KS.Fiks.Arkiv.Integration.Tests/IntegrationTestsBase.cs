@@ -28,7 +28,7 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests
             mottattMeldingArgs.SvarSender?.Ack();
         }
 
-        protected static MottattMeldingArgs GetAndVerifyByMeldingstype(List<MottattMeldingArgs> mottattMeldingArgsList, Guid sendtMeldingid, string forventetMeldingstype)
+        protected static MottattMeldingArgs? GetAndVerifyByMeldingstype(List<MottattMeldingArgs> mottattMeldingArgsList, Guid sendtMeldingid, string forventetMeldingstype)
         {
             foreach (var mottatMeldingArgs in mottattMeldingArgsList)
             {

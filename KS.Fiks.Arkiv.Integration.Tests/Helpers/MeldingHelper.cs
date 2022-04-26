@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using KS.Fiks.ASiC_E;
@@ -10,15 +11,16 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers
 {
     public class MeldingHelper
     {
-        public static async Task<PayloadFile> GetDecryptedMessagePayload(MottattMeldingArgs mottattMeldingArgs)
+        public static async Task<PayloadFile> GetDecryptedMessagePayload(MottattMeldingArgs? mottattMeldingArgs)
         {
             return GetDecryptedPayloads(mottattMeldingArgs).Result[0];
         }
-        
-        public static async Task<List<PayloadFile>> GetDecryptedPayloads(MottattMeldingArgs mottattMeldingArgs)
+
+        private static async Task<List<PayloadFile>> GetDecryptedPayloads(MottattMeldingArgs? mottattMeldingArgs)
         {
             var payloadFiles = new List<PayloadFile>();
-            
+
+            Debug.Assert(mottattMeldingArgs != null, nameof(mottattMeldingArgs) + " != null");
             if (mottattMeldingArgs.Melding.HasPayload)
             {
                 try

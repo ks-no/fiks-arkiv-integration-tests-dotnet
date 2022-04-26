@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using KS.Fiks.Arkiv.Integration.Tests.FiksIO;
 using KS.Fiks.Arkiv.Integration.Tests.Library;
+using KS.Fiks.Arkiv.Models.V1.Arkivstruktur;
 using KS.Fiks.Arkiv.Models.V1.Innsyn.Hent.Journalpost;
 using KS.Fiks.Arkiv.Models.V1.Meldingstyper;
 using KS.Fiks.IO.Client;
@@ -12,15 +13,13 @@ using KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Validation;
 using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
-using EksternNoekkel = KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding.EksternNoekkel;
 
 namespace KS.Fiks.Arkiv.Integration.Tests
 {
     public class ArkivmeldingOppdateringTests : IntegrationTestsBase
     {
-        //private static List<MottattMeldingArgs> _mottatMeldingArgsList;
-        private IFiksIOClient _client;
-        private FiksRequestMessageService _fiksRequestService;
+        private IFiksIOClient? _client;
+        private FiksRequestMessageService? _fiksRequestService;
         private Guid _mottakerKontoId;
 
         [SetUp]

@@ -1,9 +1,9 @@
 using System;
 using KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding;
 using KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding.Oppdatering;
+using KS.Fiks.Arkiv.Models.V1.Arkivstruktur;
 using KS.Fiks.Arkiv.Models.V1.Innsyn.Hent.Journalpost;
 using KS.Fiks.Arkiv.Models.V1.Metadatakatalog;
-using EksternNoekkel = KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding.EksternNoekkel;
 
 namespace KS.Fiks.Arkiv.Integration.Tests.Library
 {
@@ -13,7 +13,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
         {
              return new JournalpostHent()
              {
-                 ReferanseEksternNoekkel = new Models.V1.Innsyn.Hent.Journalpost.EksternNoekkel()
+                 ReferanseEksternNoekkel = new EksternNoekkel()
                  {
                      Fagsystem = referanseEksternNoekkel.Fagsystem,
                      Noekkel = referanseEksternNoekkel.Noekkel
@@ -33,7 +33,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
             };
         }
 
-        public static Arkivmelding CreateArkivmeldingMedNyJournalpost(string referanseEksternNoekkelNoekkel = null)
+        public static Arkivmelding CreateArkivmeldingMedNyJournalpost(string referanseEksternNoekkelNoekkel = null!)
          {
              var arkivmelding = new Arkivmelding()
              {
@@ -66,18 +66,6 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
             };
              
             return arkivmelding;
-        }
-
-        public static JournalpostHent CreateJournalpostHent(Models.V1.Arkivstruktur.EksternNoekkel referanseEksternNoekkel)
-        {
-            return new JournalpostHent()
-            {
-                ReferanseEksternNoekkel = new Models.V1.Innsyn.Hent.Journalpost.EksternNoekkel()
-                {
-                    Fagsystem = referanseEksternNoekkel.Fagsystem,
-                    Noekkel = referanseEksternNoekkel.Noekkel
-                }
-            };
         }
 
         public static ArkivmeldingOppdatering CreateArkivmeldingOppdatering(EksternNoekkel referanseEksternNoekkel, string nyTittel)

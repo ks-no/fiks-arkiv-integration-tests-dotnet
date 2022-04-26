@@ -10,19 +10,19 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Validation
 {
     public class SimpleXsdValidator
     {
-        private string baseDirectory;
+        private string? baseDirectory;
         
         public SimpleXsdValidator()
         {
             baseDirectory = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location);
         } 
         
-        public SimpleXsdValidator(string baseDirectory)
+        public SimpleXsdValidator(string? baseDirectory)
         {
             this.baseDirectory = baseDirectory;
         } 
         
-        private void Validate(string payload, XmlReaderSettings xmlReaderSettings)
+        private static void Validate(string payload, XmlReaderSettings xmlReaderSettings)
         {
             var validationHandler = new ValidationHandler();
             xmlReaderSettings.ValidationType = ValidationType.Schema;
@@ -51,14 +51,31 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Validation
             var arkivModelsAssembly = AppDomain.CurrentDomain.GetAssemblies()
                 .SingleOrDefault(assembly => assembly.GetName().Name == "KS.Fiks.Arkiv.Models.V1");
             
-            using (Stream schemaStream = arkivModelsAssembly.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.arkivmelding.xsd")) {
-                using (XmlReader schemaReader = XmlReader.Create(schemaStream)) {
-                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/arkivmelding/v2", schemaReader);
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.arkivmelding.xsd"))
+            {
+                if (schemaStream != null)
+                {
+                    using XmlReader schemaReader = XmlReader.Create(schemaStream);
+                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/arkivmelding/v2",
+                        schemaReader);
                 }
             }
-            using (Stream schemaStream = arkivModelsAssembly.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.metadatakatalog.xsd")) {
-                using (XmlReader schemaReader = XmlReader.Create(schemaStream)) {
-                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/metadatakatalog/v2", schemaReader);
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.metadatakatalog.xsd"))
+            {
+                if (schemaStream != null)
+                {
+                    using XmlReader schemaReader = XmlReader.Create(schemaStream);
+                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/metadatakatalog/v2",
+                        schemaReader);
+                }
+            }
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.arkivstruktur.xsd"))
+            {
+                if (schemaStream != null)
+                {
+                    using XmlReader schemaReader = XmlReader.Create(schemaStream);
+                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/arkivstruktur",
+                        schemaReader);
                 }
             }
             Validate(xml, xmlReaderSettings);
@@ -70,19 +87,40 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Validation
             var arkivModelsAssembly = AppDomain.CurrentDomain.GetAssemblies()
                 .SingleOrDefault(assembly => assembly.GetName().Name == "KS.Fiks.Arkiv.Models.V1");
             
-            using (Stream schemaStream = arkivModelsAssembly.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.arkivmelding.xsd")) {
-                using (XmlReader schemaReader = XmlReader.Create(schemaStream)) {
-                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/arkivmelding/v2", schemaReader);
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.arkivmelding.xsd"))
+            {
+                if (schemaStream != null)
+                {
+                    using XmlReader schemaReader = XmlReader.Create(schemaStream);
+                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/arkivmelding/v2",
+                        schemaReader);
                 }
             }
-            using (Stream schemaStream = arkivModelsAssembly.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.arkivmeldingOppdatering.xsd")) {
-                using (XmlReader schemaReader = XmlReader.Create(schemaStream)) {
-                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/arkivmeldingoppdatering/v2", schemaReader);
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.arkivmeldingOppdatering.xsd"))
+            {
+                if (schemaStream != null)
+                {
+                    using XmlReader schemaReader = XmlReader.Create(schemaStream);
+                    xmlReaderSettings.Schemas.Add(
+                        "http://www.arkivverket.no/standarder/noark5/arkivmeldingoppdatering/v2", schemaReader);
                 }
             }
-            using (Stream schemaStream = arkivModelsAssembly.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.metadatakatalog.xsd")) {
-                using (XmlReader schemaReader = XmlReader.Create(schemaStream)) {
-                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/metadatakatalog/v2", schemaReader);
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.metadatakatalog.xsd"))
+            {
+                if (schemaStream != null)
+                {
+                    using XmlReader schemaReader = XmlReader.Create(schemaStream);
+                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/metadatakatalog/v2",
+                        schemaReader);
+                }
+            }
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.arkivstruktur.xsd"))
+            {
+                if (schemaStream != null)
+                {
+                    using XmlReader schemaReader = XmlReader.Create(schemaStream);
+                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/arkivstruktur",
+                        schemaReader);
                 }
             }
             Validate(xml, xmlReaderSettings);
@@ -94,14 +132,31 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Validation
             var arkivModelsAssembly = AppDomain.CurrentDomain.GetAssemblies()
                 .SingleOrDefault(assembly => assembly.GetName().Name == "KS.Fiks.Arkiv.Models.V1");
             
-            using (Stream schemaStream = arkivModelsAssembly.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.journalpostHent.xsd")) {
-                using (XmlReader schemaReader = XmlReader.Create(schemaStream)) {
-                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/journalpost/hent/v2", schemaReader);
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.journalpostHent.xsd"))
+            {
+                if (schemaStream != null)
+                {
+                    using XmlReader schemaReader = XmlReader.Create(schemaStream);
+                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/journalpost/hent/v2",
+                        schemaReader);
                 }
             }
-            using (Stream schemaStream = arkivModelsAssembly.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.metadatakatalog.xsd")) {
-                using (XmlReader schemaReader = XmlReader.Create(schemaStream)) {
-                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/metadatakatalog/v2", schemaReader);
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.metadatakatalog.xsd"))
+            {
+                if (schemaStream != null)
+                {
+                    using XmlReader schemaReader = XmlReader.Create(schemaStream);
+                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/metadatakatalog/v2",
+                        schemaReader);
+                }
+            }
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.arkivstruktur.xsd"))
+            {
+                if (schemaStream != null)
+                {
+                    using XmlReader schemaReader = XmlReader.Create(schemaStream);
+                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/arkivstruktur",
+                        schemaReader);
                 }
             }
             Validate(payload, xmlReaderSettings);
@@ -113,19 +168,40 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Validation
             var arkivModelsAssembly = AppDomain.CurrentDomain.GetAssemblies()
                 .SingleOrDefault(assembly => assembly.GetName().Name == "KS.Fiks.Arkiv.Models.V1");
             
-            using (Stream schemaStream = arkivModelsAssembly.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.arkivmelding.xsd")) {
-                using (XmlReader schemaReader = XmlReader.Create(schemaStream)) {
-                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/arkivmelding/v2", schemaReader);
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.arkivmelding.xsd"))
+            {
+                if (schemaStream != null)
+                {
+                    using XmlReader schemaReader = XmlReader.Create(schemaStream);
+                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/arkivmelding/v2",
+                        schemaReader);
                 }
             }
-            using (var schemaStream = arkivModelsAssembly.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.journalpostHentResultat.xsd")) {
-                using (var schemaReader = XmlReader.Create(schemaStream)) {
-                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/journalpost/hent/resultat/v2", schemaReader);
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.journalpostHentResultat.xsd"))
+            {
+                if (schemaStream != null)
+                {
+                    using var schemaReader = XmlReader.Create(schemaStream);
+                    xmlReaderSettings.Schemas.Add(
+                        "http://www.arkivverket.no/standarder/noark5/journalpost/hent/resultat/v2", schemaReader);
                 }
             }
-            using (var schemaStream = arkivModelsAssembly.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.metadatakatalog.xsd")) {
-                using (var schemaReader = XmlReader.Create(schemaStream)) {
-                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/metadatakatalog/v2", schemaReader);
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.metadatakatalog.xsd"))
+            {
+                if (schemaStream != null)
+                {
+                    using var schemaReader = XmlReader.Create(schemaStream);
+                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/metadatakatalog/v2",
+                        schemaReader);
+                }
+            }
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.arkivstruktur.xsd"))
+            {
+                if (schemaStream != null)
+                {
+                    using var schemaReader = XmlReader.Create(schemaStream);
+                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/arkivstruktur",
+                        schemaReader);
                 }
             }
             Validate(payload, xmlReaderSettings);
@@ -137,14 +213,31 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Validation
             var arkivModelsAssembly = AppDomain.CurrentDomain.GetAssemblies()
                 .SingleOrDefault(assembly => assembly.GetName().Name == "KS.Fiks.Arkiv.Models.V1");
             
-            using (var schemaStream = arkivModelsAssembly.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.arkivmelding.xsd")) {
-                using (var schemaReader = XmlReader.Create(schemaStream)) {
-                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/arkivmelding/v2", schemaReader);
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.arkivmelding.xsd"))
+            {
+                if (schemaStream != null)
+                {
+                    using var schemaReader = XmlReader.Create(schemaStream);
+                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/arkivmelding/v2",
+                        schemaReader);
                 }
             }
-            using (var schemaStream = arkivModelsAssembly.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.metadatakatalog.xsd")) {
-                using (var schemaReader = XmlReader.Create(schemaStream)) {
-                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/metadatakatalog/v2", schemaReader);
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.metadatakatalog.xsd"))
+            {
+                if (schemaStream != null)
+                {
+                    using var schemaReader = XmlReader.Create(schemaStream);
+                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/metadatakatalog/v2",
+                        schemaReader);
+                }
+            }
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.arkivstruktur.xsd"))
+            {
+                if (schemaStream != null)
+                {
+                    using var schemaReader = XmlReader.Create(schemaStream);
+                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/arkivstruktur",
+                        schemaReader);
                 }
             }
             Validate(payload, xmlReaderSettings);
@@ -156,19 +249,31 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Validation
             var arkivModelsAssembly = AppDomain.CurrentDomain.GetAssemblies()
                 .SingleOrDefault(assembly => assembly.GetName().Name == "KS.Fiks.Arkiv.Models.V1");
             
-            using (var schemaStream = arkivModelsAssembly.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.sokeresultatMinimum.xsd")) {
-                using (var schemaReader = XmlReader.Create(schemaStream)) {
-                    xmlReaderSettings.Schemas.Add("http://www.ks.no/standarder/fiks/arkiv/sokeresultat/v1", schemaReader);
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.sokeresultatMinimum.xsd"))
+            {
+                if (schemaStream != null)
+                {
+                    using var schemaReader = XmlReader.Create(schemaStream);
+                    xmlReaderSettings.Schemas.Add("http://www.ks.no/standarder/fiks/arkiv/sokeresultat/v1",
+                        schemaReader);
                 }
             }
-            using (var schemaStream = arkivModelsAssembly.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.arkivstrukturMinimum.xsd")) {
-                using (var schemaReader = XmlReader.Create(schemaStream)) {
-                    xmlReaderSettings.Schemas.Add("http://www.ks.no/standarder/fiks/arkiv/arkivstruktur/minimum/v1", schemaReader);
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.arkivstrukturMinimum.xsd"))
+            {
+                if (schemaStream != null)
+                {
+                    using var schemaReader = XmlReader.Create(schemaStream);
+                    xmlReaderSettings.Schemas.Add("http://www.ks.no/standarder/fiks/arkiv/arkivstruktur/minimum/v1",
+                        schemaReader);
                 }
             }
-            using (Stream schemaStream = arkivModelsAssembly.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.metadatakatalog.xsd")) {
-                using (XmlReader schemaReader = XmlReader.Create(schemaStream)) {
-                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/metadatakatalog/v2", schemaReader);
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.metadatakatalog.xsd"))
+            {
+                if (schemaStream != null)
+                {
+                    using XmlReader schemaReader = XmlReader.Create(schemaStream);
+                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/metadatakatalog/v2",
+                        schemaReader);
                 }
             }
             Validate(payload, xmlReaderSettings);
@@ -180,19 +285,31 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Validation
             var arkivModelsAssembly = AppDomain.CurrentDomain.GetAssemblies()
                 .SingleOrDefault(assembly => assembly.GetName().Name == "KS.Fiks.Arkiv.Models.V1");
             
-            using (var schemaStream = arkivModelsAssembly.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.sokeresultatNoekler.xsd")) {
-                using (var schemaReader = XmlReader.Create(schemaStream)) {
-                    xmlReaderSettings.Schemas.Add("http://www.ks.no/standarder/fiks/arkiv/sokeresultat/v1", schemaReader);
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.sokeresultatNoekler.xsd"))
+            {
+                if (schemaStream != null)
+                {
+                    using var schemaReader = XmlReader.Create(schemaStream);
+                    xmlReaderSettings.Schemas.Add("http://www.ks.no/standarder/fiks/arkiv/sokeresultat/v1",
+                        schemaReader);
                 }
             }
-            using (var schemaStream = arkivModelsAssembly.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.arkivstrukturNoekler.xsd")) {
-                using (var schemaReader = XmlReader.Create(schemaStream)) {
-                    xmlReaderSettings.Schemas.Add("http://www.ks.no/standarder/fiks/arkiv/arkivstruktur/noekler/v1", schemaReader);
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.arkivstrukturNoekler.xsd"))
+            {
+                if (schemaStream != null)
+                {
+                    using var schemaReader = XmlReader.Create(schemaStream);
+                    xmlReaderSettings.Schemas.Add("http://www.ks.no/standarder/fiks/arkiv/arkivstruktur/noekler/v1",
+                        schemaReader);
                 }
             }
-            using (var schemaStream = arkivModelsAssembly.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.metadatakatalog.xsd")) {
-                using (var schemaReader = XmlReader.Create(schemaStream)) {
-                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/metadatakatalog/v2", schemaReader);
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.metadatakatalog.xsd"))
+            {
+                if (schemaStream != null)
+                {
+                    using var schemaReader = XmlReader.Create(schemaStream);
+                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/metadatakatalog/v2",
+                        schemaReader);
                 }
             }
             Validate(payload, xmlReaderSettings);
@@ -204,19 +321,31 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Validation
             var arkivModelsAssembly = AppDomain.CurrentDomain.GetAssemblies()
                 .SingleOrDefault(assembly => assembly.GetName().Name == "KS.Fiks.Arkiv.Models.V1");
             
-            using (var schemaStream = arkivModelsAssembly.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.sokeresultatUtvidet.xsd")) {
-                using (var schemaReader = XmlReader.Create(schemaStream)) {
-                    xmlReaderSettings.Schemas.Add("http://www.ks.no/standarder/fiks/arkiv/sokeresultat/v1", schemaReader);
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.sokeresultatUtvidet.xsd"))
+            {
+                if (schemaStream != null)
+                {
+                    using var schemaReader = XmlReader.Create(schemaStream);
+                    xmlReaderSettings.Schemas.Add("http://www.ks.no/standarder/fiks/arkiv/sokeresultat/v1",
+                        schemaReader);
                 }
             }
-            using (var schemaStream = arkivModelsAssembly.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.arkivstruktur.xsd")) {
-                using (var schemaReader = XmlReader.Create(schemaStream)) {
-                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/arkivstruktur", schemaReader);
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.arkivstruktur.xsd"))
+            {
+                if (schemaStream != null)
+                {
+                    using var schemaReader = XmlReader.Create(schemaStream);
+                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/arkivstruktur",
+                        schemaReader);
                 }
             }
-            using (var schemaStream = arkivModelsAssembly.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.metadatakatalog.xsd")) {
-                using (var schemaReader = XmlReader.Create(schemaStream)) {
-                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/metadatakatalog/v2", schemaReader);
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.metadatakatalog.xsd"))
+            {
+                if (schemaStream != null)
+                {
+                    using var schemaReader = XmlReader.Create(schemaStream);
+                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/metadatakatalog/v2",
+                        schemaReader);
                 }
             }
             Validate(payload, xmlReaderSettings);

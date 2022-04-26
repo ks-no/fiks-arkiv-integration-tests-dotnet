@@ -23,10 +23,10 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers
             public override Encoding Encoding => Encoding.UTF8;
         }
 
-        public static Arkivmelding DeSerializeArkivmelding(string xml)
+        public static Arkivmelding? DeSerializeArkivmelding(string xml)
         {
             var serializer = new XmlSerializer(typeof(Arkivmelding));
-            Arkivmelding arkivmeldingDeserialized;
+            Arkivmelding? arkivmeldingDeserialized;
             using (TextReader reader = new StringReader(xml))
             {
                 arkivmeldingDeserialized = (Arkivmelding) serializer.Deserialize(reader);

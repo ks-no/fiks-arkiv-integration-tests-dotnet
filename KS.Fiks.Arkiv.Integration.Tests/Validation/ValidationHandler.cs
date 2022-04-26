@@ -14,7 +14,7 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Validation
             errors = new List<string>();
         }
 
-        public void HandleValidationError(object sender, ValidationEventArgs e)
+        public void HandleValidationError(object? sender, ValidationEventArgs e)
         {
             switch (e.Severity)
             {
