@@ -5,11 +5,15 @@ using Dokumentbeskrivelse = KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding.Doku
 using Dokumentobjekt = KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding.Dokumentobjekt;
 using Journalpost = KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding.Journalpost;
 using Korrespondansepart = KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding.Korrespondansepart;
+using Saksmappe = KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding.Saksmappe;
 
 namespace KS.Fiks.Arkiv.Integration.Tests.Library
 {
     public class ArkivmeldingDataGenerator
     {
+        private const string SaksansvarligDefault = "Sara Saksansvarlig";
+        private const string SaksmappeTittelDefault = "En ny saksmappe fra integrasjonstest";
+
         public static Journalpost CreateJournalpost()
         {
             return new Journalpost()
@@ -83,6 +87,21 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
                 DokumentetsDato = DateTime.Now.Date,
                 MottattDato = DateTime.Now,
             };
+        }
+        
+        public static Saksmappe CreateSaksmappe(Journalpost? journalpost, EksternNoekkel referanseEksternNoekkelNoekkel)
+        {
+            var saksmappe = new Saksmappe()
+            {
+                Tittel = SaksmappeTittelDefault,
+                Saksansvarlig = SaksansvarligDefault,
+                ReferanseEksternNoekkel = referanseEksternNoekkelNoekkel
+            };
+            if (journalpost != null)
+            {
+                saksmappe.Registrering.Add(journalpost);
+            }
+            return saksmappe;
         }
     }
 }

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using KS.Fiks.Arkiv.Integration.Tests.FiksIO;
 using KS.Fiks.Arkiv.Integration.Tests.Library;
 using KS.Fiks.Arkiv.Models.V1.Arkivstruktur;
@@ -8,21 +7,15 @@ using KS.Fiks.Arkiv.Models.V1.Innsyn.Hent.Journalpost;
 using KS.Fiks.Arkiv.Models.V1.Meldingstyper;
 using KS.Fiks.IO.Client;
 using KS.Fiks.IO.Client.Models;
-using KS.FiksProtokollValidator.Tests.IntegrationTests;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Validation;
 using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
 
-namespace KS.Fiks.Arkiv.Integration.Tests
+namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
 {
     public class JournalpostHentTests : IntegrationTestsBase
     {
-        //private static List<MottattMeldingArgs> _mottatMeldingArgsList;
-        private IFiksIOClient? _client;
-        private FiksRequestMessageService? _fiksRequestService;
-        private Guid _mottakerKontoId;
-
         [SetUp]
         public void Setup()
         {
@@ -47,10 +40,10 @@ namespace KS.Fiks.Arkiv.Integration.Tests
             var arkivmelding = MeldingGenerator.CreateArkivmeldingMedNyJournalpost();
 
             var nyJournalpostAsString = ArkiveringSerializeHelper.Serialize(arkivmelding);
-            var validator = new SimpleXsdValidator(Directory.GetCurrentDirectory());
+            var validator = new SimpleXsdValidator();
             
             // Valider arkivmelding
-            validator.ValidateArkivmelding(nyJournalpostAsString);
+            validator.Validate(nyJournalpostAsString);
 
             // Send arkiver melding
             var nyJournalpostMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivV1Meldingtype.Arkivmelding, nyJournalpostAsString, "arkivmelding.xml", null, testSessionId);
@@ -69,7 +62,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests
             Assert.True(arkivmeldingKvitteringPayload.Filename == "arkivmelding-kvittering.xml", "Filnavn ikke som forventet arkivmelding-kvittering.xml");
     
             // Valider innhold (xml)
-            validator.ValidateArkivmeldingKvittering(arkivmeldingKvitteringPayload.PayloadAsString);
+            validator.Validate(arkivmeldingKvitteringPayload.PayloadAsString);
             
             var arkivmeldingKvittering = ArkiveringSerializeHelper.DeSerializeArkivmeldingKvittering(arkivmeldingKvitteringPayload.PayloadAsString);
             var systemId = arkivmeldingKvittering.RegistreringKvittering[0].SystemID; // Bruk SystemID som man fikk i kvittering
@@ -80,7 +73,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests
             var journalpostHentAsString = ArkiveringSerializeHelper.Serialize(journalpostHent);
             
             // Valider innhold (xml)
-            validator.ValidateJournalpostHent(nyJournalpostAsString);
+            validator.Validate(nyJournalpostAsString);
             
             // Nullstill meldingsliste
             _mottatMeldingArgsList.Clear();
@@ -101,7 +94,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests
             var journalpostHentResultatPayload = MeldingHelper.GetDecryptedMessagePayload(journalpostHentResultatMelding).Result;
             
             // Valider innhold (xml)
-            validator.ValidateJournalpostHentResultat(journalpostHentResultatPayload.PayloadAsString);
+            validator.Validate(journalpostHentResultatPayload.PayloadAsString);
 
             var journalpostHentResultat = ArkiveringSerializeHelper.DeSerializeXml<JournalpostHentResultat>(journalpostHentResultatPayload.PayloadAsString);
             
@@ -130,10 +123,10 @@ namespace KS.Fiks.Arkiv.Integration.Tests
             var arkivmelding = MeldingGenerator.CreateArkivmeldingMedNyJournalpost(referanseEksternNoekkel);
 
             var nyJournalpostAsString = ArkiveringSerializeHelper.Serialize(arkivmelding);
-            var validator = new SimpleXsdValidator(Directory.GetCurrentDirectory());
+            var validator = new SimpleXsdValidator();
             
             // Valider arkivmelding
-            validator.ValidateArkivmelding(nyJournalpostAsString);
+            validator.Validate(nyJournalpostAsString);
 
             // Send arkivering melding
             var nyJournalpostMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivV1Meldingtype.Arkivmelding, nyJournalpostAsString, "arkivmelding.xml", null, testSessionId);
@@ -152,7 +145,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests
             Assert.True(arkivmeldingKvitteringPayload.Filename == "arkivmelding-kvittering.xml", "Filnavn ikke som forventet arkivmelding-kvittering.xml");
     
             // Valider innhold (xml)
-            validator.ValidateArkivmeldingKvittering(arkivmeldingKvitteringPayload.PayloadAsString);
+            validator.Validate(arkivmeldingKvitteringPayload.PayloadAsString);
             
             // STEG 2: Henting av journalpost
             var journalpostHent = MeldingGenerator.CreateJournalpostHent(referanseEksternNoekkel);
@@ -160,7 +153,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests
             var journalpostHentAsString = ArkiveringSerializeHelper.Serialize(journalpostHent);
             
             // Valider innhold (xml)
-            validator.ValidateJournalpostHent(journalpostHentAsString);
+            validator.Validate(journalpostHentAsString);
             
             // Nullstill meldingsliste
             _mottatMeldingArgsList.Clear();
@@ -181,7 +174,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests
             var journalpostHentResultatPayload = MeldingHelper.GetDecryptedMessagePayload(journalpostHentResultatMelding).Result;
             
             // Valider innhold (xml)
-            validator.ValidateJournalpostHentResultat(journalpostHentResultatPayload.PayloadAsString);
+            validator.Validate(journalpostHentResultatPayload.PayloadAsString);
 
             var journalpostHentResultat = ArkiveringSerializeHelper.DeSerializeXml<JournalpostHentResultat>(journalpostHentResultatPayload.PayloadAsString);
             

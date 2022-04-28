@@ -1,15 +1,20 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using KS.Fiks.Arkiv.Integration.Tests.FiksIO;
+using KS.Fiks.IO.Client;
 using KS.Fiks.IO.Client.Models;
 using KS.Fiks.IO.Client.Models.Feilmelding;
 using NUnit.Framework;
 
-namespace KS.FiksProtokollValidator.Tests.IntegrationTests
+namespace KS.Fiks.Arkiv.Integration.Tests.Tests
 {
     public class IntegrationTestsBase
     {
         protected static List<MottattMeldingArgs> _mottatMeldingArgsList;
+        protected IFiksIOClient? _client;
+        protected FiksRequestMessageService? _fiksRequestService;
+        protected Guid _mottakerKontoId;
         
         protected static void VentPaSvar(int antallForventet, int antallVenter)
         {

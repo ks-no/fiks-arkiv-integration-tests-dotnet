@@ -3,6 +3,7 @@ using KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding;
 using KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding.Oppdatering;
 using KS.Fiks.Arkiv.Models.V1.Arkivstruktur;
 using KS.Fiks.Arkiv.Models.V1.Innsyn.Hent.Journalpost;
+using KS.Fiks.Arkiv.Models.V1.Innsyn.Hent.Mappe;
 using KS.Fiks.Arkiv.Models.V1.Metadatakatalog;
 
 namespace KS.Fiks.Arkiv.Integration.Tests.Library
@@ -19,6 +20,18 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
                      Noekkel = referanseEksternNoekkel.Noekkel
                  }
              };
+        }
+        
+        public static MappeHent CreateMappeHent(EksternNoekkel referanseEksternNoekkel)
+        {
+            return new MappeHent()
+            {
+                ReferanseEksternNoekkel = new EksternNoekkel()
+                {
+                    Fagsystem = referanseEksternNoekkel.Fagsystem,
+                    Noekkel = referanseEksternNoekkel.Noekkel
+                }
+            };
         }
         
         public static JournalpostHent CreateJournalpostHent(SystemID systemId )
@@ -67,8 +80,24 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
              
             return arkivmelding;
         }
+        
+        public static Arkivmelding CreateArkivmeldingMedSaksmappe(EksternNoekkel referanseEksternNoekkelNoekkel)
+        {
+            var arkivmelding = new Arkivmelding()
+            {
+                System = "Fagsystem X",
+                MeldingId = Guid.NewGuid().ToString(),
+                AntallFiler = 1,
+                Mappe =
+                {
+                    ArkivmeldingDataGenerator.CreateSaksmappe(ArkivmeldingDataGenerator.CreateJournalpost(), referanseEksternNoekkelNoekkel)
+                }
+            };
+            
+            return arkivmelding;
+        }
 
-        public static ArkivmeldingOppdatering CreateArkivmeldingOppdatering(EksternNoekkel referanseEksternNoekkel, string nyTittel)
+        public static ArkivmeldingOppdatering CreateArkivmeldingOppdateringRegistreringOppdateringNyTittel(EksternNoekkel referanseEksternNoekkel, string nyTittel)
         {
             return new ArkivmeldingOppdatering()
             {
@@ -79,6 +108,23 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
                     new RegistreringOppdatering()
                     {
                         Tittel = nyTittel,
+                        ReferanseEksternNoekkel = referanseEksternNoekkel
+                    }
+                }
+            };
+        }
+        
+        public static ArkivmeldingOppdatering CreateArkivmeldingOppdateringSaksmappeOppdateringNySaksansvarlig(EksternNoekkel referanseEksternNoekkel, string nySaksansvarlig)
+        {
+            return new ArkivmeldingOppdatering()
+            {
+                MeldingId = Guid.NewGuid().ToString(),
+                Tidspunkt = DateTime.Now,
+                MappeOppdateringer =
+                {
+                    new SaksmappeOppdatering()
+                    {
+                        Saksansvarlig = nySaksansvarlig,
                         ReferanseEksternNoekkel = referanseEksternNoekkel
                     }
                 }

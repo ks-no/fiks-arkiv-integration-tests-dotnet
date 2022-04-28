@@ -8,20 +8,15 @@ using KS.Fiks.Arkiv.Models.V1.Innsyn.Hent.Journalpost;
 using KS.Fiks.Arkiv.Models.V1.Meldingstyper;
 using KS.Fiks.IO.Client;
 using KS.Fiks.IO.Client.Models;
-using KS.FiksProtokollValidator.Tests.IntegrationTests;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Validation;
 using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
 
-namespace KS.Fiks.Arkiv.Integration.Tests
+namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdateringTests
 {
-    public class ArkivmeldingOppdateringTests : IntegrationTestsBase
+    public class OppdaterJournalpostTests : IntegrationTestsBase
     {
-        private IFiksIOClient? _client;
-        private FiksRequestMessageService? _fiksRequestService;
-        private Guid _mottakerKontoId;
-
         [SetUp]
         public void Setup()
         {
@@ -37,7 +32,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests
         }
         
         [Test]
-        public void Verify_Arkivmelding_With_Journalpost_Then_Verify_ArkivmeldingOppdatering_By_EksternNoekkel()
+        public void Verify_Oppdater_Tittel_Journalpost()
         {
             // Denne id'en gjør at Arkiv-simulatoren ser hvilke meldinger som henger sammen 
             var testSessionId = Guid.NewGuid().ToString();
@@ -54,14 +49,15 @@ namespace KS.Fiks.Arkiv.Integration.Tests
             // STEG 1: Opprett arkivmelding og send inn
             var arkivmelding = MeldingGenerator.CreateArkivmeldingMedNyJournalpost(referanseEksternNoekkel);
 
-            var nyJournalpostAsString = ArkiveringSerializeHelper.Serialize(arkivmelding);
-            var validator = new SimpleXsdValidator(Directory.GetCurrentDirectory());
+            var nyJournalpostSerialized = ArkiveringSerializeHelper.Serialize(arkivmelding);
+            
+            var validator = new SimpleXsdValidator();
             
             // Valider arkivmelding
-            validator.ValidateArkivmelding(nyJournalpostAsString);
+            validator.Validate(nyJournalpostSerialized);
 
             // Send melding
-            var nyJournalpostMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivV1Meldingtype.Arkivmelding, nyJournalpostAsString, "arkivmelding.xml", null, testSessionId);
+            var nyJournalpostMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivV1Meldingtype.Arkivmelding, nyJournalpostSerialized, "arkivmelding.xml", null, testSessionId);
             
             // Vent på 2 første response meldinger (mottatt og kvittering)
             VentPaSvar(2, 10);
@@ -73,27 +69,28 @@ namespace KS.Fiks.Arkiv.Integration.Tests
             // Verifiser at man får arkivmeldingKvittering melding
             var arkivmeldingKvitteringMelding = GetAndVerifyByMeldingstype(_mottatMeldingArgsList, nyJournalpostMeldingId, FiksArkivV1Meldingtype.ArkivmeldingKvittering);
             
-            
             var arkivmeldingKvitteringPayload = MeldingHelper.GetDecryptedMessagePayload(arkivmeldingKvitteringMelding).Result;
             Assert.True(arkivmeldingKvitteringPayload.Filename == "arkivmelding-kvittering.xml", "Filnavn ikke som forventet arkivmelding-kvittering.xml");
     
             // Valider innhold (xml)
-            validator.ValidateArkivmeldingKvittering(arkivmeldingKvitteringPayload.PayloadAsString);
+            validator.Validate(arkivmeldingKvitteringPayload.PayloadAsString);
 
             // STEG 2: Send oppdatering av journalpost
             string nyTittel = "En helt ny tittel";
-            var arkivmeldingOppdatering = MeldingGenerator.CreateArkivmeldingOppdatering(referanseEksternNoekkel, nyTittel);
+            var arkivmeldingOppdatering = MeldingGenerator.CreateArkivmeldingOppdateringRegistreringOppdateringNyTittel(referanseEksternNoekkel, nyTittel);
             
-            var arkivmeldingOppdateringAsString = ArkiveringSerializeHelper.Serialize(arkivmeldingOppdatering);
+            var arkivmeldingOppdateringSerialized = ArkiveringSerializeHelper.Serialize(arkivmeldingOppdatering);
+            
+            File.WriteAllText("ArkivmeldingOppdateringJournalpostTittel.xml", arkivmeldingOppdateringSerialized);
             
             // Valider innhold (xml)
-            validator.ValidateArkivmeldingOppdatering(arkivmeldingOppdateringAsString);
+            validator.Validate(arkivmeldingOppdateringSerialized);
             
             // Nullstill meldingsliste
             _mottatMeldingArgsList.Clear();
             
             // Send oppdater melding
-            var arkivmeldingOppdaterMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivV1Meldingtype.ArkivmeldingOppdater, arkivmeldingOppdateringAsString, "arkivmelding.xml", null, testSessionId);
+            var arkivmeldingOppdaterMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivV1Meldingtype.ArkivmeldingOppdater, arkivmeldingOppdateringSerialized, "arkivmelding.xml", null, testSessionId);
 
             // Vent på 2 respons meldinger. Mottat og kvittering 
             VentPaSvar(2, 10); 
@@ -114,7 +111,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests
             var journalpostHentAsString = ArkiveringSerializeHelper.Serialize(journalpostHent);
             
             // Valider innhold (xml)
-            validator.ValidateJournalpostHent(journalpostHentAsString);
+            validator.Validate(journalpostHentAsString);
             
             // Nullstill meldingsliste
             _mottatMeldingArgsList.Clear();
@@ -135,7 +132,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests
             var journalpostHentResultatPayload = MeldingHelper.GetDecryptedMessagePayload(journalpostHentResultatMelding).Result;
             
             // Valider innhold (xml)
-            validator.ValidateJournalpostHentResultat(journalpostHentResultatPayload.PayloadAsString);
+            validator.Validate(journalpostHentResultatPayload.PayloadAsString);
 
             var journalpostHentResultat = ArkiveringSerializeHelper.DeSerializeXml<JournalpostHentResultat>(journalpostHentResultatPayload.PayloadAsString);
 
