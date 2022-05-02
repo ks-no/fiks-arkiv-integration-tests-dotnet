@@ -17,7 +17,12 @@ using NUnit.Framework;
 
 namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdateringTests
 {
-    public class OppdaterMappeTests : IntegrationTestsBase
+    /**
+     * Disse testene sender først en arkivmelding for å opprette en mappe (evt med journalpost i mappe) for så
+     * oppdatere mappen ved oppdater-meldinger, og til slutt hente mappen igjen vha enten referanseEksternNoekkel eller systemID
+     * for å bekrefte at mappe er endret som ønsket
+     */
+    public class OppdaterOgHentMappeTests : IntegrationTestsBase
     {
         [SetUp]
         public void Setup()
@@ -34,7 +39,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdateringTests
         }
 
         [Test]
-        public void Verify_Oppdater_Saksmappe_Ansvarlig()
+        public void Oppdater_Saksmappe_Ansvarlig()
         {
             // Denne id'en gjør at Arkiv-simulatoren ser hvilke meldinger som henger sammen 
             var testSessionId = Guid.NewGuid().ToString();

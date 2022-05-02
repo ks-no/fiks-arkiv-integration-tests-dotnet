@@ -15,7 +15,12 @@ using NUnit.Framework;
 
 namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdateringTests
 {
-    public class OppdaterJournalpostTests : IntegrationTestsBase
+    /**
+     * Disse testene sender først en arkivmelding for å opprette en journalpost for så
+     * oppdatere journalposten ved oppdater-meldinger, og til slutt hente journalposten igjen vha enten referanseEksternNoekkel eller systemID
+     * for å bekrefte at journalpost er endret som ønsket
+     */
+    public class OppdaterOgHentJournalpostTests : IntegrationTestsBase
     {
         [SetUp]
         public void Setup()
@@ -32,7 +37,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdateringTests
         }
         
         [Test]
-        public void Verify_Oppdater_Tittel_Journalpost()
+        public void Oppdater_Tittel_Journalpost()
         {
             // Denne id'en gjør at Arkiv-simulatoren ser hvilke meldinger som henger sammen 
             var testSessionId = Guid.NewGuid().ToString();

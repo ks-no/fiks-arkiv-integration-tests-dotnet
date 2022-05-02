@@ -14,7 +14,11 @@ using NUnit.Framework;
 
 namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
 {
-    public class JournalpostHentTests : IntegrationTestsBase
+    /**
+     * Disse testene sender først en arkivmelding for å opprette en journalpost for så
+     * hente journalposten igjen vha enten referanseEksternNoekkel eller systemID
+     */
+    public class HentJournalpostTests : IntegrationTestsBase
     {
         [SetUp]
         public void Setup()
@@ -31,7 +35,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
         }
         
         [Test]
-        public void Verify_Arkivmelding_With_Journalpost_Then_Verify_JournalpostHent_By_SystemID()
+        public void Hent_Journalpost_Med_SystemID()
         {
             // Denne id'en gjør at Arkiv-simulatoren ser hvilke meldinger som hører sammen
             var testSessionId = Guid.NewGuid().ToString();
@@ -103,9 +107,8 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
             Assert.AreEqual(journalpostHentResultat.Journalpost.ReferanseEksternNoekkel.Fagsystem, arkivmelding.Registrering[0].ReferanseEksternNoekkel.Fagsystem);
             Assert.AreEqual(journalpostHentResultat.Journalpost.ReferanseEksternNoekkel.Noekkel, arkivmelding.Registrering[0].ReferanseEksternNoekkel.Noekkel);
         }
-        
-        [Test]
-        public void Verify_Arkivmelding_With_Journalpost_Then_Verify_JournalpostHent_By_EksternNoekkel()
+
+        [Test] public void Henty_Journalpost_Med_EksternNoekkel()
         {
             // Denne id'en gjør at Arkiv-simulatoren ser hvilke meldinger som henger sammen
             var testSessionId = Guid.NewGuid().ToString();
