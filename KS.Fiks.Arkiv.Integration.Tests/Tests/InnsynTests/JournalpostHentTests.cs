@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using KS.Fiks.Arkiv.Integration.Tests.FiksIO;
 using KS.Fiks.Arkiv.Integration.Tests.Library;
 using KS.Fiks.Arkiv.Models.V1.Arkivstruktur;
@@ -7,6 +8,7 @@ using KS.Fiks.Arkiv.Models.V1.Innsyn.Hent.Journalpost;
 using KS.Fiks.Arkiv.Models.V1.Meldingstyper;
 using KS.Fiks.IO.Client;
 using KS.Fiks.IO.Client.Models;
+using KS.Fiks.Protokoller.V1.Models.Feilmelding;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Validation;
 using Microsoft.Extensions.Configuration;
@@ -42,15 +44,17 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
             
             // STEG 1: Opprett arkivmelding og send inn
             var arkivmelding = MeldingGenerator.CreateArkivmeldingMedNyJournalpost();
-
-            var nyJournalpostAsString = ArkiveringSerializeHelper.Serialize(arkivmelding);
-            var validator = new SimpleXsdValidator();
             
+            var nyJournalpostSerialized = ArkiveringSerializeHelper.Serialize(arkivmelding);
+            var validator = new SimpleXsdValidator();
+
             // Valider arkivmelding
-            validator.Validate(nyJournalpostAsString);
+            validator.Validate(nyJournalpostSerialized);
+            
+            File.WriteAllText("ArkivmeldingMedNyJournalpost.xml", nyJournalpostSerialized);
 
             // Send arkiver melding
-            var nyJournalpostMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivV1Meldingtype.Arkivmelding, nyJournalpostAsString, "arkivmelding.xml", null, testSessionId);
+            var nyJournalpostMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivV1Meldingtype.Arkivmelding, nyJournalpostSerialized, "arkivmelding.xml", null, testSessionId);
             
             // Vent på 2 første response meldinger (mottatt og kvittering)
             VentPaSvar(2, 10);
@@ -74,16 +78,18 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
             // STEG 2: Henting av journalpost
             var journalpostHent = MeldingGenerator.CreateJournalpostHent(systemId);
             
-            var journalpostHentAsString = ArkiveringSerializeHelper.Serialize(journalpostHent);
+            var journalpostHentSerialized = ArkiveringSerializeHelper.Serialize(journalpostHent);
             
             // Valider innhold (xml)
-            validator.Validate(nyJournalpostAsString);
+            validator.Validate(journalpostHentSerialized);
+            
+            File.WriteAllText("HentJournalpost.xml", journalpostHentSerialized);
             
             // Nullstill meldingsliste
             _mottatMeldingArgsList.Clear();
             
             // Send hent melding
-            var journalpostHentMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivV1Meldingtype.JournalpostHent, journalpostHentAsString, "arkivmelding.xml", null, testSessionId);
+            var journalpostHentMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivV1Meldingtype.JournalpostHent, journalpostHentSerialized, "arkivmelding.xml", null, testSessionId);
 
             // Vent på 1 respons meldinger 
             VentPaSvar(1, 10);
@@ -108,14 +114,14 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
             Assert.AreEqual(journalpostHentResultat.Journalpost.ReferanseEksternNoekkel.Noekkel, arkivmelding.Registrering[0].ReferanseEksternNoekkel.Noekkel);
         }
 
-        [Test] public void Henty_Journalpost_Med_EksternNoekkel()
+        [Test] public void Hent_Journalpost_Med_EksternNoekkel()
         {
             // Denne id'en gjør at Arkiv-simulatoren ser hvilke meldinger som henger sammen
             var testSessionId = Guid.NewGuid().ToString();
 
             var referanseEksternNoekkel = new EksternNoekkel()
             {
-                Fagsystem = "Integrasjonstest med eksternnoekkel",
+                Fagsystem = "Fiks arkiv integrasjonstest hent journalpost",
                 Noekkel = Guid.NewGuid().ToString()
             };
 
@@ -125,14 +131,16 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
             // STEG 1: Opprett arkivmelding og send inn
             var arkivmelding = MeldingGenerator.CreateArkivmeldingMedNyJournalpost(referanseEksternNoekkel);
 
-            var nyJournalpostAsString = ArkiveringSerializeHelper.Serialize(arkivmelding);
+            var nyJournalpostSerialized = ArkiveringSerializeHelper.Serialize(arkivmelding);
             var validator = new SimpleXsdValidator();
             
             // Valider arkivmelding
-            validator.Validate(nyJournalpostAsString);
+            validator.Validate(nyJournalpostSerialized);
+            
+            File.WriteAllText("ArkivmeldingMedNyJournalpostEksternNoekkel.xml", nyJournalpostSerialized);
 
             // Send arkivering melding
-            var nyJournalpostMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivV1Meldingtype.Arkivmelding, nyJournalpostAsString, "arkivmelding.xml", null, testSessionId);
+            var nyJournalpostMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivV1Meldingtype.Arkivmelding, nyJournalpostSerialized, "arkivmelding.xml", null, testSessionId);
             
             // Vent på 2 første response meldinger (mottatt og kvittering)
             VentPaSvar(2, 10);
@@ -153,16 +161,18 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
             // STEG 2: Henting av journalpost
             var journalpostHent = MeldingGenerator.CreateJournalpostHent(referanseEksternNoekkel);
             
-            var journalpostHentAsString = ArkiveringSerializeHelper.Serialize(journalpostHent);
+            var journalpostHentSerialized = ArkiveringSerializeHelper.Serialize(journalpostHent);
             
             // Valider innhold (xml)
-            validator.Validate(journalpostHentAsString);
+            validator.Validate(journalpostHentSerialized);
+            
+            File.WriteAllText("HentJournalpostEksternNoekkel.xml", journalpostHentSerialized);
             
             // Nullstill meldingsliste
             _mottatMeldingArgsList.Clear();
             
             // Send hent melding
-            var journalpostHentMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivV1Meldingtype.JournalpostHent, journalpostHentAsString, "arkivmelding.xml", null, testSessionId);
+            var journalpostHentMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivV1Meldingtype.JournalpostHent, journalpostHentSerialized, "arkivmelding.xml", null, testSessionId);
 
             // Vent på 1 respons meldinger 
             VentPaSvar(1, 10);
@@ -181,9 +191,88 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
 
             var journalpostHentResultat = ArkiveringSerializeHelper.DeSerializeXml<JournalpostHentResultat>(journalpostHentResultatPayload.PayloadAsString);
             
+            File.WriteAllText("HentJournalpostResultatEksternNoekkel.xml", journalpostHentSerialized);
+            
             Assert.AreEqual(journalpostHentResultat.Journalpost.Tittel, arkivmelding.Registrering[0].Tittel);
             Assert.AreEqual(journalpostHentResultat.Journalpost.ReferanseEksternNoekkel.Fagsystem, arkivmelding.Registrering[0].ReferanseEksternNoekkel.Fagsystem);
             Assert.AreEqual(journalpostHentResultat.Journalpost.ReferanseEksternNoekkel.Noekkel, arkivmelding.Registrering[0].ReferanseEksternNoekkel.Noekkel);
+        }
+        
+        [Test] public void Hent_Journalpost_Med_Ugyldig_EksternNoekkel_Returnerer_Ikkefunnet()
+        {
+            // Denne id'en gjør at Arkiv-simulatoren ser hvilke meldinger som henger sammen
+            var testSessionId = Guid.NewGuid().ToString();
+
+            var referanseEksternNoekkel = new EksternNoekkel()
+            {
+                Fagsystem = "Fiks arkiv integrasjonstest hent journalpost",
+                Noekkel = Guid.NewGuid().ToString()
+            };
+
+            Console.Out.WriteLine(
+                $"Sender arkivmelding med ny journalpost med EksternNoekkel fagsystem {referanseEksternNoekkel.Fagsystem} og noekkel {referanseEksternNoekkel.Noekkel}");
+            
+            // STEG 1: Opprett arkivmelding og send inn
+            var arkivmelding = MeldingGenerator.CreateArkivmeldingMedNyJournalpost(referanseEksternNoekkel);
+
+            var nyJournalpostSerialized = ArkiveringSerializeHelper.Serialize(arkivmelding);
+            var validator = new SimpleXsdValidator();
+            
+            // Valider arkivmelding
+            validator.Validate(nyJournalpostSerialized);
+            
+            // Send arkivering melding
+            var nyJournalpostMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivV1Meldingtype.Arkivmelding, nyJournalpostSerialized, "arkivmelding.xml", null, testSessionId);
+            
+            // Vent på 2 første response meldinger (mottatt og kvittering)
+            VentPaSvar(2, 10);
+            Assert.True(_mottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
+
+            // Verifiser at man får mottatt melding
+            var mottattMelding = GetAndVerifyByMeldingstype(_mottatMeldingArgsList, nyJournalpostMeldingId, FiksArkivV1Meldingtype.ArkivmeldingMottatt);
+
+            // Verifiser at man får arkivmeldingKvittering melding
+            var arkivmeldingKvitteringMelding = GetAndVerifyByMeldingstype(_mottatMeldingArgsList, nyJournalpostMeldingId, FiksArkivV1Meldingtype.ArkivmeldingKvittering);
+            
+            var arkivmeldingKvitteringPayload = MeldingHelper.GetDecryptedMessagePayload(arkivmeldingKvitteringMelding).Result;
+            Assert.True(arkivmeldingKvitteringPayload.Filename == "arkivmelding-kvittering.xml", "Filnavn ikke som forventet arkivmelding-kvittering.xml");
+    
+            // Valider innhold (xml)
+            validator.Validate(arkivmeldingKvitteringPayload.PayloadAsString);
+            
+            var referanseEksternNoekkelIkkeGyldig = new EksternNoekkel()
+            {
+                Fagsystem = "Fiks arkiv integrasjonstest hent journalpost men ikke gyldig",
+                Noekkel = Guid.Empty.ToString()
+            };
+            
+            // STEG 2: Henting av journalpost
+            var journalpostHent = MeldingGenerator.CreateJournalpostHent(referanseEksternNoekkelIkkeGyldig);
+            
+            var journalpostHentSerialized = ArkiveringSerializeHelper.Serialize(journalpostHent);
+            
+            // Valider innhold (xml)
+            validator.Validate(journalpostHentSerialized);
+            
+            File.WriteAllText("HentJournalpostEksternNoekkelIkkeGyldig.xml", journalpostHentSerialized);
+            
+            // Nullstill meldingsliste
+            _mottatMeldingArgsList.Clear();
+            
+            // Send hent melding
+            var journalpostHentMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivV1Meldingtype.JournalpostHent, journalpostHentSerialized, "arkivmelding.xml", null, testSessionId);
+
+            // Vent på 1 respons meldinger 
+            VentPaSvar(1, 10);
+
+            Assert.True(_mottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
+            
+            // Verifiser at man får en Ikkefunnet feil-melding
+            var ikkefunnetFeilmelding = GetAndVerifyByMeldingstype(_mottatMeldingArgsList, journalpostHentMeldingId, FeilmeldingType.Ikkefunnet);
+
+            Assert.IsNotNull(ikkefunnetFeilmelding);
+            
+            //TODO hent feilmelding og sjekk innhold?
         }
     }
 }

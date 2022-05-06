@@ -46,7 +46,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdateringTests
 
             var referanseEksternNoekkel = new EksternNoekkel()
             {
-                Fagsystem = "Integrasjonstest for arkivmeldingoppdatering på saksmappe med eksternnoekkel",
+                Fagsystem = "Fiks arkiv integrasjonstest for arkivmeldingoppdatering på saksmappe med eksternnoekkel",
                 Noekkel = Guid.NewGuid().ToString()
             };
 
@@ -58,9 +58,6 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdateringTests
 
             var nySaksmappeAsSerialized = ArkiveringSerializeHelper.Serialize(arkivmelding);
             var validator = new SimpleXsdValidator();
-            
-            // Skriv til fil
-            File.WriteAllText("ArkivmeldingMedSaksmappeOgSaksansvarlig.xml", nySaksmappeAsSerialized);
             
             // Valider arkivmelding
             validator.Validate(nySaksmappeAsSerialized);
@@ -90,9 +87,6 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdateringTests
             
             var arkivmeldingOppdateringSerialized = ArkiveringSerializeHelper.Serialize(arkivmeldingOppdatering);
             
-            // Skriv til fil
-            File.WriteAllText("ArkivmeldingOppdaterSaksmappeSaksansvarlig.xml", arkivmeldingOppdateringSerialized);
-            
             // Valider innhold (xml)
             validator.Validate(arkivmeldingOppdateringSerialized);
             
@@ -119,9 +113,6 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdateringTests
             var mappeHent = MeldingGenerator.CreateMappeHent(referanseEksternNoekkel);
             
             var mappeHentSerialized = ArkiveringSerializeHelper.Serialize(mappeHent);
-            
-            // Skriv til fil
-            File.WriteAllText("SaksmappeHentSaksmappeMedOppdatertSaksansvarlig.xml", mappeHentSerialized);
             
             // Valider innhold (xml)
             validator.Validate(mappeHentSerialized);

@@ -20,12 +20,10 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers
         {
             var payloadFiles = new List<PayloadFile>();
 
-            Debug.Assert(mottattMeldingArgs != null, nameof(mottattMeldingArgs) + " != null");
             if (mottattMeldingArgs.Melding.HasPayload)
             {
                 try
                 {
-                    
                     IAsicReader reader = new AsiceReader();
                     await using var inputStream = mottattMeldingArgs.Melding.DecryptedStream.Result;
                     using var asice = reader.Read(inputStream);

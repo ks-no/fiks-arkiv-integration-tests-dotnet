@@ -39,12 +39,12 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
             {
                 if (mottatMeldingArgs.Melding.SvarPaMelding == sendtMeldingid)
                 {
-                    Console.Out.WriteLineAsync($"Svar på vår melding med meldingId {sendtMeldingid} funnet. Melding er av typen: {mottatMeldingArgs.Melding.MeldingType}");
+                    Console.Out.WriteLineAsync($"Svar på vår melding med meldingId {sendtMeldingid} mottatt. Melding er av typen: {mottatMeldingArgs.Melding.MeldingType}");
                     Assert.False(mottatMeldingArgs.Melding.MeldingType is FeilmeldingMeldingTypeV1.Ugyldigforespørsel or FeilmeldingMeldingTypeV1.Serverfeil, $"Uforventet svar av typen {mottatMeldingArgs.Melding.MeldingType}");
                     
                     if (mottatMeldingArgs.Melding.MeldingType == forventetMeldingstype)
                     {
-                        Console.Out.WriteLineAsync($"Forventet meldingstype {forventetMeldingstype} funnet!");
+                        Console.Out.WriteLineAsync($"Forventet meldingstype {forventetMeldingstype} mottatt!");
                         mottattMeldingArgsList.Remove(mottatMeldingArgs);
                         return mottatMeldingArgs;
                     }

@@ -86,8 +86,6 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdateringTests
             
             var arkivmeldingOppdateringSerialized = ArkiveringSerializeHelper.Serialize(arkivmeldingOppdatering);
             
-            File.WriteAllText("ArkivmeldingOppdateringJournalpostTittel.xml", arkivmeldingOppdateringSerialized);
-            
             // Valider innhold (xml)
             validator.Validate(arkivmeldingOppdateringSerialized);
             
