@@ -39,7 +39,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
         [Test]
         public void Hent_Journalpost_Med_SystemID()
         {
-            // Denne id'en gjør at Arkiv-simulatoren ser hvilke meldinger som hører sammen
+            // Denne id'en gjør at Arkiv-simulatoren ser hvilke meldinger som henger sammen. Har ingen funksjon ellers. 
             var testSessionId = Guid.NewGuid().ToString();
             
             // STEG 1: Opprett arkivmelding og send inn
@@ -116,7 +116,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
 
         [Test] public void Hent_Journalpost_Med_EksternNoekkel()
         {
-            // Denne id'en gjør at Arkiv-simulatoren ser hvilke meldinger som henger sammen
+            // Denne id'en gjør at Arkiv-simulatoren ser hvilke meldinger som henger sammen. Har ingen funksjon ellers. 
             var testSessionId = Guid.NewGuid().ToString();
 
             var referanseEksternNoekkel = new EksternNoekkel()
@@ -200,7 +200,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
         
         [Test] public void Hent_Journalpost_Med_Ikke_Eksisterende_EksternNoekkel_Returnerer_Ikkefunnet()
         {
-            // Denne id'en gjør at Arkiv-simulatoren ser hvilke meldinger som henger sammen
+            // Denne id'en gjør at Arkiv-simulatoren ser hvilke meldinger som henger sammen. Har ingen funksjon ellers. 
             var testSessionId = Guid.NewGuid().ToString();
 
             var referanseEksternNoekkel = new EksternNoekkel()

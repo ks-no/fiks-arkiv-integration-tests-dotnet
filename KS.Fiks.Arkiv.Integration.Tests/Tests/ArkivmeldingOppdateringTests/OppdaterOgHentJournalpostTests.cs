@@ -39,7 +39,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdateringTests
         [Test]
         public void Oppdater_Tittel_Journalpost()
         {
-            // Denne id'en gjør at Arkiv-simulatoren ser hvilke meldinger som henger sammen 
+            // Denne id'en gjør at Arkiv-simulatoren ser hvilke meldinger som henger sammen. Har ingen funksjon ellers.  
             var testSessionId = Guid.NewGuid().ToString();
 
             var referanseEksternNoekkel = new EksternNoekkel()
