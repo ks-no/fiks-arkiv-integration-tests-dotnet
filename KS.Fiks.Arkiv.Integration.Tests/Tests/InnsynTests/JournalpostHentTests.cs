@@ -198,7 +198,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
             Assert.AreEqual(journalpostHentResultat.Journalpost.ReferanseEksternNoekkel.Noekkel, arkivmelding.Registrering[0].ReferanseEksternNoekkel.Noekkel);
         }
         
-        [Test] public void Hent_Journalpost_Med_Ugyldig_EksternNoekkel_Returnerer_Ikkefunnet()
+        [Test] public void Hent_Journalpost_Med_Ikke_Eksisterende_EksternNoekkel_Returnerer_Ikkefunnet()
         {
             // Denne id'en gjør at Arkiv-simulatoren ser hvilke meldinger som henger sammen
             var testSessionId = Guid.NewGuid().ToString();
