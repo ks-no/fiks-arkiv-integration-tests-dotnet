@@ -1,6 +1,6 @@
 # fiks-arkiv-integration-tests-dotnet
 Integrasjonstester for Fiks-Arkiv protokollen. 
-Disse testene er stort sett mer avanserte enn de testen man kan kjøre i [Fiks-Protokoll-Validator](https://forvaltning.fiks.test.ks.no/fiks-validator/#/).
+Disse testene er stort sett mer avanserte enn de testene man kan kjøre i [Fiks-Protokoll-Validator](https://forvaltning.fiks.test.ks.no/fiks-validator/#/).
 Det vil si at integrasjonstestene skal f.eks. bevise at man kan først arkivere en journalpost for så å oppdatere den og til slutt hente den og bevise at endringen har blitt gjennomført samt mottat- og kvitteringsmeldinger ser korrekt ut. 
 
 Fiks-Protokoll-Validator tester enkeltvis meldinger som f.eks. at man kan arkivere en journalpost og at kvitteringsmelding ser korrekt ut. Stegvise meldingsutvekslinger skal skrives som integrasjonstester.  
@@ -41,6 +41,17 @@ Den nye filen skal man da putte inn sine konfigurasjonsdetaljer for Fiks-Protoko
 
 ### Test oppsett
 Hver test sender inn en unik id som header på Fiks-IO meldingen med navnet **testSessionId**. Dette er kun for at vår arkiv-simulator skal kunne se hvilke meldinger som hører sammen når man kjører disse testene mot simulatoren. Hvis man kjører disse testene mot en arkiv implementasjon kan arkivet ignorere denne id'en. Den er kun for intern validering av integrasjonstestene.
+
+### Testene
+
+Selve testene ligger under **Tests** mappen. De er gruppert på typer tester i mappene **ArkivmeldingOppdateringTests** og **InnsynTests**.
+
+#### ArkivmeldingOppdateringTests
+Tester som først oppretter en ressurs i arkivet for så å oppdatere den og så til slutt hente den igjen for å sjekke at oppdatering har blitt gjennomført. 
+
+#### InnsynTests
+Tester som først oppretter en ressurs i arkivet for å så å hente dem. 
+Testing av søk vil komme her etter hvert. 
 
 ### Flere tester?
 Vi jobber med å utvide med flere tester, men det er ingenting i veien for å skrive noen selv og komme med pull-requests på dette repoet. Jo flere tester vi får jo bedre blir dette :)
