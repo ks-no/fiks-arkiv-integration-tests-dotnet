@@ -4,7 +4,9 @@ using System.Threading;
 using KS.Fiks.Arkiv.Integration.Tests.FiksIO;
 using KS.Fiks.IO.Client;
 using KS.Fiks.IO.Client.Models;
-using KS.Fiks.IO.Client.Models.Feilmelding;
+using KS.Fiks.Protokoller.V1.Models.Feilmelding;
+using KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers;
+using Newtonsoft.Json;
 using NUnit.Framework;
 
 namespace KS.Fiks.Arkiv.Integration.Tests.Tests
@@ -40,13 +42,20 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
                 if (mottatMeldingArgs.Melding.SvarPaMelding == sendtMeldingid)
                 {
                     Console.Out.WriteLineAsync($"Svar på vår melding med meldingId {sendtMeldingid} mottatt. Melding er av typen: {mottatMeldingArgs.Melding.MeldingType}");
-                    Assert.False(mottatMeldingArgs.Melding.MeldingType is FeilmeldingMeldingTypeV1.Ugyldigforespørsel or FeilmeldingMeldingTypeV1.Serverfeil, $"Uforventet svar av typen {mottatMeldingArgs.Melding.MeldingType}");
-                    
+                      
                     if (mottatMeldingArgs.Melding.MeldingType == forventetMeldingstype)
                     {
                         Console.Out.WriteLineAsync($"Forventet meldingstype {forventetMeldingstype} mottatt!");
                         mottattMeldingArgsList.Remove(mottatMeldingArgs);
                         return mottatMeldingArgs;
+                    }
+                    
+                    if (mottatMeldingArgs.Melding.MeldingType != forventetMeldingstype && mottatMeldingArgs.Melding.MeldingType is FeilmeldingType.Ugyldigforespørsel or FeilmeldingType.Serverfeil or FeilmeldingType.Ikkefunnet)
+                    {
+                        var melding = MeldingHelper.GetDecryptedMessagePayload(mottatMeldingArgs).Result;
+                        var json = melding.PayloadAsString;
+                        var feilmelding = JsonConvert.DeserializeObject<Ugyldigforespoersel>(json);
+                        Console.Out.WriteLineAsync($"Uforventet feilmelding-type mottat {mottatMeldingArgs.Melding.MeldingType}. Feilmelding: {feilmelding.Feilmelding}");
                     }
                 }        
             }

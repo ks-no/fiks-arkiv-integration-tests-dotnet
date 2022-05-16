@@ -5,11 +5,14 @@ using KS.Fiks.Arkiv.Models.V1.Arkivstruktur;
 using KS.Fiks.Arkiv.Models.V1.Innsyn.Hent.Journalpost;
 using KS.Fiks.Arkiv.Models.V1.Innsyn.Hent.Mappe;
 using KS.Fiks.Arkiv.Models.V1.Metadatakatalog;
+using Journalpost = KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding.Journalpost;
 
 namespace KS.Fiks.Arkiv.Integration.Tests.Library
 {
     public class MeldingGenerator
     {
+        private const string FagsystemDefault = "Fagsystem integrasjonstester";
+
         public static JournalpostHent CreateJournalpostHent(EksternNoekkel referanseEksternNoekkel)
         {
              return new JournalpostHent()
@@ -50,12 +53,12 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
          {
              var arkivmelding = new Arkivmelding()
              {
-                 System = "Fagsystem X",
+                 System = FagsystemDefault,
                  MeldingId = Guid.NewGuid().ToString(),
                  AntallFiler = 1,
                  Registrering =
                  {
-                     ArkivmeldingDataGenerator.CreateJournalpost(),
+                     JournalpostGenerator.CreateJournalpost(JournalpostGenerator.ArkivdelDefault),
                  }
              };
              
@@ -64,12 +67,12 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
 
         public static Arkivmelding CreateArkivmeldingMedNyJournalpost(EksternNoekkel referanseEksternNoekkelNoekkel)
         {
-            var journalpost = ArkivmeldingDataGenerator.CreateJournalpost();
+            var journalpost = JournalpostGenerator.CreateJournalpost(JournalpostGenerator.ArkivdelDefault);
             journalpost.ReferanseEksternNoekkel = referanseEksternNoekkelNoekkel;
             
             var arkivmelding = new Arkivmelding()
             {
-                System = "Fagsystem X",
+                System = FagsystemDefault,
                 MeldingId = Guid.NewGuid().ToString(),
                 AntallFiler = 1,
                 Registrering =
@@ -81,16 +84,67 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
             return arkivmelding;
         }
         
-        public static Arkivmelding CreateArkivmeldingMedSaksmappe(EksternNoekkel referanseEksternNoekkelNoekkel)
+        public static Arkivmelding CreateArkivmelding()
         {
             var arkivmelding = new Arkivmelding()
             {
-                System = "Fagsystem X",
+                System = FagsystemDefault,
+                MeldingId = Guid.NewGuid().ToString(),
+                AntallFiler = 1,
+            };
+             
+            return arkivmelding;
+        }
+
+        public static Arkivmelding CreateArkivmeldingMedNyttHovedDokument(EksternNoekkel referanseEksternNoekkelNoekkel)
+        {
+            var journalpost = JournalpostGenerator.CreateJournalpost(JournalpostGenerator.ArkivdelDefault);
+            journalpost.ReferanseEksternNoekkel = referanseEksternNoekkelNoekkel;
+            journalpost.Dokumentbeskrivelse.Add(JournalpostGenerator.CreateDokumentbeskrivelse());
+
+            var arkivmelding = new Arkivmelding()
+            {
+                System = FagsystemDefault,
+                MeldingId = Guid.NewGuid().ToString(),
+                AntallFiler = 1,
+                Registrering =
+                {
+                    journalpost
+                }
+            };
+
+            return arkivmelding;
+        }
+
+        public static Arkivmelding CreateArkivmeldingPåEksisterendeJournalpostMedNyttVedlegg(EksternNoekkel referanseEksternNoekkelNoekkel)
+        {
+            var journalpost = JournalpostGenerator.CreateJournalpost(JournalpostGenerator.ArkivdelDefault);
+            journalpost.ReferanseEksternNoekkel = referanseEksternNoekkelNoekkel;
+            
+            var arkivmelding = new Arkivmelding()
+            {
+                System = FagsystemDefault,
+                MeldingId = Guid.NewGuid().ToString(),
+                AntallFiler = 1,
+                Registrering =
+                {
+                    journalpost
+                }
+            };
+             
+            return arkivmelding;
+        }
+        
+        public static Arkivmelding CreateArkivmeldingMedSaksmappe(EksternNoekkel referanseEksternNoekkelNoekkel, Journalpost journalpost = null)
+        {
+            var arkivmelding = new Arkivmelding()
+            {
+                System = FagsystemDefault,
                 MeldingId = Guid.NewGuid().ToString(),
                 AntallFiler = 1,
                 Mappe =
                 {
-                    ArkivmeldingDataGenerator.CreateSaksmappe(ArkivmeldingDataGenerator.CreateJournalpost(), referanseEksternNoekkelNoekkel)
+                    MappeGenerator.CreateSaksmappe(referanseEksternNoekkelNoekkel, journalpost)
                 }
             };
             

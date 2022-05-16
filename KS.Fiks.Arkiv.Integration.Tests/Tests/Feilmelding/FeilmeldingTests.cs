@@ -17,10 +17,9 @@ using NUnit.Framework;
 namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
 {
     /**
-     * Disse testene sender først en arkivmelding for å opprette en journalpost for så
-     * hente journalposten igjen vha enten referanseEksternNoekkel eller systemID
+     * Disse testene se forsøker å framprovosere feil og sjekke at man får korrekt feilmelding tilbake*Æ^`  
      */
-    public class HentJournalpostTests : IntegrationTestsBase
+    public class FeilmeldingTests : IntegrationTestsBase
     {
         [SetUp]
         public void Setup()
@@ -196,6 +195,47 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
             Assert.AreEqual(journalpostHentResultat.Journalpost.Tittel, arkivmelding.Registrering[0].Tittel);
             Assert.AreEqual(journalpostHentResultat.Journalpost.ReferanseEksternNoekkel.Fagsystem, arkivmelding.Registrering[0].ReferanseEksternNoekkel.Fagsystem);
             Assert.AreEqual(journalpostHentResultat.Journalpost.ReferanseEksternNoekkel.Noekkel, arkivmelding.Registrering[0].ReferanseEksternNoekkel.Noekkel);
+        }
+        
+        [Test] public void Hent_Journalpost_Med_Ikke_Eksisterende_EksternNoekkel_Returnerer_Ikkefunnet()
+        {
+            // Denne id'en gjør at Arkiv-simulatoren ser hvilke meldinger som henger sammen. Har ingen funksjon ellers. 
+            var testSessionId = Guid.NewGuid().ToString();
+            var validator = new SimpleXsdValidator();
+            
+            var referanseEksternNoekkelIkkeGyldig = new EksternNoekkel()
+            {
+                Fagsystem = "Fiks arkiv integrasjonstest hent journalpost med ikke gyldig referanseEksternNoekkel",
+                Noekkel = Guid.Empty.ToString() // Bør ikke kunne eksistere i Arkivet
+            };
+            
+            // STEG 1: Forsøke hente journalpost som ikke eksisterer
+            var journalpostHent = MeldingGenerator.CreateJournalpostHent(referanseEksternNoekkelIkkeGyldig);
+            
+            var journalpostHentSerialized = ArkiveringSerializeHelper.Serialize(journalpostHent);
+            
+            // Valider innhold (xml)
+            validator.Validate(journalpostHentSerialized);
+            
+            File.WriteAllText("HentJournalpostEksternNoekkelIkkeGyldig.xml", journalpostHentSerialized);
+            
+            // Nullstill meldingsliste
+            _mottatMeldingArgsList.Clear();
+            
+            // Send hent melding
+            var journalpostHentMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.JournalpostHent, journalpostHentSerialized, "arkivmelding.xml", null, testSessionId);
+
+            // Vent på 1 respons meldinger 
+            VentPaSvar(1, 10);
+
+            Assert.True(_mottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
+            
+            // Verifiser at man får en Ikkefunnet feil-melding
+            var ikkefunnetFeilmelding = GetAndVerifyByMeldingstype(_mottatMeldingArgsList, journalpostHentMeldingId, FeilmeldingType.Ikkefunnet);
+
+            Assert.IsNotNull(ikkefunnetFeilmelding);
+            
+            //TODO hent feilmelding og sjekk innhold?
         }
     }
 }
