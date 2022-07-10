@@ -1,13 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using KS.Fiks.ASiC_E;
 using KS.Fiks.IO.Client.Models;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Models;
 
-namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers
+namespace KS.Fiks.Arkiv.Integration.Tests.Helpers
 {
     public class MeldingHelper
     {

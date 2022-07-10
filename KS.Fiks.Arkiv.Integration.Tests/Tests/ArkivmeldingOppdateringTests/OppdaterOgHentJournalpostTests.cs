@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using KS.Fiks.Arkiv.Integration.Tests.FiksIO;
+using KS.Fiks.Arkiv.Integration.Tests.Helpers;
 using KS.Fiks.Arkiv.Integration.Tests.Library;
 using KS.Fiks.Arkiv.Models.V1.Arkivstruktur;
 using KS.Fiks.Arkiv.Models.V1.Innsyn.Hent.Journalpost;

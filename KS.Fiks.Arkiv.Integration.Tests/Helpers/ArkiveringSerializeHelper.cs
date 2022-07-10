@@ -3,6 +3,8 @@ using System.Text;
 using System.Xml.Serialization;
 using KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding;
 using KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmeldingkvittering;
+using KS.Fiks.Arkiv.Models.V1.Feilmelding;
+using KS.Fiks.Arkiv.Models.V1.Meldingstyper;
 
 namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers
 {
@@ -47,7 +49,6 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers
             return arkivmeldingDeserialized;
         }
         
-                
         public static T DeSerializeXml<T>(string xml)
         {
             var serializer = new XmlSerializer(typeof(T));

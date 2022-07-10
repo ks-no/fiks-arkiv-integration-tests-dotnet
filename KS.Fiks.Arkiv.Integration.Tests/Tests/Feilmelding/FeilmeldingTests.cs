@@ -4,11 +4,10 @@ using System.IO;
 using KS.Fiks.Arkiv.Integration.Tests.FiksIO;
 using KS.Fiks.Arkiv.Integration.Tests.Library;
 using KS.Fiks.Arkiv.Models.V1.Arkivstruktur;
-using KS.Fiks.Arkiv.Models.V1.Innsyn.Hent.Journalpost;
+using KS.Fiks.Arkiv.Models.V1.Feilmelding;
 using KS.Fiks.Arkiv.Models.V1.Meldingstyper;
 using KS.Fiks.IO.Client;
 using KS.Fiks.IO.Client.Models;
-using KS.Fiks.Protokoller.V1.Models.Feilmelding;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Validation;
 using Microsoft.Extensions.Configuration;
@@ -35,7 +34,8 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
             _mottakerKontoId = Guid.Parse(config["TestConfig:ArkivAccountId"]);
         }
 
-        [Test] public void Hent_Journalpost_Med_Ikke_Eksisterende_EksternNoekkel_Returnerer_Ikkefunnet()
+        [Test] 
+        public void Hent_Journalpost_Med_Ikke_Eksisterende_EksternNoekkel_Returnerer_Ikkefunnet()
         {
             // Denne id'en gjør at Arkiv-simulatoren ser hvilke meldinger som henger sammen. Har ingen funksjon ellers. 
             var testSessionId = Guid.NewGuid().ToString();
@@ -69,7 +69,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
             Assert.True(_mottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
             
             // Verifiser at man får en Ikkefunnet feil-melding
-            var ikkefunnetFeilmelding = GetAndVerifyByMeldingstype(_mottatMeldingArgsList, journalpostHentMeldingId, FeilmeldingType.Ikkefunnet);
+            var ikkefunnetFeilmelding = GetAndVerifyByMeldingstype(_mottatMeldingArgsList, journalpostHentMeldingId, FiksArkivMeldingtype.Ikkefunnet);
 
             Assert.IsNotNull(ikkefunnetFeilmelding);
             

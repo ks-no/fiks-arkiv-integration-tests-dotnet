@@ -1,13 +1,24 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
+using KS.Fiks.Arkiv.Integration.Tests.Exceptions;
 using KS.Fiks.Arkiv.Integration.Tests.FiksIO;
+using KS.Fiks.Arkiv.Integration.Tests.Helpers;
+using KS.Fiks.Arkiv.Integration.Tests.Library;
+using KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmeldingkvittering;
+using KS.Fiks.Arkiv.Models.V1.Arkivstruktur;
+using KS.Fiks.Arkiv.Models.V1.Feilmelding;
+using KS.Fiks.Arkiv.Models.V1.Innsyn.Hent.Mappe;
+using KS.Fiks.Arkiv.Models.V1.Meldingstyper;
 using KS.Fiks.IO.Client;
 using KS.Fiks.IO.Client.Models;
-using KS.Fiks.Protokoller.V1.Models.Feilmelding;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers;
+using KS.FiksProtokollValidator.Tests.IntegrationTests.Validation;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using NUnit.Framework;
+using EksternNoekkel = KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding.EksternNoekkel;
 
 namespace KS.Fiks.Arkiv.Integration.Tests.Tests
 {
@@ -17,6 +28,20 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
         protected IFiksIOClient? _client;
         protected FiksRequestMessageService? _fiksRequestService;
         protected Guid _mottakerKontoId;
+        protected SimpleXsdValidator validator;
+
+        protected void Init()
+        {
+            //TODO En annen lokal lagring som kjørte for disse testene hadde vært stilig i stedet for en liste.
+            _mottatMeldingArgsList = new List<MottattMeldingArgs>();
+            var config = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.Local.json")
+                .Build();
+            _client = new FiksIOClient(FiksIOConfigurationBuilder.CreateFiksIOConfiguration(config));
+            _client.NewSubscription(OnMottattMelding);
+            _fiksRequestService = new FiksRequestMessageService(config);
+            _mottakerKontoId = Guid.Parse(config["TestConfig:ArkivAccountId"]);
+        }
         
         protected static void VentPaSvar(int antallForventet, int antallVenter)
         {
@@ -49,18 +74,150 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
                         mottattMeldingArgsList.Remove(mottatMeldingArgs);
                         return mottatMeldingArgs;
                     }
-                    
-                    if (mottatMeldingArgs.Melding.MeldingType != forventetMeldingstype && mottatMeldingArgs.Melding.MeldingType is FeilmeldingType.Ugyldigforespørsel or FeilmeldingType.Serverfeil or FeilmeldingType.Ikkefunnet)
+
+                    if (mottatMeldingArgs.Melding.MeldingType != forventetMeldingstype)
                     {
-                        var melding = MeldingHelper.GetDecryptedMessagePayload(mottatMeldingArgs).Result;
-                        var json = melding.PayloadAsString;
-                        var feilmelding = JsonConvert.DeserializeObject<Ugyldigforespoersel>(json);
-                        Console.Out.WriteLineAsync($"Uforventet feilmelding-type mottat {mottatMeldingArgs.Melding.MeldingType}. Feilmelding: {feilmelding.Feilmelding}");
-                    }
+                        if (FiksArkivMeldingtype.IsFeilmelding(mottatMeldingArgs.Melding.MeldingType))
+                        {
+                            var melding = MeldingHelper.GetDecryptedMessagePayload(mottatMeldingArgs).Result;
+                            var xml = melding.PayloadAsString;
+                            FeilmeldingBase feilmelding = null;
+                            switch (mottatMeldingArgs.Melding.MeldingType)
+                            {
+                                case FiksArkivMeldingtype.Ugyldigforespørsel:
+                                    feilmelding = ArkiveringSerializeHelper.DeSerializeXml<Ugyldigforespoersel>(xml);
+                                    throw new UnexpectedAnswerException($"Uforventet feilmelding mottatt {mottatMeldingArgs.Melding.MeldingType}. Feilmelding: {feilmelding.Feilmelding}. Forventet meldingstypen {forventetMeldingstype}");
+                                case FiksArkivMeldingtype.Serverfeil:
+                                    feilmelding = ArkiveringSerializeHelper.DeSerializeXml<Serverfeil>(xml);
+                                    throw new UnexpectedAnswerException($"Uforventet feilmelding mottatt {mottatMeldingArgs.Melding.MeldingType}. Feilmelding: {feilmelding.Feilmelding}. Forventet meldingstypen {forventetMeldingstype}");
+                                case FiksArkivMeldingtype.Ikkefunnet:
+                                    feilmelding = ArkiveringSerializeHelper.DeSerializeXml<Ikkefunnet>(xml);
+                                    throw new UnexpectedAnswerException($"Uforventet feilmelding mottatt {mottatMeldingArgs.Melding.MeldingType}. Feilmelding: {feilmelding.Feilmelding}. Forventet meldingstypen {forventetMeldingstype}");
+                                default:
+                                    throw new UnexpectedAnswerException($"Uforventet feilmelding mottatt av typen {mottatMeldingArgs.Melding.MeldingType}. Klarte ikke parse den heller. Er det en ny feilmeldingstype?. Forventet meldingstypen {forventetMeldingstype}");
+                            }
+                        }
+                        throw new UnexpectedAnswerException($"Uforventet melding mottatt av typen {mottatMeldingArgs.Melding.MeldingType}. Forventet meldingstypen {forventetMeldingstype}");
+                    } 
                 }        
             }
 
             return null;
+        }
+        
+        protected static bool HarFeilmelding(List<MottattMeldingArgs> mottattMeldingArgsList, Guid sendtMeldingid)
+        {
+            foreach (var mottatMeldingArgs in mottattMeldingArgsList)
+            {
+                if (mottatMeldingArgs.Melding.SvarPaMelding == sendtMeldingid)
+                {
+                    if (FiksArkivMeldingtype.IsFeilmelding(mottatMeldingArgs.Melding.MeldingType))
+                    {
+                        Console.Out.WriteLineAsync($"Svar med feilmelding på vår melding med meldingId {sendtMeldingid} mottatt. Melding er av typen: {mottatMeldingArgs.Melding.MeldingType}");
+
+                        return true;
+                    }
+                }        
+            }
+            return false;
+        }
+        
+        protected static bool Ikkfunnet(List<MottattMeldingArgs> mottattMeldingArgsList, Guid sendtMeldingid)
+        {
+            foreach (var mottatMeldingArgs in mottattMeldingArgsList)
+            {
+                if (mottatMeldingArgs.Melding.SvarPaMelding == sendtMeldingid)
+                {
+                    if (FiksArkivMeldingtype.Ikkefunnet == mottatMeldingArgs.Melding.MeldingType)
+                    {
+                        Console.Out.WriteLineAsync($"Svar med feilmelding på vår melding med meldingId {sendtMeldingid} mottatt. Melding er som forventet av typen: {mottatMeldingArgs.Melding.MeldingType}");
+                        return true;
+                    }
+                }        
+            }
+            return false;
+        }
+
+        protected Saksmappe? HentSaksmappe(string testSessionId, Models.V1.Arkivering.Arkivmelding.EksternNoekkel referanseEksternNoekkel)
+        {
+            var mappeHent = MeldingGenerator.CreateMappeHent(referanseEksternNoekkel);
+            
+            var mappeHentSerialized = ArkiveringSerializeHelper.Serialize(mappeHent);
+            
+            File.WriteAllText("MappeHent.xml", mappeHentSerialized);
+            
+            // Valider innhold (xml)
+            validator.Validate(mappeHentSerialized);
+            
+            // Nullstill meldingsliste
+            _mottatMeldingArgsList.Clear();
+            
+            // Send hent melding
+            var mappeHentMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.MappeHent, mappeHentSerialized, "arkivmelding.xml", null, testSessionId);
+
+            // Vent på 1 respons meldinger 
+            VentPaSvar(1, 10);
+
+            Assert.True(_mottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
+
+            if( Ikkfunnet(_mottatMeldingArgsList, mappeHentMeldingId) )
+            {
+                return null; 
+            }
+            
+            // Verifiser at man får mappeHentResultat melding
+            var mappeHentResultatMelding = GetAndVerifyByMeldingstype(_mottatMeldingArgsList, mappeHentMeldingId, FiksArkivMeldingtype.MappeHentResultat);
+
+            Assert.IsNotNull(mappeHentResultatMelding);
+            
+            var mappeHentResultatPayload = MeldingHelper.GetDecryptedMessagePayload(mappeHentResultatMelding).Result;
+            
+            // Valider innhold (xml)
+            validator.Validate(mappeHentResultatPayload.PayloadAsString);
+
+            var mappeHentResultat = ArkiveringSerializeHelper.DeSerializeXml<MappeHentResultat>(mappeHentResultatPayload.PayloadAsString);
+
+            return (Saksmappe)mappeHentResultat.Mappe;
+        }
+        
+        protected ArkivmeldingKvittering OpprettSaksmappe(string testSessionId, EksternNoekkel referanseEksternNoekkel)
+        {
+            Console.Out.WriteLine($"Sender arkivmelding med ny saksmappe med EksternNoekkel fagsystem {referanseEksternNoekkel.Fagsystem} og noekkel {referanseEksternNoekkel.Noekkel}");
+
+            var arkivmeldingNySaksmappe = MeldingGenerator.CreateArkivmeldingMedSaksmappe(referanseEksternNoekkel);
+
+            var nySaksmappeSerialized = ArkiveringSerializeHelper.Serialize(arkivmeldingNySaksmappe);
+
+            // Valider arkivmelding
+            validator.Validate(nySaksmappeSerialized);
+
+            File.WriteAllText("ArkivmeldingMedNySaksmappe2.xml", nySaksmappeSerialized);
+
+            // Send melding
+            var nySaksmappeMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.Arkivmelding,
+                nySaksmappeSerialized, "arkivmelding.xml", null, testSessionId);
+
+            // Vent på 2 første response meldinger (mottatt og kvittering)
+            VentPaSvar(2, 10);
+            Assert.True(_mottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
+
+            // Verifiser at man får mottatt melding
+            GetAndVerifyByMeldingstype(_mottatMeldingArgsList, nySaksmappeMeldingId, FiksArkivMeldingtype.ArkivmeldingMottatt);
+
+            // Verifiser at man får arkivmeldingKvittering melding
+            var arkivmeldingKvitteringMelding = GetAndVerifyByMeldingstype(_mottatMeldingArgsList, nySaksmappeMeldingId,
+                FiksArkivMeldingtype.ArkivmeldingKvittering);
+
+            var arkivmeldingKvitteringPayload = MeldingHelper.GetDecryptedMessagePayload(arkivmeldingKvitteringMelding).Result;
+            Assert.True(arkivmeldingKvitteringPayload.Filename == "arkivmelding-kvittering.xml",
+                "Filnavn ikke som forventet arkivmelding-kvittering.xml");
+
+            // Valider innhold i kvitteringen (xml)
+            validator.Validate(arkivmeldingKvitteringPayload.PayloadAsString);
+
+            var arkivmeldingKvittering =
+                ArkiveringSerializeHelper.DeSerializeXml<ArkivmeldingKvittering>(arkivmeldingKvitteringPayload.PayloadAsString);
+            return arkivmeldingKvittering;
         }
     }
 }
