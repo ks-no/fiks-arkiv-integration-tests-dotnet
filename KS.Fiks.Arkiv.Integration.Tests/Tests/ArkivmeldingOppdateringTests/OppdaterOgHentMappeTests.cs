@@ -69,10 +69,13 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdateringTests
             Assert.True(_mottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
 
             // Verifiser at man får mottatt melding
-            GetAndVerifyByMeldingstype(_mottatMeldingArgsList, nySaksmappeMeldingId, FiksArkivMeldingtype.ArkivmeldingMottatt);
+            SjekkForventetMelding(_mottatMeldingArgsList, nySaksmappeMeldingId, FiksArkivMeldingtype.ArkivmeldingMottatt);
 
             // Verifiser at man får arkivmeldingKvittering melding
-            var arkivmeldingKvitteringMelding = GetAndVerifyByMeldingstype(_mottatMeldingArgsList, nySaksmappeMeldingId, FiksArkivMeldingtype.ArkivmeldingKvittering);
+            SjekkForventetMelding(_mottatMeldingArgsList, nySaksmappeMeldingId, FiksArkivMeldingtype.ArkivmeldingKvittering);
+            
+            // Hent meldingen
+            var arkivmeldingKvitteringMelding = GetMottattMelding(_mottatMeldingArgsList, nySaksmappeMeldingId, FiksArkivMeldingtype.ArkivmeldingKvittering);
             
             var arkivmeldingKvitteringPayload = MeldingHelper.GetDecryptedMessagePayload(arkivmeldingKvitteringMelding).Result;
             Assert.True(arkivmeldingKvitteringPayload.Filename == "arkivmelding-kvittering.xml", "Filnavn ikke som forventet arkivmelding-kvittering.xml");
@@ -81,7 +84,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdateringTests
             validator.Validate(arkivmeldingKvitteringPayload.PayloadAsString);
 
             // STEG 2: Send oppdatering av saksmappe og saksansvarlig
-            string nySaksansvarlig = "Nelly Ny Saksansvarlig";
+            var nySaksansvarlig = "Nelly Ny Saksansvarlig";
             var arkivmeldingOppdatering = MeldingGenerator.CreateArkivmeldingOppdateringSaksmappeOppdateringNySaksansvarlig(referanseEksternNoekkel, nySaksansvarlig);
             
             var arkivmeldingOppdateringSerialized = ArkiveringSerializeHelper.Serialize(arkivmeldingOppdatering);
@@ -96,15 +99,17 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdateringTests
             var arkivmeldingOppdaterMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOppdater, arkivmeldingOppdateringSerialized, "arkivmelding.xml", null, testSessionId);
 
             // Vent på 2 respons meldinger. Mottat og kvittering 
-            VentPaSvar(2, 10); 
-            
-            // Verifiser at man får mottatt melding
-            GetAndVerifyByMeldingstype(_mottatMeldingArgsList, nySaksmappeMeldingId, FiksArkivMeldingtype.ArkivmeldingMottatt);
-
+            VentPaSvar(2, 10);
             Assert.True(_mottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
             
+            // Verifiser at man får mottatt melding
+            SjekkForventetMelding(_mottatMeldingArgsList, arkivmeldingOppdaterMeldingId, FiksArkivMeldingtype.ArkivmeldingOppdaterMottatt);
+
             // Verifiser at man får arkivmeldingOppdaterKvittering melding
-            var arkivmeldingOppdaterKvittering = GetAndVerifyByMeldingstype(_mottatMeldingArgsList, arkivmeldingOppdaterMeldingId, FiksArkivMeldingtype.ArkivmeldingOppdaterKvittering);
+            SjekkForventetMelding(_mottatMeldingArgsList, arkivmeldingOppdaterMeldingId, FiksArkivMeldingtype.ArkivmeldingOppdaterKvittering);
+            
+            // Hent melding
+            var arkivmeldingOppdaterKvittering = GetMottattMelding(_mottatMeldingArgsList, arkivmeldingOppdaterMeldingId, FiksArkivMeldingtype.ArkivmeldingOppdaterKvittering);
 
             Assert.IsNotNull(arkivmeldingOppdaterKvittering);
             
@@ -130,7 +135,10 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdateringTests
             Assert.True(_mottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
             
             // Verifiser at man får mappeHentResultat melding
-            var mappeHentResultatMelding = GetAndVerifyByMeldingstype(_mottatMeldingArgsList, mappeHentMeldingId, FiksArkivMeldingtype.MappeHentResultat);
+            SjekkForventetMelding(_mottatMeldingArgsList, mappeHentMeldingId, FiksArkivMeldingtype.MappeHentResultat);
+            
+            // Hent melding
+            var mappeHentResultatMelding = GetMottattMelding(_mottatMeldingArgsList, mappeHentMeldingId, FiksArkivMeldingtype.MappeHentResultat);
 
             Assert.IsNotNull(mappeHentResultatMelding);
             
@@ -139,9 +147,9 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdateringTests
             // Valider innhold (xml)
             validator.Validate(mappeHentResultatPayload.PayloadAsString);
 
-            var mappeHentResultat = ArkiveringSerializeHelper.DeSerializeXml<MappeHentResultat>(mappeHentResultatPayload.PayloadAsString);
+            var mappeHentResultat = ArkiveringSerializeHelper.DeserializeXml<MappeHentResultat>(mappeHentResultatPayload.PayloadAsString);
 
-            Saksmappe saksmappe = (Saksmappe)mappeHentResultat.Mappe;
+            var saksmappe = (Saksmappe)mappeHentResultat.Mappe;
 
             Assert.AreEqual(nySaksansvarlig, saksmappe.Saksansvarlig);
            // Assert.AreEqual(saksmappe.Ek.Fagsystem, arkivmelding.Mappe[0].ReferanseEksternNoekkel.Fagsystem);

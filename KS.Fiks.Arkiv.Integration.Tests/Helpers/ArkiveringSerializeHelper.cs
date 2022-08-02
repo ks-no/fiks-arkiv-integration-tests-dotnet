@@ -3,8 +3,6 @@ using System.Text;
 using System.Xml.Serialization;
 using KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding;
 using KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmeldingkvittering;
-using KS.Fiks.Arkiv.Models.V1.Feilmelding;
-using KS.Fiks.Arkiv.Models.V1.Meldingstyper;
 
 namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers
 {
@@ -25,7 +23,7 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers
             public override Encoding Encoding => Encoding.UTF8;
         }
 
-        public static Arkivmelding? DeSerializeArkivmelding(string xml)
+        public static Arkivmelding? DeserializeArkivmelding(string xml)
         {
             var serializer = new XmlSerializer(typeof(Arkivmelding));
             Arkivmelding? arkivmeldingDeserialized;
@@ -37,7 +35,7 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers
             return arkivmeldingDeserialized;
         }
         
-        public static ArkivmeldingKvittering DeSerializeArkivmeldingKvittering(string xml)
+        public static ArkivmeldingKvittering DeserializeArkivmeldingKvittering(string xml)
         {
             var serializer = new XmlSerializer(typeof(ArkivmeldingKvittering));
             ArkivmeldingKvittering arkivmeldingDeserialized;
@@ -49,7 +47,7 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers
             return arkivmeldingDeserialized;
         }
         
-        public static T DeSerializeXml<T>(string xml)
+        public static T DeserializeXml<T>(string xml)
         {
             var serializer = new XmlSerializer(typeof(T));
             T xmlDeserialized;

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using KS.Fiks.Arkiv.Integration.Tests.Exceptions;
 using KS.Fiks.Arkiv.Integration.Tests.FiksIO;
@@ -18,6 +19,7 @@ using KS.FiksProtokollValidator.Tests.IntegrationTests.Validation;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using NUnit.Framework;
+using NUnit.Framework.Internal.Commands;
 using EksternNoekkel = KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding.EksternNoekkel;
 
 namespace KS.Fiks.Arkiv.Integration.Tests.Tests
@@ -60,45 +62,50 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
             mottattMeldingArgs.SvarSender?.Ack();
         }
 
-        protected static MottattMeldingArgs? GetAndVerifyByMeldingstype(List<MottattMeldingArgs> mottattMeldingArgsList, Guid sendtMeldingid, string forventetMeldingstype)
+        protected static void SjekkForventetMelding(IEnumerable<MottattMeldingArgs> mottattMeldingArgsList, Guid sendtMeldingsid, string forventetMeldingstype)
+        {
+            var found = mottattMeldingArgsList.Where(mottattMeldingArgs => mottattMeldingArgs.Melding.SvarPaMelding == sendtMeldingsid).Any(mottatMeldingArgs => mottatMeldingArgs.Melding.MeldingType == forventetMeldingstype);
+            if (!found)
+            {
+                foreach (var mottatMeldingArgs in mottattMeldingArgsList)
+                {
+                    if (FiksArkivMeldingtype.IsFeilmelding(mottatMeldingArgs.Melding.MeldingType))
+                    {
+                        var melding = MeldingHelper.GetDecryptedMessagePayload(mottatMeldingArgs).Result;
+                        var xml = melding.PayloadAsString;
+                        FeilmeldingBase feilmelding = null;
+                        switch (mottatMeldingArgs.Melding.MeldingType)
+                        {
+                            case FiksArkivMeldingtype.Ugyldigforespørsel:
+                                feilmelding = ArkiveringSerializeHelper.DeserializeXml<Ugyldigforespoersel>(xml);
+                                throw new UnexpectedAnswerException($"Uforventet feilmelding mottatt {mottatMeldingArgs.Melding.MeldingType}. Feilmelding: {feilmelding.Feilmelding}. Forventet meldingstypen {forventetMeldingstype}");
+                            case FiksArkivMeldingtype.Serverfeil:
+                                feilmelding = ArkiveringSerializeHelper.DeserializeXml<Serverfeil>(xml);
+                                throw new UnexpectedAnswerException($"Uforventet feilmelding mottatt {mottatMeldingArgs.Melding.MeldingType}. Feilmelding: {feilmelding.Feilmelding}. Forventet meldingstypen {forventetMeldingstype}");
+                            case FiksArkivMeldingtype.Ikkefunnet:
+                                feilmelding = ArkiveringSerializeHelper.DeserializeXml<Ikkefunnet>(xml);
+                                throw new UnexpectedAnswerException($"Uforventet feilmelding mottatt {mottatMeldingArgs.Melding.MeldingType}. Feilmelding: {feilmelding.Feilmelding}. Forventet meldingstypen {forventetMeldingstype}");
+                            default:
+                                throw new UnexpectedAnswerException($"Uforventet feilmelding mottatt av typen {mottatMeldingArgs.Melding.MeldingType}. Klarte ikke parse den heller. Er det en ny feilmeldingstype?. Forventet meldingstypen {forventetMeldingstype}");
+                        }
+                    }
+                    throw new UnexpectedAnswerException($"Uforventet melding mottatt av typen {mottatMeldingArgs.Melding.MeldingType}. Forventet meldingstypen {forventetMeldingstype}");  
+                }
+            }
+            Console.Out.WriteLineAsync($"Forventet meldingstype {forventetMeldingstype} mottatt for meldingsid  {sendtMeldingsid}!");
+        }
+
+        protected static MottattMeldingArgs? GetMottattMelding(List<MottattMeldingArgs> mottattMeldingArgsList, Guid sendtMeldingsid, string forventetMeldingstype)
         {
             foreach (var mottatMeldingArgs in mottattMeldingArgsList)
             {
-                if (mottatMeldingArgs.Melding.SvarPaMelding == sendtMeldingid)
+                if (mottatMeldingArgs.Melding.SvarPaMelding == sendtMeldingsid)
                 {
-                    Console.Out.WriteLineAsync($"Svar på vår melding med meldingId {sendtMeldingid} mottatt. Melding er av typen: {mottatMeldingArgs.Melding.MeldingType}");
-                      
                     if (mottatMeldingArgs.Melding.MeldingType == forventetMeldingstype)
                     {
-                        Console.Out.WriteLineAsync($"Forventet meldingstype {forventetMeldingstype} mottatt!");
                         mottattMeldingArgsList.Remove(mottatMeldingArgs);
                         return mottatMeldingArgs;
                     }
-
-                    if (mottatMeldingArgs.Melding.MeldingType != forventetMeldingstype)
-                    {
-                        if (FiksArkivMeldingtype.IsFeilmelding(mottatMeldingArgs.Melding.MeldingType))
-                        {
-                            var melding = MeldingHelper.GetDecryptedMessagePayload(mottatMeldingArgs).Result;
-                            var xml = melding.PayloadAsString;
-                            FeilmeldingBase feilmelding = null;
-                            switch (mottatMeldingArgs.Melding.MeldingType)
-                            {
-                                case FiksArkivMeldingtype.Ugyldigforespørsel:
-                                    feilmelding = ArkiveringSerializeHelper.DeSerializeXml<Ugyldigforespoersel>(xml);
-                                    throw new UnexpectedAnswerException($"Uforventet feilmelding mottatt {mottatMeldingArgs.Melding.MeldingType}. Feilmelding: {feilmelding.Feilmelding}. Forventet meldingstypen {forventetMeldingstype}");
-                                case FiksArkivMeldingtype.Serverfeil:
-                                    feilmelding = ArkiveringSerializeHelper.DeSerializeXml<Serverfeil>(xml);
-                                    throw new UnexpectedAnswerException($"Uforventet feilmelding mottatt {mottatMeldingArgs.Melding.MeldingType}. Feilmelding: {feilmelding.Feilmelding}. Forventet meldingstypen {forventetMeldingstype}");
-                                case FiksArkivMeldingtype.Ikkefunnet:
-                                    feilmelding = ArkiveringSerializeHelper.DeSerializeXml<Ikkefunnet>(xml);
-                                    throw new UnexpectedAnswerException($"Uforventet feilmelding mottatt {mottatMeldingArgs.Melding.MeldingType}. Feilmelding: {feilmelding.Feilmelding}. Forventet meldingstypen {forventetMeldingstype}");
-                                default:
-                                    throw new UnexpectedAnswerException($"Uforventet feilmelding mottatt av typen {mottatMeldingArgs.Melding.MeldingType}. Klarte ikke parse den heller. Er det en ny feilmeldingstype?. Forventet meldingstypen {forventetMeldingstype}");
-                            }
-                        }
-                        throw new UnexpectedAnswerException($"Uforventet melding mottatt av typen {mottatMeldingArgs.Melding.MeldingType}. Forventet meldingstypen {forventetMeldingstype}");
-                    } 
                 }        
             }
 
@@ -166,7 +173,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
             }
             
             // Verifiser at man får mappeHentResultat melding
-            var mappeHentResultatMelding = GetAndVerifyByMeldingstype(_mottatMeldingArgsList, mappeHentMeldingId, FiksArkivMeldingtype.MappeHentResultat);
+            var mappeHentResultatMelding = GetMottattMelding(_mottatMeldingArgsList, mappeHentMeldingId, FiksArkivMeldingtype.MappeHentResultat);
 
             Assert.IsNotNull(mappeHentResultatMelding);
             
@@ -175,7 +182,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
             // Valider innhold (xml)
             validator.Validate(mappeHentResultatPayload.PayloadAsString);
 
-            var mappeHentResultat = ArkiveringSerializeHelper.DeSerializeXml<MappeHentResultat>(mappeHentResultatPayload.PayloadAsString);
+            var mappeHentResultat = ArkiveringSerializeHelper.DeserializeXml<MappeHentResultat>(mappeHentResultatPayload.PayloadAsString);
 
             return (Saksmappe)mappeHentResultat.Mappe;
         }
@@ -202,10 +209,10 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
             Assert.True(_mottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
 
             // Verifiser at man får mottatt melding
-            GetAndVerifyByMeldingstype(_mottatMeldingArgsList, nySaksmappeMeldingId, FiksArkivMeldingtype.ArkivmeldingMottatt);
+            GetMottattMelding(_mottatMeldingArgsList, nySaksmappeMeldingId, FiksArkivMeldingtype.ArkivmeldingMottatt);
 
             // Verifiser at man får arkivmeldingKvittering melding
-            var arkivmeldingKvitteringMelding = GetAndVerifyByMeldingstype(_mottatMeldingArgsList, nySaksmappeMeldingId,
+            var arkivmeldingKvitteringMelding = GetMottattMelding(_mottatMeldingArgsList, nySaksmappeMeldingId,
                 FiksArkivMeldingtype.ArkivmeldingKvittering);
 
             var arkivmeldingKvitteringPayload = MeldingHelper.GetDecryptedMessagePayload(arkivmeldingKvitteringMelding).Result;
@@ -216,7 +223,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
             validator.Validate(arkivmeldingKvitteringPayload.PayloadAsString);
 
             var arkivmeldingKvittering =
-                ArkiveringSerializeHelper.DeSerializeXml<ArkivmeldingKvittering>(arkivmeldingKvitteringPayload.PayloadAsString);
+                ArkiveringSerializeHelper.DeserializeXml<ArkivmeldingKvittering>(arkivmeldingKvitteringPayload.PayloadAsString);
             return arkivmeldingKvittering;
         }
     }
