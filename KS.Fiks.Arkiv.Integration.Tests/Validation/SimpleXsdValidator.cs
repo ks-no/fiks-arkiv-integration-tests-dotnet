@@ -17,12 +17,12 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Validation
             var arkivModelsAssembly = AppDomain.CurrentDomain.GetAssemblies()
                 .SingleOrDefault(assembly => assembly.GetName().Name == "KS.Fiks.Arkiv.Models.V1");
             
-            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.arkivmelding.xsd"))
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.no.ks.fiks.arkiv.v1.arkivering.arkivmelding.xsd"))
             {
                 if (schemaStream != null)
                 {
                     using XmlReader schemaReader = XmlReader.Create(schemaStream);
-                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/arkivmelding/v2",
+                    xmlReaderSettings.Schemas.Add("https://ks-no.github.io/standarder/fiks-protokoll/fiks-arkiv/arkivmelding/v1",
                         schemaReader);
                 }
             }
@@ -31,7 +31,7 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Validation
                 if (schemaStream != null)
                 {
                     using XmlReader schemaReader = XmlReader.Create(schemaStream);
-                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/metadatakatalog/v2",
+                    xmlReaderSettings.Schemas.Add("https://ks-no.github.io/standarder/fiks-protokoll/fiks-arkiv/metadatakatalog/v1",
                         schemaReader);
                 }
             }
@@ -40,7 +40,7 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Validation
                 if (schemaStream != null)
                 {
                     using XmlReader schemaReader = XmlReader.Create(schemaStream);
-                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/arkivstruktur",
+                    xmlReaderSettings.Schemas.Add("https://ks-no.github.io/standarder/fiks-protokoll/fiks-arkiv/arkivstruktur/v1",
                         schemaReader);
                 }
             }
@@ -50,51 +50,51 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Validation
                 {
                     using XmlReader schemaReader = XmlReader.Create(schemaStream);
                     xmlReaderSettings.Schemas.Add(
-                        "http://www.arkivverket.no/standarder/noark5/arkivmeldingoppdatering/v2", schemaReader);
+                        "https://ks-no.github.io/standarder/fiks-protokoll/fiks-arkiv/arkivmeldingoppdatering/v1", schemaReader);
                 }
             }
-            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.journalpostHent.xsd"))
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.no.ks.fiks.arkiv.v1.innsyn.journalpost.hent.xsd"))
             {
                 if (schemaStream != null)
                 {
                     using XmlReader schemaReader = XmlReader.Create(schemaStream);
-                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/journalpost/hent/v2",
+                    xmlReaderSettings.Schemas.Add("https://ks-no.github.io/standarder/fiks-protokoll/fiks-arkiv/journalpost/hent/v1",
                         schemaReader);
                 }
             }
-            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.journalpostHentResultat.xsd"))
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.no.ks.fiks.arkiv.v1.innsyn.journalpost.hent.resultat.xsd"))
             {
                 if (schemaStream != null)
                 {
                     using var schemaReader = XmlReader.Create(schemaStream);
                     xmlReaderSettings.Schemas.Add(
-                        "http://www.arkivverket.no/standarder/noark5/journalpost/hent/resultat/v2", schemaReader);
+                        "https://ks-no.github.io/standarder/fiks-protokoll/fiks-arkiv/journalpost/hent/resultat/v1", schemaReader);
                 }
             }
-            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.mappeHent.xsd"))
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.no.ks.fiks.arkiv.v1.innsyn.mappe.hent.xsd"))
             {
                 if (schemaStream != null)
                 {
                     using XmlReader schemaReader = XmlReader.Create(schemaStream);
-                    xmlReaderSettings.Schemas.Add("http://www.arkivverket.no/standarder/noark5/mappe/hent/v2",
+                    xmlReaderSettings.Schemas.Add("https://ks-no.github.io/standarder/fiks-protokoll/fiks-arkiv/mappe/hent/v1",
                         schemaReader);
                 }
             }
-            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.mappeHentResultat.xsd"))
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.no.ks.fiks.arkiv.v1.innsyn.mappe.hent.resultat.xsd"))
             {
                 if (schemaStream != null)
                 {
                     using var schemaReader = XmlReader.Create(schemaStream);
                     xmlReaderSettings.Schemas.Add(
-                        "http://www.arkivverket.no/standarder/noark5/mappe/hent/resultat/v2", schemaReader);
+                        "https://ks-no.github.io/standarder/fiks-protokoll/fiks-arkiv/mappe/hent/resultat/v1", schemaReader);
                 }
             }
-            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.sokeresultatMinimum.xsd"))
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.no.ks.fiks.arkiv.v1.innsyn.sok.resultat.minimum.xsd"))
             {
                 if (schemaStream != null)
                 {
                     using var schemaReader = XmlReader.Create(schemaStream);
-                    xmlReaderSettings.Schemas.Add("http://www.ks.no/standarder/fiks/arkiv/sokeresultat/v1",
+                    xmlReaderSettings.Schemas.Add("https://ks-no.github.io/standarder/fiks-protokoll/fiks-arkiv/sokeresultat/v1",
                         schemaReader);
                 }
             }
@@ -103,16 +103,16 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Validation
                 if (schemaStream != null)
                 {
                     using var schemaReader = XmlReader.Create(schemaStream);
-                    xmlReaderSettings.Schemas.Add("http://www.ks.no/standarder/fiks/arkiv/arkivstruktur/minimum/v1",
+                    xmlReaderSettings.Schemas.Add("https://ks-no.github.io/standarder/fiks-protokoll/fiks-arkiv/arkivstruktur/minimum/v1",
                         schemaReader);
                 }
             }
-            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.sokeresultatUtvidet.xsd"))
+            using (var schemaStream = arkivModelsAssembly?.GetManifestResourceStream("KS.Fiks.Arkiv.Models.V1.Schema.V1.no.ks.fiks.arkiv.v1.innsyn.sok.resultat.utvidet.xsd"))
             {
                 if (schemaStream != null)
                 {
                     using var schemaReader = XmlReader.Create(schemaStream);
-                    xmlReaderSettings.Schemas.Add("http://www.ks.no/standarder/fiks/arkiv/sokeresultat/v1",
+                    xmlReaderSettings.Schemas.Add("https://ks-no.github.io/standarder/fiks-protokoll/fiks-arkiv/sokeresultat/v1",
                         schemaReader);
                 }
             }

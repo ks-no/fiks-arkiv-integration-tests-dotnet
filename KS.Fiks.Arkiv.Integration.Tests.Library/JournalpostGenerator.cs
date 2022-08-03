@@ -1,14 +1,12 @@
 using System;
-using System.Collections.ObjectModel;
+using KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding;
 using KS.Fiks.Arkiv.Models.V1.Arkivstruktur;
-using KS.Fiks.Arkiv.Models.V1.Kodelister;
 using KS.Fiks.Arkiv.Models.V1.Metadatakatalog;
 using Dokumentbeskrivelse = KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding.Dokumentbeskrivelse;
 using Dokumentobjekt = KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding.Dokumentobjekt;
+using EksternNoekkel = KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding.EksternNoekkel;
 using Journalpost = KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding.Journalpost;
-using Kode = KS.Fiks.Arkiv.Models.V1.Metadatakatalog.Kode;
 using Korrespondansepart = KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding.Korrespondansepart;
-using Saksmappe = KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding.Saksmappe;
 
 namespace KS.Fiks.Arkiv.Integration.Tests.Library
 {
@@ -16,11 +14,11 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
     {
         public const string SaksansvarligDefault = "Sara Saksansvarlig";
         public const string SaksmappeTittelDefault = "En ny saksmappe fra integrasjonstest";
-        public const string FagsystemDefault = "Fagsystem X";
-        public const string ArkivdelDefault = "Integrasjonstester";
+        public const string FagsystemDefault = "Fagsystem validatortester";
+        public const string ArkivdelDefault = "Arkiv validatortester";
             
 
-        public static Journalpost CreateJournalpost(SystemID referanseForelderMappe)
+        public static Journalpost CreateJournalpost(ReferanseForelderMappe referanseForelderMappe)
         {
             var jp = CreateJournalpost();
             jp.ReferanseForelderMappe = referanseForelderMappe;
@@ -112,7 +110,6 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
                 });
             return jp;
         } 
-        
         
         private static Journalpost CreateJournalpost()
         {

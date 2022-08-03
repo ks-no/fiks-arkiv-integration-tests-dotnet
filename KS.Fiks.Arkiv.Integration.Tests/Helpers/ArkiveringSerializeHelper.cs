@@ -23,7 +23,7 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers
             public override Encoding Encoding => Encoding.UTF8;
         }
 
-        public static Arkivmelding? DeSerializeArkivmelding(string xml)
+        public static Arkivmelding? DeserializeArkivmelding(string xml)
         {
             var serializer = new XmlSerializer(typeof(Arkivmelding));
             Arkivmelding? arkivmeldingDeserialized;
@@ -35,7 +35,7 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers
             return arkivmeldingDeserialized;
         }
         
-        public static ArkivmeldingKvittering DeSerializeArkivmeldingKvittering(string xml)
+        public static ArkivmeldingKvittering DeserializeArkivmeldingKvittering(string xml)
         {
             var serializer = new XmlSerializer(typeof(ArkivmeldingKvittering));
             ArkivmeldingKvittering arkivmeldingDeserialized;
@@ -47,8 +47,7 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers
             return arkivmeldingDeserialized;
         }
         
-                
-        public static T DeSerializeXml<T>(string xml)
+        public static T DeserializeXml<T>(string xml)
         {
             var serializer = new XmlSerializer(typeof(T));
             T xmlDeserialized;

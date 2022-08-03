@@ -53,7 +53,9 @@ namespace KS.Fiks.Arkiv.Integration.Tests.FiksIO
             // Optional: Use custom amqp host (i.e. for connection to test queue)
             var amqpConfiguration = new AmqpConfiguration(
                 host: config["FiksIOConfig:AmqpHost"],
-                port: int.Parse(config["FiksIOConfig:AmqpPort"]), sslOption1);
+                port: int.Parse(config["FiksIOConfig:AmqpPort"]),
+                sslOption1,
+                "Fiks-Arkiv Integration-Tests");
 
             // Combine all configurations
             return new FiksIOConfiguration(

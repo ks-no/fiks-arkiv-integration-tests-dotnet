@@ -1,11 +1,9 @@
 using System;
 using KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding;
 using KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding.Oppdatering;
-using KS.Fiks.Arkiv.Models.V1.Arkivstruktur;
 using KS.Fiks.Arkiv.Models.V1.Innsyn.Hent.Journalpost;
 using KS.Fiks.Arkiv.Models.V1.Innsyn.Hent.Mappe;
 using KS.Fiks.Arkiv.Models.V1.Metadatakatalog;
-using Journalpost = KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding.Journalpost;
 
 namespace KS.Fiks.Arkiv.Integration.Tests.Library
 {
@@ -17,7 +15,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
         {
              return new JournalpostHent()
              {
-                 ReferanseEksternNoekkel = new EksternNoekkel()
+                 ReferanseEksternNoekkel = new Models.V1.Arkivstruktur.EksternNoekkel()
                  {
                      Fagsystem = referanseEksternNoekkel.Fagsystem,
                      Noekkel = referanseEksternNoekkel.Noekkel
@@ -29,7 +27,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
         {
             return new MappeHent()
             {
-                ReferanseEksternNoekkel = new EksternNoekkel()
+                ReferanseEksternNoekkel = new Models.V1.Arkivstruktur.EksternNoekkel()
                 {
                     Fagsystem = referanseEksternNoekkel.Fagsystem,
                     Noekkel = referanseEksternNoekkel.Noekkel
@@ -180,6 +178,111 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
                     {
                         Saksansvarlig = nySaksansvarlig,
                         ReferanseEksternNoekkel = referanseEksternNoekkel
+                    }
+                }
+            };
+        }
+
+        public static Arkivmelding CreateArkivmeldingMedNyJournalpost(Models.V1.Arkivstruktur.EksternNoekkel referanseEksternNoekkelNoekkel)
+        {
+            var journalpost = JournalpostGenerator.CreateJournalpost(JournalpostGenerator.ArkivdelDefault);
+            journalpost.ReferanseEksternNoekkel = new EksternNoekkel()
+            {
+                Fagsystem = referanseEksternNoekkelNoekkel.Fagsystem,
+                Noekkel = referanseEksternNoekkelNoekkel.Noekkel
+            };
+            
+            var arkivmelding = new Arkivmelding()
+            {
+                System = FagsystemDefault,
+                MeldingId = Guid.NewGuid().ToString(),
+                AntallFiler = 1,
+                Registrering =
+                {
+                    journalpost
+                }
+            };
+             
+            return arkivmelding;
+        }
+
+        public static JournalpostHent CreateJournalpostHent(Models.V1.Arkivstruktur.EksternNoekkel referanseEksternNoekkel)
+        {
+            return new JournalpostHent()
+            {
+                ReferanseEksternNoekkel = new Models.V1.Arkivstruktur.EksternNoekkel()
+                {
+                    Fagsystem = referanseEksternNoekkel.Fagsystem,
+                    Noekkel = referanseEksternNoekkel.Noekkel
+                }
+            };
+        }
+
+        public static object CreateArkivmeldingOppdateringRegistreringOppdateringNyTittel(Models.V1.Arkivstruktur.EksternNoekkel referanseEksternNoekkel, string nyTittel)
+        {
+            return new ArkivmeldingOppdatering()
+            {
+                MeldingId = Guid.NewGuid().ToString(),
+                Tidspunkt = DateTime.Now,
+                RegistreringOppdateringer =
+                {
+                    new RegistreringOppdatering()
+                    {
+                        Tittel = nyTittel,
+                        ReferanseEksternNoekkel = new EksternNoekkel()
+                        {
+                            Fagsystem = referanseEksternNoekkel.Fagsystem,
+                            Noekkel = referanseEksternNoekkel.Noekkel
+                        }
+                    }
+                }
+            };
+        }
+
+        public static MappeHent CreateMappeHent(Models.V1.Arkivstruktur.EksternNoekkel referanseEksternNoekkel)
+        {
+            return new MappeHent()
+            {
+                ReferanseEksternNoekkel = new Models.V1.Arkivstruktur.EksternNoekkel()
+                {
+                    Fagsystem = referanseEksternNoekkel.Fagsystem,
+                    Noekkel = referanseEksternNoekkel.Noekkel
+                }
+            };
+        }
+
+        public static Arkivmelding CreateArkivmeldingMedSaksmappe(Models.V1.Arkivstruktur.EksternNoekkel referanseEksternNoekkelNoekkel, Journalpost journalpost = null)
+        {
+            var arkivmelding = new Arkivmelding()
+            {
+                System = FagsystemDefault,
+                MeldingId = Guid.NewGuid().ToString(),
+                AntallFiler = 1,
+                Mappe =
+                {
+                    MappeGenerator.CreateSaksmappe(referanseEksternNoekkelNoekkel, journalpost)
+                }
+            };
+            
+            return arkivmelding;
+        }
+
+        public static object CreateArkivmeldingOppdateringSaksmappeOppdateringNySaksansvarlig(Models.V1.Arkivstruktur.EksternNoekkel referanseEksternNoekkel, string nySaksansvarlig)
+        {
+            return new ArkivmeldingOppdatering()
+            {
+                MeldingId = Guid.NewGuid().ToString(),
+                Tidspunkt = DateTime.Now,
+                MappeOppdateringer =
+                {
+                    new SaksmappeOppdatering()
+                    {
+                        Saksansvarlig = nySaksansvarlig,
+                        ReferanseEksternNoekkel = new EksternNoekkel()
+                        {
+                            Fagsystem = referanseEksternNoekkel.Fagsystem,
+                            Noekkel = referanseEksternNoekkel.Noekkel
+                        }
                     }
                 }
             };

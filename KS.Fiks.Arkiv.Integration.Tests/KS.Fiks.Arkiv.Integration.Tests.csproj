@@ -1,16 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <Nullable>enable</Nullable>
 
         <IsPackable>false</IsPackable>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="KS.Fiks.Arkiv.Models.V1" Version="0.0.8" />
-        <PackageReference Include="KS.Fiks.IO.Client" Version="1.2.9" />
-        <PackageReference Include="KS.Fiks.Protokoller.V1" Version="1.0.0" />
+        <PackageReference Include="KS.Fiks.Arkiv.Models.V1" Version="0.0.20" />
+        <PackageReference Include="KS.Fiks.IO.Client" Version="1.2.11" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
@@ -27,6 +26,7 @@
       <Content Include="appsettings.Local.json">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
+      <None Remove="Tests\Arkivering\arkivmelding.xml" />
     </ItemGroup>
 
     <ItemGroup>
