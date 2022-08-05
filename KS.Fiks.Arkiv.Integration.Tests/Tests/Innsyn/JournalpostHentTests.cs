@@ -45,7 +45,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
             // STEG 1: Opprett arkivmelding og send inn
             var arkivmelding = MeldingGenerator.CreateArkivmeldingMedNyJournalpost();
             
-            var nyJournalpostSerialized = ArkiveringSerializeHelper.Serialize(arkivmelding);
+            var nyJournalpostSerialized = SerializeHelper.Serialize(arkivmelding);
             var validator = new SimpleXsdValidator();
 
             // Valider arkivmelding
@@ -75,13 +75,13 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
             // Valider innhold (xml)
             validator.Validate(arkivmeldingKvitteringPayload.PayloadAsString);
             
-            var arkivmeldingKvittering = ArkiveringSerializeHelper.DeserializeArkivmeldingKvittering(arkivmeldingKvitteringPayload.PayloadAsString);
+            var arkivmeldingKvittering = SerializeHelper.DeserializeArkivmeldingKvittering(arkivmeldingKvitteringPayload.PayloadAsString);
             var systemId = arkivmeldingKvittering.RegistreringKvittering[0].SystemID; // Bruk SystemID som man fikk i kvittering
 
             // STEG 2: Henting av journalpost
             var journalpostHent = MeldingGenerator.CreateJournalpostHent(systemId);
             
-            var journalpostHentSerialized = ArkiveringSerializeHelper.Serialize(journalpostHent);
+            var journalpostHentSerialized = SerializeHelper.Serialize(journalpostHent);
             
             // Valider innhold (xml)
             validator.Validate(journalpostHentSerialized);
@@ -112,7 +112,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
             // Valider innhold (xml)
             validator.Validate(journalpostHentResultatPayload.PayloadAsString);
 
-            var journalpostHentResultat = ArkiveringSerializeHelper.DeserializeXml<JournalpostHentResultat>(journalpostHentResultatPayload.PayloadAsString);
+            var journalpostHentResultat = SerializeHelper.DeserializeXml<JournalpostHentResultat>(journalpostHentResultatPayload.PayloadAsString);
             
             Assert.AreEqual(journalpostHentResultat.Journalpost.SystemID.Value, systemId.Value);
             Assert.AreEqual(journalpostHentResultat.Journalpost.Tittel, arkivmelding.Registrering[0].Tittel);
@@ -134,10 +134,13 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
             Console.Out.WriteLine(
                 $"Sender arkivmelding med ny journalpost med EksternNoekkel fagsystem {referanseEksternNoekkel.Fagsystem} og noekkel {referanseEksternNoekkel.Noekkel}");
             
-            // STEG 1: Opprett arkivmelding og send inn
+            /*
+             * STEG 1:
+             * Opprett arkivmelding med en journalpost og send inn
+             */
             var arkivmelding = MeldingGenerator.CreateArkivmeldingMedNyJournalpost(referanseEksternNoekkel);
 
-            var nyJournalpostSerialized = ArkiveringSerializeHelper.Serialize(arkivmelding);
+            var nyJournalpostSerialized = SerializeHelper.Serialize(arkivmelding);
             var validator = new SimpleXsdValidator();
             
             // Valider arkivmelding
@@ -167,10 +170,13 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
             // Valider innhold (xml)
             validator.Validate(arkivmeldingKvitteringPayload.PayloadAsString);
             
-            // STEG 2: Henting av journalpost
+            /*
+             * STEG 2:
+             * Hent journalposten som ble opprettet i steg 1
+             */
             var journalpostHent = MeldingGenerator.CreateJournalpostHent(referanseEksternNoekkel);
             
-            var journalpostHentSerialized = ArkiveringSerializeHelper.Serialize(journalpostHent);
+            var journalpostHentSerialized = SerializeHelper.Serialize(journalpostHent);
             
             // Valider innhold (xml)
             validator.Validate(journalpostHentSerialized);
@@ -201,7 +207,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
             // Valider innhold (xml)
             validator.Validate(journalpostHentResultatPayload.PayloadAsString);
 
-            var journalpostHentResultat = ArkiveringSerializeHelper.DeserializeXml<JournalpostHentResultat>(journalpostHentResultatPayload.PayloadAsString);
+            var journalpostHentResultat = SerializeHelper.DeserializeXml<JournalpostHentResultat>(journalpostHentResultatPayload.PayloadAsString);
             
             File.WriteAllText("HentJournalpostResultatEksternNoekkel.xml", journalpostHentSerialized);
             

@@ -47,7 +47,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
             };
         }
 
-        public static Arkivmelding CreateArkivmeldingMedNyJournalpost(string referanseEksternNoekkelNoekkel = null!)
+        public static Arkivmelding CreateArkivmeldingMedNyJournalpost(string referanseEksternNoekkelNoekkel = null!, string tittel = null)
          {
              var arkivmelding = new Arkivmelding()
              {
@@ -56,7 +56,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
                  AntallFiler = 1,
                  Registrering =
                  {
-                     JournalpostGenerator.CreateJournalpost(JournalpostGenerator.ArkivdelDefault),
+                     JournalpostGenerator.CreateJournalpost(JournalpostGenerator.ArkivdelDefault, tittel),
                  }
              };
              

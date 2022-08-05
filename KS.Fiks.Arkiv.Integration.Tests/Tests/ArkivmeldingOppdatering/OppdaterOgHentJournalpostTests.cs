@@ -51,10 +51,13 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdateringTests
             Console.Out.WriteLine(
                 $"Sender arkivmelding med ny journalpost med EksternNoekkel fagsystem {referanseEksternNoekkel.Fagsystem} og noekkel {referanseEksternNoekkel.Noekkel}");
             
-            // STEG 1: Opprett arkivmelding og send inn
+            /*
+             * STEG 1:
+             * Opprett arkivmelding og send inn
+             */
             var arkivmelding = MeldingGenerator.CreateArkivmeldingMedNyJournalpost(referanseEksternNoekkel);
 
-            var nyJournalpostSerialized = ArkiveringSerializeHelper.Serialize(arkivmelding);
+            var nyJournalpostSerialized = SerializeHelper.Serialize(arkivmelding);
             
             var validator = new SimpleXsdValidator();
             
@@ -83,11 +86,15 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdateringTests
             // Valider innhold (xml)
             validator.Validate(arkivmeldingKvitteringPayload.PayloadAsString);
 
-            // STEG 2: Send oppdatering av journalpost
-            string nyTittel = "En helt ny tittel";
+            /*
+             * STEG 2:
+             * Send oppdatering av journalposten som ble opprettet i steg 1
+             */
+            
+            var nyTittel = "En helt ny tittel";
             var arkivmeldingOppdatering = MeldingGenerator.CreateArkivmeldingOppdateringRegistreringOppdateringNyTittel(referanseEksternNoekkel, nyTittel);
             
-            var arkivmeldingOppdateringSerialized = ArkiveringSerializeHelper.Serialize(arkivmeldingOppdatering);
+            var arkivmeldingOppdateringSerialized = SerializeHelper.Serialize(arkivmeldingOppdatering);
             
             // Valider innhold (xml)
             validator.Validate(arkivmeldingOppdateringSerialized);
@@ -113,10 +120,14 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdateringTests
 
             Assert.IsNotNull(arkivmeldingOppdaterKvittering);
             
-            // STEG 3: Henting av journalpost
+            /*
+             * STEG 3:
+             * Hent journalpost som har blitt oppdatert og bekreft at den er oppdatert
+             */
+            
             var journalpostHent = MeldingGenerator.CreateJournalpostHent(referanseEksternNoekkel);
             
-            var journalpostHentAsString = ArkiveringSerializeHelper.Serialize(journalpostHent);
+            var journalpostHentAsString = SerializeHelper.Serialize(journalpostHent);
             
             // Valider innhold (xml)
             validator.Validate(journalpostHentAsString);
@@ -145,7 +156,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdateringTests
             // Valider innhold (xml)
             validator.Validate(journalpostHentResultatPayload.PayloadAsString);
 
-            var journalpostHentResultat = ArkiveringSerializeHelper.DeserializeXml<JournalpostHentResultat>(journalpostHentResultatPayload.PayloadAsString);
+            var journalpostHentResultat = SerializeHelper.DeserializeXml<JournalpostHentResultat>(journalpostHentResultatPayload.PayloadAsString);
 
             Assert.AreEqual(nyTittel, journalpostHentResultat.Journalpost.Tittel);
             Assert.AreEqual(journalpostHentResultat.Journalpost.ReferanseEksternNoekkel.Fagsystem, arkivmelding.Registrering[0].ReferanseEksternNoekkel.Fagsystem);

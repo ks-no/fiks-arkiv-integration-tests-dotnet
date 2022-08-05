@@ -94,7 +94,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
             var arkivmelding = MeldingGenerator.CreateArkivmelding();
             arkivmelding.Registrering.Add(journalpost);
 
-            var nyJournalpostSerialized = ArkiveringSerializeHelper.Serialize(arkivmelding);
+            var nyJournalpostSerialized = SerializeHelper.Serialize(arkivmelding);
             
             File.WriteAllText("ArkivmeldingMedNyJournalpostOgDokument.xml", nyJournalpostSerialized);
             
@@ -130,7 +130,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
              */
             var journalpostHent = MeldingGenerator.CreateJournalpostHent(referanseEksternNoekkelNyJournalpost);
             
-            var journalpostHentAsString = ArkiveringSerializeHelper.Serialize(journalpostHent);
+            var journalpostHentAsString = SerializeHelper.Serialize(journalpostHent);
             
             // Valider innhold (xml)
             validator.Validate(journalpostHentAsString);
@@ -159,7 +159,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
             // Valider innhold (xml)
             validator.Validate(journalpostHentResultatPayload.PayloadAsString);
 
-            var journalpostHentResultat = ArkiveringSerializeHelper.DeserializeXml<JournalpostHentResultat>(journalpostHentResultatPayload.PayloadAsString);
+            var journalpostHentResultat = SerializeHelper.DeserializeXml<JournalpostHentResultat>(journalpostHentResultatPayload.PayloadAsString);
 
             Assert.AreEqual(journalpostHentResultat.Journalpost.ReferanseEksternNoekkel.Fagsystem, arkivmelding.Registrering[0].ReferanseEksternNoekkel.Fagsystem);
             Assert.AreEqual(journalpostHentResultat.Journalpost.ReferanseEksternNoekkel.Noekkel, arkivmelding.Registrering[0].ReferanseEksternNoekkel.Noekkel);
@@ -211,7 +211,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
             var arkivmelding = MeldingGenerator.CreateArkivmelding();
             arkivmelding.Registrering.Add(journalpost);
 
-            var nyJournalpostSerialized = ArkiveringSerializeHelper.Serialize(arkivmelding);
+            var nyJournalpostSerialized = SerializeHelper.Serialize(arkivmelding);
             
             File.WriteAllText("ArkivmeldingMedNyJournalpostOgDokument.xml", nyJournalpostSerialized);
             
@@ -247,7 +247,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
              */
             var journalpostHent = MeldingGenerator.CreateJournalpostHent(referanseEksternNoekkelNyJournalpost);
             
-            var journalpostHentAsString = ArkiveringSerializeHelper.Serialize(journalpostHent);
+            var journalpostHentAsString = SerializeHelper.Serialize(journalpostHent);
             
             // Valider innhold (xml)
             validator.Validate(journalpostHentAsString);
@@ -276,7 +276,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
             // Valider innhold (xml)
             validator.Validate(journalpostHentResultatPayload.PayloadAsString);
 
-            var journalpostHentResultat = ArkiveringSerializeHelper.DeserializeXml<JournalpostHentResultat>(journalpostHentResultatPayload.PayloadAsString);
+            var journalpostHentResultat = SerializeHelper.DeserializeXml<JournalpostHentResultat>(journalpostHentResultatPayload.PayloadAsString);
 
             Assert.AreEqual(journalpostHentResultat.Journalpost.ReferanseEksternNoekkel.Fagsystem, arkivmelding.Registrering[0].ReferanseEksternNoekkel.Fagsystem);
             Assert.AreEqual(journalpostHentResultat.Journalpost.ReferanseEksternNoekkel.Noekkel, arkivmelding.Registrering[0].ReferanseEksternNoekkel.Noekkel);

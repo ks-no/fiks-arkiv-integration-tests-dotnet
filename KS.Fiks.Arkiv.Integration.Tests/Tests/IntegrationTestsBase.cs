@@ -77,13 +77,13 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
                         switch (mottatMeldingArgs.Melding.MeldingType)
                         {
                             case FiksArkivMeldingtype.Ugyldigforespørsel:
-                                feilmelding = ArkiveringSerializeHelper.DeserializeXml<Ugyldigforespoersel>(xml);
+                                feilmelding = SerializeHelper.DeserializeXml<Ugyldigforespoersel>(xml);
                                 throw new UnexpectedAnswerException($"Uforventet feilmelding mottatt {mottatMeldingArgs.Melding.MeldingType}. Feilmelding: {feilmelding.Feilmelding}. Forventet meldingstypen {forventetMeldingstype}");
                             case FiksArkivMeldingtype.Serverfeil:
-                                feilmelding = ArkiveringSerializeHelper.DeserializeXml<Serverfeil>(xml);
+                                feilmelding = SerializeHelper.DeserializeXml<Serverfeil>(xml);
                                 throw new UnexpectedAnswerException($"Uforventet feilmelding mottatt {mottatMeldingArgs.Melding.MeldingType}. Feilmelding: {feilmelding.Feilmelding}. Forventet meldingstypen {forventetMeldingstype}");
                             case FiksArkivMeldingtype.Ikkefunnet:
-                                feilmelding = ArkiveringSerializeHelper.DeserializeXml<Ikkefunnet>(xml);
+                                feilmelding = SerializeHelper.DeserializeXml<Ikkefunnet>(xml);
                                 throw new UnexpectedAnswerException($"Uforventet feilmelding mottatt {mottatMeldingArgs.Melding.MeldingType}. Feilmelding: {feilmelding.Feilmelding}. Forventet meldingstypen {forventetMeldingstype}");
                             default:
                                 throw new UnexpectedAnswerException($"Uforventet feilmelding mottatt av typen {mottatMeldingArgs.Melding.MeldingType}. Klarte ikke parse den heller. Er det en ny feilmeldingstype?. Forventet meldingstypen {forventetMeldingstype}");
@@ -149,7 +149,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
         {
             var mappeHent = MeldingGenerator.CreateMappeHent(referanseEksternNoekkel);
             
-            var mappeHentSerialized = ArkiveringSerializeHelper.Serialize(mappeHent);
+            var mappeHentSerialized = SerializeHelper.Serialize(mappeHent);
             
             File.WriteAllText("MappeHent.xml", mappeHentSerialized);
             
@@ -182,7 +182,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
             // Valider innhold (xml)
             validator.Validate(mappeHentResultatPayload.PayloadAsString);
 
-            var mappeHentResultat = ArkiveringSerializeHelper.DeserializeXml<MappeHentResultat>(mappeHentResultatPayload.PayloadAsString);
+            var mappeHentResultat = SerializeHelper.DeserializeXml<MappeHentResultat>(mappeHentResultatPayload.PayloadAsString);
 
             return (Saksmappe)mappeHentResultat.Mappe;
         }
@@ -193,7 +193,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
 
             var arkivmeldingNySaksmappe = MeldingGenerator.CreateArkivmeldingMedSaksmappe(referanseEksternNoekkel);
 
-            var nySaksmappeSerialized = ArkiveringSerializeHelper.Serialize(arkivmeldingNySaksmappe);
+            var nySaksmappeSerialized = SerializeHelper.Serialize(arkivmeldingNySaksmappe);
 
             // Valider arkivmelding
             validator.Validate(nySaksmappeSerialized);
@@ -223,7 +223,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
             validator.Validate(arkivmeldingKvitteringPayload.PayloadAsString);
 
             var arkivmeldingKvittering =
-                ArkiveringSerializeHelper.DeserializeXml<ArkivmeldingKvittering>(arkivmeldingKvitteringPayload.PayloadAsString);
+                SerializeHelper.DeserializeXml<ArkivmeldingKvittering>(arkivmeldingKvitteringPayload.PayloadAsString);
             return arkivmeldingKvittering;
         }
     }

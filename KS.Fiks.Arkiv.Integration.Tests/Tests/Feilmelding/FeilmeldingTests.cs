@@ -46,10 +46,13 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Feilmelding
                 Noekkel = Guid.Empty.ToString() // Bør ikke kunne eksistere i Arkivet
             };
             
-            // STEG 1: Forsøke hente journalpost som ikke eksisterer
+            /*
+             * STEG 1:
+             * Forsøk å hente journalpost som ikke skal eksistere
+             */
             var journalpostHent = MeldingGenerator.CreateJournalpostHent(referanseEksternNoekkelIkkeGyldig);
             
-            var journalpostHentSerialized = ArkiveringSerializeHelper.Serialize(journalpostHent);
+            var journalpostHentSerialized = SerializeHelper.Serialize(journalpostHent);
             
             // Valider innhold (xml)
             validator.Validate(journalpostHentSerialized);
@@ -71,8 +74,6 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Feilmelding
             var ikkefunnetFeilmelding = GetMottattMelding(_mottatMeldingArgsList, journalpostHentMeldingId, FiksArkivMeldingtype.Ikkefunnet);
 
             Assert.IsNotNull(ikkefunnetFeilmelding);
-            
-            //TODO hent feilmelding og sjekk innhold?
         }
     }
 }
