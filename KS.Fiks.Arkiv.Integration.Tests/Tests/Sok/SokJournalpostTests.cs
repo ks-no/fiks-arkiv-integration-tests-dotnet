@@ -6,17 +6,14 @@ using KS.Fiks.Arkiv.Integration.Tests.Helpers;
 using KS.Fiks.Arkiv.Integration.Tests.Library;
 using KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding;
 using KS.Fiks.Arkiv.Models.V1.Arkivstruktur;
-using KS.Fiks.Arkiv.Models.V1.Innsyn.Hent.Journalpost;
 using KS.Fiks.Arkiv.Models.V1.Innsyn.Sok;
 using KS.Fiks.Arkiv.Models.V1.Meldingstyper;
-using KS.Fiks.Arkiv.Models.V1.Metadatakatalog;
 using KS.Fiks.IO.Client;
 using KS.Fiks.IO.Client.Models;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Validation;
 using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
-using EksternNoekkel = KS.Fiks.Arkiv.Models.V1.Arkivstruktur.EksternNoekkel;
 
 namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Sok
 {
@@ -40,13 +37,13 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Sok
             _mottakerKontoId = Guid.Parse(config["TestConfig:ArkivAccountId"]);
             validator = new SimpleXsdValidator();
         }
-        
+
         [Test]
         public void Sok_Etter_Journalpost_Med_Tittel_Og_Wildcard()
         {
             // Denne id'en gjør at Arkiv-simulatoren ser hvilke meldinger som henger sammen. Har ingen funksjon ellers. 
             var testSessionId = Guid.NewGuid().ToString();
-            
+
             /*
              * STEG 1:
              * Opprett arkivmeldinger med journalpost med forskjellige titler og send inn til arkiv
@@ -62,31 +59,44 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Sok
             var arkivmelding2 = ArkiverJournalpost(testSessionId, tittel2);
             var arkivmelding3 = ArkiverJournalpost(testSessionId, tittel3);
             var arkivmelding4 = ArkiverJournalpost(testSessionId, tittel4);
-            
+
             /*
              * STEG 2:
              * Søk etter journalpost med tittel
              */
 
             var sokeord = "Tittel*";
-            
-            var sok = new Models.V1.Innsyn.Sok.Sok();
-            var parameter = new Parameter()
+
+            var sok = new Models.V1.Innsyn.Sok.Sok
             {
-                Felt = SokFelt.RegistreringTittel,
-                Operator = OperatorType.Equal,
-                Parameterverdier = new Parameterverdier()
+                Sokdefinisjon = new JournalpostSokdefinisjon()
                 {
-                    Stringvalues = { sokeord }
-                }
+                    Inkluder = { JournalpostInkluder.Korrespondansepart },
+                    Parametere = { 
+                        new JournalpostParameter()
+                        {
+                            Felt = JournalpostSokefelt.RegistreringTittel,
+                            Operator = OperatorType.Equal,
+                            SokVerdier = new SokVerdier()
+                            {
+                                Stringvalues = { "En journalpost tittel med wildcard*" }
+                            }
+                        } 
+                    },
+                    Sortering =
+                    {
+                        new JournalpostSortering()
+                        {
+                            Felt = JournalpostSorteringsfelt.RegistreringOpprettetDato
+                        }
+                    },
+                    Responstype = Responstype.Utvidet,
+                },
+                Take = 10,
+                System = "Integrasjonstester",
+                Tidspunkt = DateTime.Now,
+                MeldingId = Guid.NewGuid().ToString()
             };
-            sok.Parameter.Add(parameter);
-            sok.ResponsType = ResponsType.Utvidet;
-            sok.Respons = Respons.Journalpost;
-            sok.Take = 10;
-            sok.System = "Integrasjonstester";
-            sok.Tidspunkt = DateTime.Now;
-            sok.MeldingId = Guid.NewGuid().ToString();
 
             // Send søk melding
             var sokSerialized = SerializeHelper.Serialize(sok);

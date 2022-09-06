@@ -52,7 +52,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
                     {
                         new Dokumentobjekt()
                         {
-                            Versjonsnummer = "1",
+                            Versjonsnummer = 1,
                             Variantformat = new Variantformat()
                             {
                                 KodeProperty= "P"
@@ -92,7 +92,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
                     {
                         new Dokumentobjekt()
                         {
-                            Versjonsnummer = "1",
+                            Versjonsnummer = 1,
                             Variantformat = new Variantformat()
                             {
                                 KodeProperty= "P"
@@ -127,11 +127,16 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
                     {
                         Korrespondanseparttype = new Korrespondanseparttype()
                         {
-                            KodeProperty= "IM"
+                            KodeProperty = "IM"
                         },
                         KorrespondansepartNavn = "Oppmålingsetaten",
-                        AdministrativEnhet = "Oppmålingsetaten",
-                        Saksbehandler = "Ingrid Mottaker"
+                        AdministrativEnhet = new AdministrativEnhet()
+                        {
+                            Navn = "Oppmålingsetaten",
+                        },
+                        Saksbehandler = new Saksbehandler() { 
+                            Navn = "Ingrid Mottaker"
+                        }
                     }
                 },
                 Journalposttype = new Journalposttype()

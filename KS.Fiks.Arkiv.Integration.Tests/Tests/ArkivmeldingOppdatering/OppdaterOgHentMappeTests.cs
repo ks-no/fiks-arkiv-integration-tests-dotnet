@@ -7,6 +7,7 @@ using KS.Fiks.Arkiv.Integration.Tests.Library;
 using KS.Fiks.Arkiv.Models.V1.Arkivstruktur;
 using KS.Fiks.Arkiv.Models.V1.Innsyn.Hent.Mappe;
 using KS.Fiks.Arkiv.Models.V1.Meldingstyper;
+using KS.Fiks.Arkiv.Models.V1.Metadatakatalog;
 using KS.Fiks.IO.Client;
 using KS.Fiks.IO.Client.Models;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers;
@@ -151,9 +152,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdateringTests
 
             var saksmappe = (Saksmappe)mappeHentResultat.Mappe;
 
-            Assert.AreEqual(nySaksansvarlig, saksmappe.Saksansvarlig);
-           // Assert.AreEqual(saksmappe.Ek.Fagsystem, arkivmelding.Mappe[0].ReferanseEksternNoekkel.Fagsystem);
-            //Assert.AreEqual(mappeHentResultat.Mappe.ReferanseEksternNoekkel.Noekkel, arkivmelding.Registrering[0].ReferanseEksternNoekkel.Noekkel);
+            Assert.AreEqual(nySaksansvarlig, saksmappe.Saksansvarlig.Navn);
         }
     }
 }

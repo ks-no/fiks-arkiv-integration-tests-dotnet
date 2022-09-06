@@ -12,6 +12,7 @@ using KS.Fiks.Arkiv.Models.V1.Arkivstruktur;
 using KS.Fiks.Arkiv.Models.V1.Feilmelding;
 using KS.Fiks.Arkiv.Models.V1.Innsyn.Hent.Mappe;
 using KS.Fiks.Arkiv.Models.V1.Meldingstyper;
+using KS.Fiks.Arkiv.Models.V1.Metadatakatalog;
 using KS.Fiks.IO.Client;
 using KS.Fiks.IO.Client.Models;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers;
@@ -20,7 +21,6 @@ using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using NUnit.Framework.Internal.Commands;
-using EksternNoekkel = KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding.EksternNoekkel;
 
 namespace KS.Fiks.Arkiv.Integration.Tests.Tests
 {
@@ -145,7 +145,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
             return false;
         }
 
-        protected Saksmappe? HentSaksmappe(string testSessionId, Models.V1.Arkivering.Arkivmelding.EksternNoekkel referanseEksternNoekkel)
+        protected Saksmappe? HentSaksmappe(string testSessionId, EksternNoekkel referanseEksternNoekkel)
         {
             var mappeHent = MeldingGenerator.CreateMappeHent(referanseEksternNoekkel);
             
