@@ -1,12 +1,6 @@
 using System;
 using KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding;
-using KS.Fiks.Arkiv.Models.V1.Arkivstruktur;
 using KS.Fiks.Arkiv.Models.V1.Metadatakatalog;
-using Dokumentbeskrivelse = KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding.Dokumentbeskrivelse;
-using Dokumentobjekt = KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding.Dokumentobjekt;
-using EksternNoekkel = KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding.EksternNoekkel;
-using Journalpost = KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding.Journalpost;
-using Korrespondansepart = KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding.Korrespondansepart;
 
 namespace KS.Fiks.Arkiv.Integration.Tests.Library
 {
@@ -24,11 +18,15 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
             jp.ReferanseForelderMappe = referanseForelderMappe;
             return jp;
         }
-             
-        public static Journalpost CreateJournalpost(string referanseArkivdel)
+
+        public static Journalpost CreateJournalpost(string referanseArkivdel, string tittel = null)
         {
             var jp = CreateJournalpost();
             jp.Arkivdel = new Kode() {KodeProperty = referanseArkivdel};
+            if (tittel != null)
+            {
+                jp.Tittel = tittel;
+            }
             return jp;
         }
         
@@ -54,7 +52,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
                     {
                         new Dokumentobjekt()
                         {
-                            Versjonsnummer = "1",
+                            Versjonsnummer = 1,
                             Variantformat = new Variantformat()
                             {
                                 KodeProperty= "P"
@@ -94,7 +92,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
                     {
                         new Dokumentobjekt()
                         {
-                            Versjonsnummer = "1",
+                            Versjonsnummer = 1,
                             Variantformat = new Variantformat()
                             {
                                 KodeProperty= "P"
@@ -129,11 +127,16 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
                     {
                         Korrespondanseparttype = new Korrespondanseparttype()
                         {
-                            KodeProperty= "IM"
+                            KodeProperty = "IM"
                         },
                         KorrespondansepartNavn = "Oppmålingsetaten",
-                        AdministrativEnhet = "Oppmålingsetaten",
-                        Saksbehandler = "Ingrid Mottaker"
+                        AdministrativEnhet = new AdministrativEnhet()
+                        {
+                            Navn = "Oppmålingsetaten",
+                        },
+                        Saksbehandler = new Saksbehandler() { 
+                            Navn = "Ingrid Mottaker"
+                        }
                     }
                 },
                 Journalposttype = new Journalposttype()

@@ -7,6 +7,7 @@ using KS.Fiks.Arkiv.Integration.Tests.Library;
 using KS.Fiks.Arkiv.Models.V1.Arkivstruktur;
 using KS.Fiks.Arkiv.Models.V1.Innsyn.Hent.Mappe;
 using KS.Fiks.Arkiv.Models.V1.Meldingstyper;
+using KS.Fiks.Arkiv.Models.V1.Metadatakatalog;
 using KS.Fiks.IO.Client;
 using KS.Fiks.IO.Client.Models;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers;
@@ -55,7 +56,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdateringTests
             // STEG 1: Opprett arkivmelding med en saksmappe og send inn
             var arkivmelding = MeldingGenerator.CreateArkivmeldingMedSaksmappe(referanseEksternNoekkel);
 
-            var nySaksmappeAsSerialized = ArkiveringSerializeHelper.Serialize(arkivmelding);
+            var nySaksmappeAsSerialized = SerializeHelper.Serialize(arkivmelding);
             var validator = new SimpleXsdValidator();
             
             // Valider arkivmelding
@@ -87,7 +88,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdateringTests
             var nySaksansvarlig = "Nelly Ny Saksansvarlig";
             var arkivmeldingOppdatering = MeldingGenerator.CreateArkivmeldingOppdateringSaksmappeOppdateringNySaksansvarlig(referanseEksternNoekkel, nySaksansvarlig);
             
-            var arkivmeldingOppdateringSerialized = ArkiveringSerializeHelper.Serialize(arkivmeldingOppdatering);
+            var arkivmeldingOppdateringSerialized = SerializeHelper.Serialize(arkivmeldingOppdatering);
             
             // Valider innhold (xml)
             validator.Validate(arkivmeldingOppdateringSerialized);
@@ -116,7 +117,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdateringTests
             // STEG 3: Henting av saksmappe
             var mappeHent = MeldingGenerator.CreateMappeHent(referanseEksternNoekkel);
             
-            var mappeHentSerialized = ArkiveringSerializeHelper.Serialize(mappeHent);
+            var mappeHentSerialized = SerializeHelper.Serialize(mappeHent);
             
             File.WriteAllText("MappeHent.xml", mappeHentSerialized);
             
@@ -147,13 +148,11 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdateringTests
             // Valider innhold (xml)
             validator.Validate(mappeHentResultatPayload.PayloadAsString);
 
-            var mappeHentResultat = ArkiveringSerializeHelper.DeserializeXml<MappeHentResultat>(mappeHentResultatPayload.PayloadAsString);
+            var mappeHentResultat = SerializeHelper.DeserializeXml<MappeHentResultat>(mappeHentResultatPayload.PayloadAsString);
 
             var saksmappe = (Saksmappe)mappeHentResultat.Mappe;
 
-            Assert.AreEqual(nySaksansvarlig, saksmappe.Saksansvarlig);
-           // Assert.AreEqual(saksmappe.Ek.Fagsystem, arkivmelding.Mappe[0].ReferanseEksternNoekkel.Fagsystem);
-            //Assert.AreEqual(mappeHentResultat.Mappe.ReferanseEksternNoekkel.Noekkel, arkivmelding.Registrering[0].ReferanseEksternNoekkel.Noekkel);
+            Assert.AreEqual(nySaksansvarlig, saksmappe.Saksansvarlig.Navn);
         }
     }
 }

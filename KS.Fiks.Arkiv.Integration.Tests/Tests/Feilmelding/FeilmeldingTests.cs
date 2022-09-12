@@ -5,6 +5,7 @@ using KS.Fiks.Arkiv.Integration.Tests.FiksIO;
 using KS.Fiks.Arkiv.Integration.Tests.Library;
 using KS.Fiks.Arkiv.Models.V1.Arkivstruktur;
 using KS.Fiks.Arkiv.Models.V1.Meldingstyper;
+using KS.Fiks.Arkiv.Models.V1.Metadatakatalog;
 using KS.Fiks.IO.Client;
 using KS.Fiks.IO.Client.Models;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers;
@@ -46,10 +47,13 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Feilmelding
                 Noekkel = Guid.Empty.ToString() // Bør ikke kunne eksistere i Arkivet
             };
             
-            // STEG 1: Forsøke hente journalpost som ikke eksisterer
+            /*
+             * STEG 1:
+             * Forsøk å hente journalpost som ikke skal eksistere
+             */
             var journalpostHent = MeldingGenerator.CreateJournalpostHent(referanseEksternNoekkelIkkeGyldig);
             
-            var journalpostHentSerialized = ArkiveringSerializeHelper.Serialize(journalpostHent);
+            var journalpostHentSerialized = SerializeHelper.Serialize(journalpostHent);
             
             // Valider innhold (xml)
             validator.Validate(journalpostHentSerialized);
@@ -60,7 +64,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Feilmelding
             _mottatMeldingArgsList.Clear();
             
             // Send hent melding
-            var journalpostHentMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.JournalpostHent, journalpostHentSerialized, "arkivmelding.xml", null, testSessionId);
+            var journalpostHentMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.RegistreringHent, journalpostHentSerialized, "arkivmelding.xml", null, testSessionId);
 
             // Vent på 1 respons meldinger 
             VentPaSvar(1, 10);
@@ -71,8 +75,6 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Feilmelding
             var ikkefunnetFeilmelding = GetMottattMelding(_mottatMeldingArgsList, journalpostHentMeldingId, FiksArkivMeldingtype.Ikkefunnet);
 
             Assert.IsNotNull(ikkefunnetFeilmelding);
-            
-            //TODO hent feilmelding og sjekk innhold?
         }
     }
 }

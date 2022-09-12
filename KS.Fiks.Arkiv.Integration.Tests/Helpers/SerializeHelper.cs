@@ -3,10 +3,11 @@ using System.Text;
 using System.Xml.Serialization;
 using KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding;
 using KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmeldingkvittering;
+using KS.Fiks.Arkiv.Models.V1.Innsyn.Sok;
 
 namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers
 {
-    public class ArkiveringSerializeHelper
+    public class SerializeHelper
     {
         public static string Serialize(object arkivmelding)
         {
@@ -45,6 +46,18 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers
             }
 
             return arkivmeldingDeserialized;
+        }
+        
+        public static Sokeresultat DeserializeSokeresultatUtvidet(string xml)
+        {
+            var serializer = new XmlSerializer(typeof(Sokeresultat));
+            Sokeresultat sokeresultatDeserialized;
+            using (TextReader reader = new StringReader(xml))
+            {
+                sokeresultatDeserialized = (Sokeresultat) serializer.Deserialize(reader);
+            }
+
+            return sokeresultatDeserialized;
         }
         
         public static T DeserializeXml<T>(string xml)
