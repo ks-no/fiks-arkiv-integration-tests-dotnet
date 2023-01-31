@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using KS.Fiks.IO.Client;
+using KS.Fiks.IO.Client.Configuration;
 using KS.Fiks.IO.Client.Models;
 using Microsoft.Extensions.Configuration;
 
@@ -11,19 +13,27 @@ namespace KS.Fiks.Arkiv.Integration.Tests.FiksIO
     {
         private readonly Guid _senderId;
         private FiksIOClient _client;
-        private const int TTLMinutes = 5; 
+        private const int TTLMinutes = 5;
+        private readonly FiksIOConfiguration _fiksIoConfiguration;
 
         public FiksRequestMessageService(IConfigurationRoot configuration)
         {
-            var config = FiksIOConfigurationBuilder.CreateFiksIOConfiguration(configuration);
-
-            _client = new FiksIOClient(config);
-
-            _senderId = config.KontoConfiguration.KontoId;
+            _fiksIoConfiguration = FiksIOConfigurationBuilder.CreateFiksIOConfiguration(configuration);
+            _senderId = _fiksIoConfiguration.KontoConfiguration.KontoId;
+            Initialization = InitializeAsync();
         }
-
-        public Guid Send(Guid mottakerKontoId, string meldingsType, string payloadContent, string payloadFilename, List<KeyValuePair<string, FileStream>>? attachments, string testSessionId)
+        
+        private async Task InitializeAsync()
         {
+            _client = await FiksIOClient.CreateAsync(_fiksIoConfiguration);
+        }
+        
+        private Task Initialization { get; set; }
+
+        public async Task<Guid> Send(Guid mottakerKontoId, string meldingsType, string payloadContent, string payloadFilename, List<KeyValuePair<string, FileStream>>? attachments, string testSessionId)
+        {
+            await Initialization;
+            
             var headere = new Dictionary<string, string>() { { "testSessionId", testSessionId } };
             var ttl = new TimeSpan(0, TTLMinutes, 0);
             var messageRequest = new MeldingRequest(_senderId, mottakerKontoId, meldingsType, ttl, headere: headere);
@@ -41,7 +51,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.FiksIO
                 }    
             }
 
-            var result = _client.Send(messageRequest, payloads).Result;
+            var result = await _client.Send(messageRequest, payloads);
 
             return result.MeldingId;
         }

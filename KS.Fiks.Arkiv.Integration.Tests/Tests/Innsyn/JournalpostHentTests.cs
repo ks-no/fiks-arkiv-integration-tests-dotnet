@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using KS.Fiks.Arkiv.Integration.Tests.FiksIO;
 using KS.Fiks.Arkiv.Integration.Tests.Helpers;
 using KS.Fiks.Arkiv.Integration.Tests.Library;
@@ -23,21 +24,21 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
     public class HentJournalpostTests : IntegrationTestsBase
     {
         [SetUp]
-        public void Setup()
+        public async Task Setup()
         {
             //TODO En annen lokal lagring som kjørte for disse testene hadde vært stilig i stedet for en liste. 
             _mottatMeldingArgsList = new List<MottattMeldingArgs>();
             var config = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.Local.json")
                 .Build();
-            _client = new FiksIOClient(FiksIOConfigurationBuilder.CreateFiksIOConfiguration(config));
+            _client = await FiksIOClient.CreateAsync(FiksIOConfigurationBuilder.CreateFiksIOConfiguration(config));
             _client.NewSubscription(OnMottattMelding);
             _fiksRequestService = new FiksRequestMessageService(config);
             _mottakerKontoId = Guid.Parse(config["TestConfig:ArkivAccountId"]);
         }
         
         [Test]
-        public void Hent_Journalpost_Med_SystemID()
+        public async Task Hent_Journalpost_Med_SystemID()
         {
             // Denne id'en gjør at Arkiv-simulatoren ser hvilke meldinger som henger sammen. Har ingen funksjon ellers. 
             var testSessionId = Guid.NewGuid().ToString();
@@ -54,7 +55,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
             File.WriteAllText("ArkivmeldingMedNyJournalpost.xml", nyJournalpostSerialized);
 
             // Send arkiver melding
-            var nyJournalpostMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.Arkivmelding, nyJournalpostSerialized, "arkivmelding.xml", null, testSessionId);
+            var nyJournalpostMeldingId = await _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.Arkivmelding, nyJournalpostSerialized, "arkivmelding.xml", null, testSessionId);
             
             // Vent på 2 første response meldinger (mottatt og kvittering)
             VentPaSvar(2, 10);
@@ -92,7 +93,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
             _mottatMeldingArgsList.Clear();
             
             // Send hent melding
-            var journalpostHentMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.RegistreringHent, journalpostHentSerialized, "arkivmelding.xml", null, testSessionId);
+            var journalpostHentMeldingId = await _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.RegistreringHent, journalpostHentSerialized, "arkivmelding.xml", null, testSessionId);
 
             // Vent på 1 respons meldinger 
             VentPaSvar(1, 10);
@@ -120,7 +121,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
             Assert.AreEqual(journalpostHentResultat.Journalpost.ReferanseEksternNoekkel.Noekkel, arkivmelding.Registrering[0].ReferanseEksternNoekkel.Noekkel);
         }
 
-        [Test] public void Hent_Journalpost_Med_EksternNoekkel()
+        [Test] public async Task Hent_Journalpost_Med_EksternNoekkel()
         {
             // Denne id'en gjør at Arkiv-simulatoren ser hvilke meldinger som henger sammen. Har ingen funksjon ellers. 
             var testSessionId = Guid.NewGuid().ToString();
@@ -149,7 +150,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
             File.WriteAllText("ArkivmeldingMedNyJournalpostEksternNoekkel.xml", nyJournalpostSerialized);
 
             // Send arkivering melding
-            var nyJournalpostMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.Arkivmelding, nyJournalpostSerialized, "arkivmelding.xml", null, testSessionId);
+            var nyJournalpostMeldingId = await _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.Arkivmelding, nyJournalpostSerialized, "arkivmelding.xml", null, testSessionId);
             
             // Vent på 2 første response meldinger (mottatt og kvittering)
             VentPaSvar(2, 10);
@@ -187,7 +188,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
             _mottatMeldingArgsList.Clear();
             
             // Send hent melding
-            var journalpostHentMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.RegistreringHent, journalpostHentSerialized, "arkivmelding.xml", null, testSessionId);
+            var journalpostHentMeldingId = await _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.RegistreringHent, journalpostHentSerialized, "arkivmelding.xml", null, testSessionId);
 
             // Vent på 1 respons meldinger 
             VentPaSvar(1, 10);

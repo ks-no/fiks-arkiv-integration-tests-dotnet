@@ -12,10 +12,10 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
         public const string ArkivdelDefault = "Arkiv validatortester";
             
 
-        public static Journalpost CreateJournalpost(ReferanseForelderMappe referanseForelderMappe)
+        public static Journalpost CreateJournalpost(ReferanseTilMappe referanseTilForelderMappe)
         {
             var jp = CreateJournalpost();
-            jp.ReferanseForelderMappe = referanseForelderMappe;
+            jp.ReferanseForelderMappe = referanseTilForelderMappe;
             return jp;
         }
 

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using KS.Fiks.Arkiv.Integration.Tests.Helpers;
 using KS.Fiks.Arkiv.Integration.Tests.Library;
 using KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding;
@@ -25,9 +26,9 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
         private EksternNoekkel _saksmappeEksternNoekkel;
 
         [SetUp]
-        public void Setup()
+        public async Task Setup()
         {
-            Init();
+            await Init();
             
             validator = new SimpleXsdValidator();
             
@@ -45,7 +46,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
          * Til slutt henter testen journalpost og validerer den
          */
         [Test]
-        public void Opprett_Eller_Hent_Saksmappe_Deretter_Opprett_Ny_Journalpost_Med_Hoveddokument_Verifiser_Hentet_Journalpost()
+        public async Task Opprett_Eller_Hent_Saksmappe_Deretter_Opprett_Ny_Journalpost_Med_Hoveddokument_Verifiser_Hentet_Journalpost()
         {
             // Denne id'en gjør at Arkiv-simulatoren ser hvilke meldinger som henger sammen. Har ingen funksjon ellers.  
             var testSessionId = Guid.NewGuid().ToString();
@@ -56,7 +57,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
              * 
              */
 
-            var saksmappeSystemID = OpprettEllerHentSaksmappe(testSessionId);
+            var saksmappeSystemID = await OpprettEllerHentSaksmappe(testSessionId);
 
             /*
              * STEG 2:
@@ -74,7 +75,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
                 Noekkel = Guid.NewGuid().ToString()
             };
 
-            var referanseForelderMappe = new ReferanseForelderMappe
+            var referanseForelderMappe = new ReferanseTilMappe()
             {
                 SystemID = saksmappeSystemID
             };
@@ -92,7 +93,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
             validator.Validate(nyJournalpostSerialized);
 
             // Send melding
-            var nyJournalpostMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.Arkivmelding, nyJournalpostSerialized, "arkivmelding.xml", null, testSessionId);
+            var nyJournalpostMeldingId = await _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.Arkivmelding, nyJournalpostSerialized, "arkivmelding.xml", null, testSessionId);
             
             // Vent på 2 første response meldinger (mottatt og kvittering)
             VentPaSvar(2, 10);
@@ -129,7 +130,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
             _mottatMeldingArgsList.Clear();
             
             // Send hent melding
-            var journalpostHentMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.RegistreringHent, journalpostHentAsString, "arkivmelding.xml", null, testSessionId);
+            var journalpostHentMeldingId = await _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.RegistreringHent, journalpostHentAsString, "arkivmelding.xml", null, testSessionId);
 
             // Vent på 1 respons meldinger 
             VentPaSvar(1, 10);
@@ -162,7 +163,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
          * Til slutt henter testen journalpost og validerer den
          */
         [Test]
-        public void Opprett_Eller_Hent_Saksmappe_Deretter_Opprett_Ny_Journalpost_Med_Hoveddokument_Verifiser_Hentet_Saksmappe()
+        public async Task Opprett_Eller_Hent_Saksmappe_Deretter_Opprett_Ny_Journalpost_Med_Hoveddokument_Verifiser_Hentet_Saksmappe()
         {
             // Denne id'en gjør at Arkiv-simulatoren ser hvilke meldinger som henger sammen. Har ingen funksjon ellers.  
             var testSessionId = Guid.NewGuid().ToString();
@@ -173,7 +174,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
              * 
              */
 
-            var saksmappeSystemID = OpprettEllerHentSaksmappe(testSessionId);
+            var saksmappeSystemID = await OpprettEllerHentSaksmappe(testSessionId);
 
             /*
              * STEG 2:
@@ -191,7 +192,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
                 Noekkel = Guid.NewGuid().ToString()
             };
 
-            var referanseForelderMappe = new ReferanseForelderMappe
+            var referanseForelderMappe = new ReferanseTilMappe()
             {
                 ReferanseEksternNoekkel = _saksmappeEksternNoekkel
             };
@@ -209,7 +210,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
             validator.Validate(nyJournalpostSerialized);
 
             // Send melding
-            var nyJournalpostMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.Arkivmelding, nyJournalpostSerialized, "arkivmelding.xml", null, testSessionId);
+            var nyJournalpostMeldingId = await _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.Arkivmelding, nyJournalpostSerialized, "arkivmelding.xml", null, testSessionId);
             
             // Vent på 2 første response meldinger (mottatt og kvittering)
             VentPaSvar(2, 10);
@@ -246,7 +247,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
             _mottatMeldingArgsList.Clear();
             
             // Send hent melding
-            var journalpostHentMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.RegistreringHent, journalpostHentAsString, "arkivmelding.xml", null, testSessionId);
+            var journalpostHentMeldingId = await _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.RegistreringHent, journalpostHentAsString, "arkivmelding.xml", null, testSessionId);
 
             // Vent på 1 respons meldinger 
             VentPaSvar(1, 10);
@@ -272,12 +273,12 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
             Assert.AreEqual(RegistreringHentResultat.Journalpost.ReferanseEksternNoekkel.Noekkel, arkivmelding.Registrering[0].ReferanseEksternNoekkel.Noekkel);
         }
 
-        private SystemID OpprettEllerHentSaksmappe(string testSessionId)
+        private async Task<SystemID> OpprettEllerHentSaksmappe(string testSessionId)
         {
             Console.Out.WriteLine(
                 $"Forsøker hente saksmappe med referanseEksternNoekkel Fagsystem {EksternNoekkelFagsystem} og Noekkel {SaksmappeEksternNoekkelNoekkel}");
 
-            var saksmappe = HentSaksmappe(testSessionId, _saksmappeEksternNoekkel);
+            var saksmappe = await HentSaksmappe(testSessionId, _saksmappeEksternNoekkel);
 
             SystemID saksmappeSystemID;
 
@@ -285,7 +286,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
             {
                 Console.Out.WriteLine(
                     $"Fant ikke noen saksmappe med referanseEksternNoekkel Fagsystem {EksternNoekkelFagsystem} og Noekkel {SaksmappeEksternNoekkelNoekkel}. Oppretter ny i stedet.");
-                var arkivmeldingKvittering = OpprettSaksmappe(testSessionId, _saksmappeEksternNoekkel);
+                var arkivmeldingKvittering = await OpprettSaksmappe(testSessionId, _saksmappeEksternNoekkel);
                 saksmappeSystemID = new SystemID()
                 {
                     Value = arkivmeldingKvittering.MappeKvittering[0].SystemID.Value,

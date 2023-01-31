@@ -56,12 +56,18 @@ namespace KS.Fiks.Arkiv.Integration.Tests.FiksIO
                 port: int.Parse(config["FiksIOConfig:AmqpPort"]),
                 sslOption1,
                 "Fiks-Arkiv Integration-Tests");
+            
+            // Asice signing
+            var asiceSigningConfiguration = new AsiceSigningConfiguration(
+                config["FiksIOConfig:AsiceSigningPublicKey"], 
+                config["FiksIOConfig:AsiceSigningPrivateKey"]);
 
             // Combine all configurations
             return new FiksIOConfiguration(
                 kontoConfiguration: accountConfiguration,
                 integrasjonConfiguration: integrationConfiguration,
                 maskinportenConfiguration: maskinportenClientConfiguration,
+                asiceSigningConfiguration: asiceSigningConfiguration,
                 apiConfiguration: apiConfiguration,
                 amqpConfiguration: amqpConfiguration);
         }
