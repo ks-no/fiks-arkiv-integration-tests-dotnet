@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using KS.Fiks.Arkiv.Integration.Tests.Exceptions;
 using KS.Fiks.Arkiv.Integration.Tests.FiksIO;
 using KS.Fiks.Arkiv.Integration.Tests.Helpers;
@@ -18,9 +19,7 @@ using KS.Fiks.IO.Client.Models;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Validation;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 using NUnit.Framework;
-using NUnit.Framework.Internal.Commands;
 
 namespace KS.Fiks.Arkiv.Integration.Tests.Tests
 {
@@ -32,14 +31,14 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
         protected Guid _mottakerKontoId;
         protected SimpleXsdValidator validator;
 
-        protected void Init()
+        protected async Task Init()
         {
             //TODO En annen lokal lagring som kjørte for disse testene hadde vært stilig i stedet for en liste.
             _mottatMeldingArgsList = new List<MottattMeldingArgs>();
             var config = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.Local.json")
                 .Build();
-            _client = new FiksIOClient(FiksIOConfigurationBuilder.CreateFiksIOConfiguration(config));
+            _client = await FiksIOClient.CreateAsync(FiksIOConfigurationBuilder.CreateFiksIOConfiguration(config));
             _client.NewSubscription(OnMottattMelding);
             _fiksRequestService = new FiksRequestMessageService(config);
             _mottakerKontoId = Guid.Parse(config["TestConfig:ArkivAccountId"]);
@@ -145,7 +144,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
             return false;
         }
 
-        protected Saksmappe? HentSaksmappe(string testSessionId, EksternNoekkel referanseEksternNoekkel)
+        protected async Task<Saksmappe?> HentSaksmappe(string testSessionId, EksternNoekkel referanseEksternNoekkel)
         {
             var mappeHent = MeldingGenerator.CreateMappeHent(referanseEksternNoekkel);
             
@@ -160,7 +159,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
             _mottatMeldingArgsList.Clear();
             
             // Send hent melding
-            var mappeHentMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.MappeHent, mappeHentSerialized, "arkivmelding.xml", null, testSessionId);
+            var mappeHentMeldingId = await _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.MappeHent, mappeHentSerialized, "arkivmelding.xml", null, testSessionId);
 
             // Vent på 1 respons meldinger 
             VentPaSvar(1, 10);
@@ -187,7 +186,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
             return (Saksmappe)mappeHentResultat.Mappe;
         }
         
-        protected ArkivmeldingKvittering OpprettSaksmappe(string testSessionId, EksternNoekkel referanseEksternNoekkel)
+        protected async Task<ArkivmeldingKvittering> OpprettSaksmappe(string testSessionId, EksternNoekkel referanseEksternNoekkel)
         {
             Console.Out.WriteLine($"Sender arkivmelding med ny saksmappe med EksternNoekkel fagsystem {referanseEksternNoekkel.Fagsystem} og noekkel {referanseEksternNoekkel.Noekkel}");
 
@@ -201,7 +200,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
             File.WriteAllText("ArkivmeldingMedNySaksmappe2.xml", nySaksmappeSerialized);
 
             // Send melding
-            var nySaksmappeMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.Arkivmelding,
+            var nySaksmappeMeldingId = await _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.Arkivmelding,
                 nySaksmappeSerialized, "arkivmelding.xml", null, testSessionId);
 
             // Vent på 2 første response meldinger (mottatt og kvittering)

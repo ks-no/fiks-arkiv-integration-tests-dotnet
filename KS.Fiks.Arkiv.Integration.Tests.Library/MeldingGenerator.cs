@@ -58,7 +58,6 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
              var arkivmelding = new Arkivmelding()
              {
                  System = FagsystemDefault,
-                 MeldingId = Guid.NewGuid().ToString(),
                  AntallFiler = 1,
                  Registrering =
                  {
@@ -74,7 +73,6 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
             var arkivmelding = new Arkivmelding()
             {
                 System = FagsystemDefault,
-                MeldingId = Guid.NewGuid().ToString(),
                 AntallFiler = 1,
             };
              
@@ -90,7 +88,6 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
             var arkivmelding = new Arkivmelding()
             {
                 System = FagsystemDefault,
-                MeldingId = Guid.NewGuid().ToString(),
                 AntallFiler = 1,
                 Registrering =
                 {
@@ -109,7 +106,6 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
             var arkivmelding = new Arkivmelding()
             {
                 System = FagsystemDefault,
-                MeldingId = Guid.NewGuid().ToString(),
                 AntallFiler = 1,
                 Registrering =
                 {
@@ -125,7 +121,6 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
             var arkivmelding = new Arkivmelding()
             {
                 System = FagsystemDefault,
-                MeldingId = Guid.NewGuid().ToString(),
                 AntallFiler = 1,
                 Mappe =
                 {
@@ -136,18 +131,17 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
             return arkivmelding;
         }
 
-        public static ArkivmeldingOppdatering CreateArkivmeldingOppdateringRegistreringOppdateringNyTittel(EksternNoekkel referanseEksternNoekkel, string nyTittel)
+        public static ArkivmeldingOppdatering CreateArkivmeldingOppdateringRegistreringOppdateringNyTittel(ReferanseTilRegistrering referanseTilRegistrering, string nyTittel)
         {
             return new ArkivmeldingOppdatering()
             {
-                MeldingId = Guid.NewGuid().ToString(),
                 Tidspunkt = DateTime.Now,
                 RegistreringOppdateringer =
                 {
                     new RegistreringOppdatering()
                     {
                         Tittel = nyTittel,
-                        ReferanseEksternNoekkel = referanseEksternNoekkel
+                        ReferanseTilRegistrering = referanseTilRegistrering
                     }
                 }
             };
@@ -157,7 +151,6 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
         {
             return new ArkivmeldingOppdatering()
             {
-                MeldingId = Guid.NewGuid().ToString(),
                 Tidspunkt = DateTime.Now,
                 MappeOppdateringer =
                 {
@@ -188,7 +181,6 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
             var arkivmelding = new Arkivmelding()
             {
                 System = FagsystemDefault,
-                MeldingId = Guid.NewGuid().ToString(),
                 AntallFiler = 1,
                 Registrering =
                 {

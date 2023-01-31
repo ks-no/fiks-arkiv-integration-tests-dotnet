@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using KS.Fiks.Arkiv.Integration.Tests.FiksIO;
 using KS.Fiks.Arkiv.Integration.Tests.Helpers;
 using KS.Fiks.Arkiv.Integration.Tests.Library;
@@ -24,14 +25,14 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Sok
     public class SokJournalpostTests : IntegrationTestsBase
     {
         [SetUp]
-        public void Setup()
+        public async Task Setup()
         {
             //TODO En annen lokal lagring som kjørte for disse testene hadde vært stilig i stedet for en liste. 
             _mottatMeldingArgsList = new List<MottattMeldingArgs>();
             var config = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.Local.json")
                 .Build();
-            _client = new FiksIOClient(FiksIOConfigurationBuilder.CreateFiksIOConfiguration(config));
+            _client = await FiksIOClient.CreateAsync(FiksIOConfigurationBuilder.CreateFiksIOConfiguration(config));
             _client.NewSubscription(OnMottattMelding);
             _fiksRequestService = new FiksRequestMessageService(config);
             _mottakerKontoId = Guid.Parse(config["TestConfig:ArkivAccountId"]);
@@ -39,7 +40,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Sok
         }
 
         [Test]
-        public void Sok_Etter_Journalpost_Med_Tittel_Og_Wildcard()
+        public async Task Sok_Etter_Journalpost_Med_Tittel_Og_Wildcard()
         {
             // Denne id'en gjør at Arkiv-simulatoren ser hvilke meldinger som henger sammen. Har ingen funksjon ellers. 
             var testSessionId = Guid.NewGuid().ToString();
@@ -55,10 +56,10 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Sok
             var tittel3 = "Med en tittel til som kan bli til treff";
             var tittel4 = "Titteltei er et ord som inneholder søkeordet";
 
-            var arkivmelding1 = ArkiverJournalpost(testSessionId, tittel1);
-            var arkivmelding2 = ArkiverJournalpost(testSessionId, tittel2);
-            var arkivmelding3 = ArkiverJournalpost(testSessionId, tittel3);
-            var arkivmelding4 = ArkiverJournalpost(testSessionId, tittel4);
+            var arkivmelding1 = await ArkiverJournalpost(testSessionId, tittel1);
+            var arkivmelding2 = await ArkiverJournalpost(testSessionId, tittel2);
+            var arkivmelding3 = await ArkiverJournalpost(testSessionId, tittel3);
+            var arkivmelding4 = await ArkiverJournalpost(testSessionId, tittel4);
 
             /*
              * STEG 2:
@@ -95,12 +96,11 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Sok
                 Take = 10,
                 System = "Integrasjonstester",
                 Tidspunkt = DateTime.Now,
-                MeldingId = Guid.NewGuid().ToString()
             };
 
             // Send søk melding
             var sokSerialized = SerializeHelper.Serialize(sok);
-            var sokMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.Sok,
+            var sokMeldingId = await _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.Sok,
                 sokSerialized, "sok.xml", null, testSessionId);
             
             // Vent på respons
@@ -131,7 +131,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Sok
             }
         }
 
-        private Arkivmelding ArkiverJournalpost(string testSessionId, string tittel)
+        private async Task<Arkivmelding> ArkiverJournalpost(string testSessionId, string tittel)
         {
             var arkivmelding = MeldingGenerator.CreateArkivmeldingMedNyJournalpost(tittel: tittel);
 
@@ -145,7 +145,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Sok
             File.WriteAllText("ArkivmeldingMedNyJournalpost.xml", nyJournalpostSerialized);
 
             // Send arkiver melding
-            var nyJournalpostMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.Arkivmelding,
+            var nyJournalpostMeldingId = await _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.Arkivmelding,
                 nyJournalpostSerialized, "arkivmelding.xml", null, testSessionId);
 
             Console.Out.WriteLineAsync($"Arkivmelding med ny journalpost med tittel {tittel} sendt");

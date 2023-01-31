@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using KS.Fiks.IO.Client;
+using KS.Fiks.IO.Client.Configuration;
 using KS.Fiks.IO.Client.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -13,11 +14,21 @@ namespace KS.Fiks.Arkiv.Integration.Tests.FiksIO
     {
         private static IFiksIOClient _client;
         public static List<MottattMeldingArgs> MottatMeldingArgsList;
+        private FiksIOConfiguration _fiksIoConfiguration;
+        private FiksIOClient Client { get; set; }
 
         public FiksResponseMessageService(IConfigurationRoot fiksIoConfig)
         {
             MottatMeldingArgsList = new List<MottattMeldingArgs>();
-            _client = new FiksIOClient(FiksIOConfigurationBuilder.CreateFiksIOConfiguration(fiksIoConfig));
+            _fiksIoConfiguration = FiksIOConfigurationBuilder.CreateFiksIOConfiguration(fiksIoConfig);
+            Initialization = InitializeAsync();
+        }
+
+        private Task Initialization { get; set; }
+
+        private async Task InitializeAsync()
+        {
+            Client = await FiksIOClient.CreateAsync(_fiksIoConfiguration);
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)

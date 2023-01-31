@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using KS.Fiks.Arkiv.Integration.Tests.FiksIO;
 using KS.Fiks.Arkiv.Integration.Tests.Helpers;
 using KS.Fiks.Arkiv.Integration.Tests.Library;
@@ -25,21 +26,21 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdateringTests
     public class OppdaterOgHentMappeTests : IntegrationTestsBase
     {
         [SetUp]
-        public void Setup()
+        public async Task Setup()
         {
             //TODO En annen lokal lagring som kjørte for disse testene hadde vært stilig i stedet for en liste. 
             _mottatMeldingArgsList = new List<MottattMeldingArgs>();
             var config = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.Local.json")
                 .Build();
-            _client = new FiksIOClient(FiksIOConfigurationBuilder.CreateFiksIOConfiguration(config));
+            _client = await FiksIOClient.CreateAsync(FiksIOConfigurationBuilder.CreateFiksIOConfiguration(config));
             _client.NewSubscription(OnMottattMelding);
             _fiksRequestService = new FiksRequestMessageService(config);
             _mottakerKontoId = Guid.Parse(config["TestConfig:ArkivAccountId"]);
         }
 
         [Test]
-        public void Oppdater_Saksmappe_Ansvarlig()
+        public async Task Oppdater_Saksmappe_Ansvarlig()
         {
             // Denne id'en gjør at Arkiv-simulatoren ser hvilke meldinger som henger sammen. Har ingen funksjon ellers.  
             var testSessionId = Guid.NewGuid().ToString();
@@ -63,7 +64,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdateringTests
             validator.Validate(nySaksmappeAsSerialized);
 
             // Send melding
-            var nySaksmappeMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.Arkivmelding, nySaksmappeAsSerialized, "arkivmelding.xml", null, testSessionId);
+            var nySaksmappeMeldingId = await _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.Arkivmelding, nySaksmappeAsSerialized, "arkivmelding.xml", null, testSessionId);
             
             // Vent på 2 første response meldinger (mottatt og kvittering)
             VentPaSvar(2, 10);
@@ -97,7 +98,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdateringTests
             _mottatMeldingArgsList.Clear();
             
             // Send oppdater melding
-            var arkivmeldingOppdaterMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOppdater, arkivmeldingOppdateringSerialized, "arkivmelding.xml", null, testSessionId);
+            var arkivmeldingOppdaterMeldingId = await _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOppdater, arkivmeldingOppdateringSerialized, "arkivmelding.xml", null, testSessionId);
 
             // Vent på 2 respons meldinger. Mottat og kvittering 
             VentPaSvar(2, 10);
@@ -128,7 +129,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdateringTests
             _mottatMeldingArgsList.Clear();
             
             // Send hent melding
-            var mappeHentMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.MappeHent, mappeHentSerialized, "arkivmelding.xml", null, testSessionId);
+            var mappeHentMeldingId = await _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.MappeHent, mappeHentSerialized, "arkivmelding.xml", null, testSessionId);
 
             // Vent på 1 respons meldinger 
             VentPaSvar(1, 10);

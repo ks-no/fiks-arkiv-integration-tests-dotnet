@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using KS.Fiks.Arkiv.Integration.Tests.FiksIO;
 using KS.Fiks.Arkiv.Integration.Tests.Library;
 using KS.Fiks.Arkiv.Models.V1.Arkivstruktur;
@@ -21,21 +22,21 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Feilmelding
     public class FeilmeldingTests : IntegrationTestsBase
     {
         [SetUp]
-        public void Setup()
+        public async Task Setup()
         {
             //TODO En annen lokal lagring som kjørte for disse testene hadde vært stilig i stedet for en liste. 
             _mottatMeldingArgsList = new List<MottattMeldingArgs>();
             var config = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.Local.json")
                 .Build();
-            _client = new FiksIOClient(FiksIOConfigurationBuilder.CreateFiksIOConfiguration(config));
+            _client = await FiksIOClient.CreateAsync(FiksIOConfigurationBuilder.CreateFiksIOConfiguration(config));
             _client.NewSubscription(OnMottattMelding);
             _fiksRequestService = new FiksRequestMessageService(config);
             _mottakerKontoId = Guid.Parse(config["TestConfig:ArkivAccountId"]);
         }
 
         [Test] 
-        public void Hent_Journalpost_Med_Ikke_Eksisterende_EksternNoekkel_Returnerer_Ikkefunnet()
+        public async Task Hent_Journalpost_Med_Ikke_Eksisterende_EksternNoekkel_Returnerer_Ikkefunnet()
         {
             // Denne id'en gjør at Arkiv-simulatoren ser hvilke meldinger som henger sammen. Har ingen funksjon ellers. 
             var testSessionId = Guid.NewGuid().ToString();
@@ -64,7 +65,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Feilmelding
             _mottatMeldingArgsList.Clear();
             
             // Send hent melding
-            var journalpostHentMeldingId = _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.RegistreringHent, journalpostHentSerialized, "arkivmelding.xml", null, testSessionId);
+            var journalpostHentMeldingId = await _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.RegistreringHent, journalpostHentSerialized, "arkivmelding.xml", null, testSessionId);
 
             // Vent på 1 respons meldinger 
             VentPaSvar(1, 10);
