@@ -29,12 +29,12 @@ Den nye filen skal man da putte inn sine konfigurasjonsdetaljer for Fiks-Protoko
     "FiksIoIntegrationPassword": "PASSWORD_FOR_INTEGRATION_TO_FIKS_HERE",
     "FiksIoIntegrationScope": "ks:fiks",
     "FiksIoPrivateKey": "PATH\\TO\\PRIVKEY.PEM",
-    "MaskinPortenAudienceUrl": "http://localhost:8080/oidc-provider-mock/",
+    "MaskinPortenAudienceUrl": "http://test.maskinporten.no/",
     "MaskinPortenCompanyCertificateThumbprint": "",
     "MaskinPortenCompanyCertificatePath": "PATH\\TO\\MASKINPORTENCERT.p12",
     "MaskinPortenCompanyCertificatePassword": "PASSWORD_FOR_MASKINPORTENCERT",
     "MaskinPortenIssuer": "dummyIssuer",
-    "MaskinPortenTokenUrl": "https://oidc-ver2.difi.no/idporten-oidc-provider/token"
+    "MaskinPortenTokenUrl": "https://test.maskinporten.no/token"
   }
 }
 ```
