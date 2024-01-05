@@ -113,7 +113,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
             {
                 System = FagsystemDefault,
                 AntallFiler = 1,
-                Mappe = MappeGenerator.CreateSaksmappe(referanseEksternNoekkelNoekkel)
+                Mappe = MappeBuilder.Init().BuildSaksmappe(referanseEksternNoekkelNoekkel)
             };
             
             return arkivmelding;

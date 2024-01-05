@@ -38,6 +38,125 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
                 Noekkel = SaksmappeEksternNoekkelNoekkel
             };
         }
+        
+        /*
+         * Denne testen oppretter saksmappe hvis den ikke finnes og ny journalpost med et hoveddokument på saksmappen.
+         * Saksmappen blir ikke opprettet hvis den allerede eksisterer, men journalpost blir opprettet 
+         * Journalpost bruker referanseForeldermappe med SystemID fra saksmappen
+         * Til slutt henter testen journalpost og validerer den
+         */
+        [Test]
+        public async Task Opprett_Saksmappe_Og_Journalpost_I_En_Melding()
+        {
+            // Denne id'en gjør at Arkiv-simulatoren ser hvilke meldinger som henger sammen. Har ingen funksjon ellers.  
+            var testSessionId = Guid.NewGuid().ToString();
+
+            /*
+             * STEG 1:
+             * Opprett arkivmelding med saksmappe og journalpost og send til arkiv
+             * Med klassifikasjon
+             */
+
+            var klassifikasjon = new Klassifikasjon()
+            {
+                KlasseID = "En klasseID",
+            };
+            
+            var mappe = MappeBuilder.Init().WithKlassifikasjon(klassifikasjon).BuildSaksmappe(_saksmappeEksternNoekkel);
+            var referanseTilSaksmappe = new ReferanseTilMappe()
+            {
+                ReferanseEksternNoekkel = _saksmappeEksternNoekkel
+            };
+            
+            MottattMeldingArgs? arkivmeldingKvitteringMelding;
+            PayloadFile arkivmeldingKvitteringPayload;
+            
+            var referanseEksternNoekkelNyJournalpost= new EksternNoekkel()
+            {
+                Fagsystem = EksternNoekkelFagsystem,
+                Noekkel = Guid.NewGuid().ToString()
+            };
+
+            // Legg til journalpost i arkivmelding
+            var journalpost = JournalpostGenerator.CreateJournalpost(referanseTilSaksmappe);
+            journalpost.ReferanseEksternNoekkel = referanseEksternNoekkelNyJournalpost;
+            var arkivmelding = MeldingGenerator.CreateArkivmelding();
+            arkivmelding.Registrering = journalpost;
+            
+            // Legg til mappe i arkivmelding
+            arkivmelding.Mappe = mappe;
+
+            var nyJournalpostSerialized = SerializeHelper.Serialize(arkivmelding);
+            
+            File.WriteAllText("ArkivmeldingMedNyJournalpostOgDokument.xml", nyJournalpostSerialized);
+            
+            // Valider arkivmelding
+            validator.Validate(nyJournalpostSerialized);
+
+            // Send melding
+            var nyJournalpostMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOpprett, nyJournalpostSerialized, "arkivmelding.xml", null, testSessionId);
+            
+            // Vent på 2 første response meldinger (mottatt og kvittering)
+            VentPaSvar(2, 10);
+            Assert.True(MottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
+
+            // Verifiser at man får mottatt melding
+            SjekkForventetMelding(MottatMeldingArgsList, nyJournalpostMeldingId, FiksArkivMeldingtype.ArkivmeldingOpprettMottatt);
+
+            // Verifiser at man får arkivmeldingKvittering melding
+            SjekkForventetMelding(MottatMeldingArgsList, nyJournalpostMeldingId, FiksArkivMeldingtype.ArkivmeldingOpprettKvittering);
+            
+            // Hent meldingen
+            arkivmeldingKvitteringMelding = GetMottattMelding(MottatMeldingArgsList, nyJournalpostMeldingId, FiksArkivMeldingtype.ArkivmeldingOpprettKvittering);
+            
+            arkivmeldingKvitteringPayload = MeldingHelper.GetDecryptedMessagePayload(arkivmeldingKvitteringMelding).Result;
+            Assert.True(arkivmeldingKvitteringPayload.Filename == "arkivmelding-kvittering.xml", "Filnavn ikke som forventet arkivmelding-kvittering.xml");
+    
+            // Valider innhold (xml)
+            validator.Validate(arkivmeldingKvitteringPayload.PayloadAsString);
+
+            /*
+             * STEG 2:
+             * Hent oppprettet journalpost igjen og valider
+             * 
+             */
+            var journalpostHent = MeldingGenerator.CreateJournalpostHent(referanseEksternNoekkelNyJournalpost);
+            
+            var journalpostHentAsString = SerializeHelper.Serialize(journalpostHent);
+            
+            // Valider innhold (xml)
+            validator.Validate(journalpostHentAsString);
+            
+            // Nullstill meldingsliste
+            MottatMeldingArgsList.Clear();
+            
+            // Send hent melding
+            var journalpostHentMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.RegistreringHent, journalpostHentAsString, "arkivmelding.xml", null, testSessionId);
+
+            // Vent på 1 respons meldinger 
+            VentPaSvar(1, 10);
+
+            Assert.True(MottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
+            
+            // Verifiser at man får RegistreringHentResultat melding
+            SjekkForventetMelding(MottatMeldingArgsList, journalpostHentMeldingId, FiksArkivMeldingtype.RegistreringHentResultat);
+            
+            // Hent meldingen
+            var RegistreringHentResultatMelding = GetMottattMelding(MottatMeldingArgsList, journalpostHentMeldingId, FiksArkivMeldingtype.RegistreringHentResultat);
+
+            Assert.IsNotNull(RegistreringHentResultatMelding);
+            
+            var RegistreringHentResultatPayload = MeldingHelper.GetDecryptedMessagePayload(RegistreringHentResultatMelding).Result;
+            
+            // Valider innhold (xml)
+            validator.Validate(RegistreringHentResultatPayload.PayloadAsString);
+
+            var RegistreringHentResultat = SerializeHelper.DeserializeXml<RegistreringHentResultat>(RegistreringHentResultatPayload.PayloadAsString);
+
+            Assert.AreEqual(RegistreringHentResultat.Journalpost.ReferanseEksternNoekkel.Fagsystem, arkivmelding.Registrering.ReferanseEksternNoekkel.Fagsystem);
+            Assert.AreEqual(RegistreringHentResultat.Journalpost.ReferanseEksternNoekkel.Noekkel, arkivmelding.Registrering.ReferanseEksternNoekkel.Noekkel);
+        }
+        
 
         /*
          * Denne testen sjekker om en saksmappe finnes og hvis ikke oppretter den saksmappen med referanseEksternNoekkel
