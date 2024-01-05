@@ -59,10 +59,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
              {
                  System = FagsystemDefault,
                  AntallFiler = 1,
-                 Registrering =
-                 {
-                     JournalpostGenerator.CreateJournalpost(JournalpostGenerator.ArkivdelDefault, tittel),
-                 }
+                 Registrering = JournalpostGenerator.CreateJournalpost(JournalpostGenerator.ArkivdelDefault, tittel),
              };
              
              return arkivmelding;
@@ -89,10 +86,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
             {
                 System = FagsystemDefault,
                 AntallFiler = 1,
-                Registrering =
-                {
-                    journalpost
-                }
+                Registrering = journalpost
             };
 
             return arkivmelding;
@@ -107,25 +101,19 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
             {
                 System = FagsystemDefault,
                 AntallFiler = 1,
-                Registrering =
-                {
-                    journalpost
-                }
+                Registrering = journalpost
             };
              
             return arkivmelding;
         }
         
-        public static Arkivmelding CreateArkivmeldingMedSaksmappe(EksternNoekkel referanseEksternNoekkelNoekkel, Journalpost journalpost = null)
+        public static Arkivmelding CreateArkivmeldingMedSaksmappe(EksternNoekkel referanseEksternNoekkelNoekkel)
         {
             var arkivmelding = new Arkivmelding()
             {
                 System = FagsystemDefault,
                 AntallFiler = 1,
-                Mappe =
-                {
-                    MappeGenerator.CreateSaksmappe(referanseEksternNoekkelNoekkel, journalpost)
-                }
+                Mappe = MappeGenerator.CreateSaksmappe(referanseEksternNoekkelNoekkel)
             };
             
             return arkivmelding;
@@ -135,7 +123,6 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
         {
             return new ArkivmeldingOppdatering()
             {
-                Tidspunkt = DateTime.Now,
                 RegistreringOppdateringer =
                 {
                     new RegistreringOppdatering()
@@ -151,7 +138,6 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
         {
             return new ArkivmeldingOppdatering()
             {
-                Tidspunkt = DateTime.Now,
                 MappeOppdateringer =
                 {
                     new SaksmappeOppdatering()
@@ -182,10 +168,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
             {
                 System = FagsystemDefault,
                 AntallFiler = 1,
-                Registrering =
-                {
-                    journalpost
-                }
+                Registrering = journalpost
             };
              
             return arkivmelding;

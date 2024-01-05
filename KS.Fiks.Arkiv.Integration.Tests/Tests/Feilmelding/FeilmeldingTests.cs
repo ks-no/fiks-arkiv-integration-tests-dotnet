@@ -25,14 +25,14 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Feilmelding
         public async Task Setup()
         {
             //TODO En annen lokal lagring som kjørte for disse testene hadde vært stilig i stedet for en liste. 
-            _mottatMeldingArgsList = new List<MottattMeldingArgs>();
+            MottatMeldingArgsList = new List<MottattMeldingArgs>();
             var config = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.Local.json")
                 .Build();
-            _client = await FiksIOClient.CreateAsync(FiksIOConfigurationBuilder.CreateFiksIOConfiguration(config));
-            _client.NewSubscription(OnMottattMelding);
-            _fiksRequestService = new FiksRequestMessageService(config);
-            _mottakerKontoId = Guid.Parse(config["TestConfig:ArkivAccountId"]);
+            Client = await FiksIOClient.CreateAsync(FiksIOConfigurationBuilder.CreateFiksIOConfiguration(config));
+            Client.NewSubscription(OnMottattMelding);
+            FiksRequestService = new FiksRequestMessageService(config);
+            MottakerKontoId = Guid.Parse(config["TestConfig:ArkivAccountId"]);
         }
 
         [Test] 
@@ -62,18 +62,18 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Feilmelding
             File.WriteAllText("HentJournalpostEksternNoekkelIkkeGyldig.xml", journalpostHentSerialized);
             
             // Nullstill meldingsliste
-            _mottatMeldingArgsList.Clear();
+            MottatMeldingArgsList.Clear();
             
             // Send hent melding
-            var journalpostHentMeldingId = await _fiksRequestService.Send(_mottakerKontoId, FiksArkivMeldingtype.RegistreringHent, journalpostHentSerialized, "arkivmelding.xml", null, testSessionId);
+            var journalpostHentMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.RegistreringHent, journalpostHentSerialized, "arkivmelding.xml", null, testSessionId);
 
             // Vent på 1 respons meldinger 
             VentPaSvar(1, 10);
 
-            Assert.True(_mottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
+            Assert.True(MottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
             
             // Verifiser at man får en Ikkefunnet feil-melding
-            var ikkefunnetFeilmelding = GetMottattMelding(_mottatMeldingArgsList, journalpostHentMeldingId, FiksArkivMeldingtype.Ikkefunnet);
+            var ikkefunnetFeilmelding = GetMottattMelding(MottatMeldingArgsList, journalpostHentMeldingId, FiksArkivMeldingtype.Ikkefunnet);
 
             Assert.IsNotNull(ikkefunnetFeilmelding);
         }

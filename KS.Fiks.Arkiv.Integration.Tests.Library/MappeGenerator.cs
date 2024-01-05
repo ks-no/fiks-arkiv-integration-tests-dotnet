@@ -8,7 +8,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
         private const string SaksansvarligDefault = "Sara Saksansvarlig";
         private const string SaksmappeTittelDefault = "En ny saksmappe fra integrasjonstest";
             
-        public static Mappe CreateSaksmappe(EksternNoekkel referanseEksternNoekkelNoekkel, Journalpost journalpost)
+        public static Mappe CreateSaksmappe(EksternNoekkel referanseEksternNoekkelNoekkel)
         {
             var saksmappe = new Saksmappe()
             {
@@ -19,10 +19,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
                 },
                 ReferanseEksternNoekkel = referanseEksternNoekkelNoekkel
             };
-            if (journalpost != null)
-            {
-                saksmappe.Registrering.Add(journalpost);
-            }
+            
             return saksmappe;
         }
     }
