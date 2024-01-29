@@ -52,7 +52,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Feilmelding
              * STEG 1:
              * Forsøk å hente journalpost som ikke skal eksistere
              */
-            var journalpostHent = MeldingGenerator.CreateJournalpostHent(referanseEksternNoekkelIkkeGyldig);
+            var journalpostHent = RegistreringHentBuilder.Init().WithEksternNoekkel(referanseEksternNoekkelIkkeGyldig).Build();
             
             var journalpostHentSerialized = SerializeHelper.Serialize(journalpostHent);
             

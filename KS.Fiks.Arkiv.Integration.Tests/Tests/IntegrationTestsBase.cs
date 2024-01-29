@@ -176,7 +176,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
 
             Assert.IsNotNull(mappeHentResultatMelding);
             
-            var mappeHentResultatPayload = MeldingHelper.GetDecryptedMessagePayload(mappeHentResultatMelding).Result;
+            var mappeHentResultatPayload = await MeldingHelper.GetDecryptedMessagePayload(mappeHentResultatMelding);
             
             // Valider innhold (xml)
             validator.Validate(mappeHentResultatPayload.PayloadAsString);

@@ -80,7 +80,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
             var systemId = arkivmeldingKvittering.RegistreringKvittering.SystemID; // Bruk SystemID som man fikk i kvittering
 
             // STEG 2: Henting av journalpost
-            var journalpostHent = MeldingGenerator.CreateJournalpostHent(systemId);
+            var journalpostHent = RegistreringHentBuilder.Init().WithSystemID(systemId).Build();
             
             var journalpostHentSerialized = SerializeHelper.Serialize(journalpostHent);
             
@@ -175,7 +175,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
              * STEG 2:
              * Hent journalposten som ble opprettet i steg 1
              */
-            var journalpostHent = MeldingGenerator.CreateJournalpostHent(referanseEksternNoekkel);
+            var journalpostHent = RegistreringHentBuilder.Init().WithEksternNoekkel(referanseEksternNoekkel).Build();
             
             var journalpostHentSerialized = SerializeHelper.Serialize(journalpostHent);
             

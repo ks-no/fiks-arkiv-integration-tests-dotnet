@@ -11,24 +11,13 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
     {
         private const string FagsystemDefault = "Fagsystem integrasjonstester";
 
-        public static RegistreringHent CreateJournalpostHent(EksternNoekkel referanseEksternNoekkel)
-        {
-             return new RegistreringHent()
-             {
-                 ReferanseTilRegistrering = new ReferanseTilRegistrering()
-                 {
-                     ReferanseEksternNoekkel = new EksternNoekkel() {
-                        Fagsystem = referanseEksternNoekkel.Fagsystem,
-                        Noekkel = referanseEksternNoekkel.Noekkel
-                     }
-                 }
-             };
-        }
+
         
         public static MappeHent CreateMappeHent(EksternNoekkel referanseEksternNoekkel)
         {
             return new MappeHent()
             {
+                System = FagsystemDefault,
                 ReferanseTilMappe = new ReferanseTilMappe()
                 {
                     ReferanseEksternNoekkel = new EksternNoekkel() {
@@ -38,20 +27,6 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
                 }
             };
         }
-        
-        public static RegistreringHent CreateJournalpostHent(SystemID systemId )
-        {
-            return new RegistreringHent()
-            {
-                ReferanseTilRegistrering = new ReferanseTilRegistrering(){
-                  SystemID = new SystemID()
-                   {
-                       Label = systemId.Label,
-                       Value = systemId.Value
-                   }
-               },
-            };
-        }
 
         public static Arkivmelding CreateArkivmeldingMedNyJournalpost(string referanseEksternNoekkelNoekkel = null!, string tittel = null)
          {
@@ -59,7 +34,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
              {
                  System = FagsystemDefault,
                  AntallFiler = 1,
-                 Registrering = JournalpostGenerator.CreateJournalpost(JournalpostGenerator.ArkivdelDefault, tittel),
+                 Registrering = JournalpostBuilder.Init().WithArkivdel(JournalpostBuilder.ArkivdelDefault).WithTittel(tittel).Build(),
              };
              
              return arkivmelding;
@@ -78,9 +53,9 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
 
         public static Arkivmelding CreateArkivmeldingMedNyttHovedDokument(EksternNoekkel referanseEksternNoekkelNoekkel)
         {
-            var journalpost = JournalpostGenerator.CreateJournalpost(JournalpostGenerator.ArkivdelDefault);
+            var journalpost = JournalpostBuilder.Init().WithArkivdel(JournalpostBuilder.ArkivdelDefault).Build();
             journalpost.ReferanseEksternNoekkel = referanseEksternNoekkelNoekkel;
-            journalpost.Dokumentbeskrivelse.Add(JournalpostGenerator.CreateDokumentbeskrivelse());
+            journalpost.Dokumentbeskrivelse.Add(JournalpostBuilder.CreateDokumentbeskrivelse());
 
             var arkivmelding = new Arkivmelding()
             {
@@ -94,7 +69,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
 
         public static Arkivmelding CreateArkivmeldingPåEksisterendeJournalpostMedNyttVedlegg(EksternNoekkel referanseEksternNoekkelNoekkel)
         {
-            var journalpost = JournalpostGenerator.CreateJournalpost(JournalpostGenerator.ArkivdelDefault);
+            var journalpost = JournalpostBuilder.Init().WithArkivdel(JournalpostBuilder.ArkivdelDefault).Build();
             journalpost.ReferanseEksternNoekkel = referanseEksternNoekkelNoekkel;
             
             var arkivmelding = new Arkivmelding()
@@ -157,7 +132,10 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
 
         public static Arkivmelding CreateArkivmeldingMedNyJournalpost(EksternNoekkel referanseEksternNoekkelNoekkel)
         {
-            var journalpost = JournalpostGenerator.CreateJournalpost(JournalpostGenerator.ArkivdelDefault);
+            var journalpost = JournalpostBuilder
+                .Init()
+                .WithTittel("Test tittel")
+                .WithArkivdel(JournalpostBuilder.ArkivdelDefault).Build();
             journalpost.ReferanseEksternNoekkel = new EksternNoekkel()
             {
                 Fagsystem = referanseEksternNoekkelNoekkel.Fagsystem,

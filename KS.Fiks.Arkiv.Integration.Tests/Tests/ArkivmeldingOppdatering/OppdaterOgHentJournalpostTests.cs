@@ -14,7 +14,7 @@ using KS.FiksProtokollValidator.Tests.IntegrationTests.Validation;
 using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
 
-namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdateringTests
+namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdatering
 {
     /**
      * Disse testene sender først en arkivmelding for å opprette en journalpost for så
@@ -134,7 +134,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdateringTests
              * Hent journalpost som har blitt oppdatert og bekreft at den er oppdatert
              */
             
-            var journalpostHent = MeldingGenerator.CreateJournalpostHent(referanseEksternNoekkel);
+            var journalpostHent = RegistreringHentBuilder.Init().WithEksternNoekkel(referanseEksternNoekkel).Build();
             
             var journalpostHentAsString = SerializeHelper.Serialize(journalpostHent);
             

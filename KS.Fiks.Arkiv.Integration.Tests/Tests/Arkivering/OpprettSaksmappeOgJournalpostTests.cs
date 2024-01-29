@@ -19,7 +19,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
      * Disse testene sender først en arkivmelding for å hente en saksmappe og eventuelt opprette saksmappen hvis den ikke eksisterer.
      * For så å sende inn journalposter og eventuelt dokumenter på saksmappen
      */
-    public class NySaksmappTests : IntegrationTestsBase
+    public class OpprettSaksmappeOgJournalpostTests : IntegrationTestsBase
     {
         private const string EksternNoekkelFagsystem = "Validatortester saksmappe";
         private const string SaksmappeEksternNoekkelNoekkel = "4950bac7-79f2-4ec4-90bf-0c41e8d9ce78";
@@ -78,12 +78,14 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
             };
 
             // Legg til journalpost i arkivmelding
-            var journalpost = JournalpostGenerator.CreateJournalpost(referanseTilSaksmappe);
+            var journalpost = JournalpostBuilder
+                .Init()
+                .WithTittel("Test tittel")
+                .WithReferanseTilForelderMappe(referanseTilSaksmappe)
+                .Build();
             journalpost.ReferanseEksternNoekkel = referanseEksternNoekkelNyJournalpost;
             var arkivmelding = MeldingGenerator.CreateArkivmelding();
             arkivmelding.Registrering = journalpost;
-            
-            // Legg til mappe i arkivmelding
             arkivmelding.Mappe = mappe;
 
             var nyJournalpostSerialized = SerializeHelper.Serialize(arkivmelding);
@@ -120,7 +122,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
              * Hent oppprettet journalpost igjen og valider
              * 
              */
-            var journalpostHent = MeldingGenerator.CreateJournalpostHent(referanseEksternNoekkelNyJournalpost);
+            var journalpostHent = RegistreringHentBuilder.Init().WithEksternNoekkel(referanseEksternNoekkelNyJournalpost).Build();
             
             var journalpostHentAsString = SerializeHelper.Serialize(journalpostHent);
             
@@ -142,19 +144,19 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
             SjekkForventetMelding(MottatMeldingArgsList, journalpostHentMeldingId, FiksArkivMeldingtype.RegistreringHentResultat);
             
             // Hent meldingen
-            var RegistreringHentResultatMelding = GetMottattMelding(MottatMeldingArgsList, journalpostHentMeldingId, FiksArkivMeldingtype.RegistreringHentResultat);
+            var registreringHentResultatMelding = GetMottattMelding(MottatMeldingArgsList, journalpostHentMeldingId, FiksArkivMeldingtype.RegistreringHentResultat);
 
-            Assert.IsNotNull(RegistreringHentResultatMelding);
+            Assert.IsNotNull(registreringHentResultatMelding);
             
-            var RegistreringHentResultatPayload = MeldingHelper.GetDecryptedMessagePayload(RegistreringHentResultatMelding).Result;
+            var registreringHentResultatPayload = MeldingHelper.GetDecryptedMessagePayload(registreringHentResultatMelding).Result;
             
             // Valider innhold (xml)
-            validator.Validate(RegistreringHentResultatPayload.PayloadAsString);
+            validator.Validate(registreringHentResultatPayload.PayloadAsString);
 
-            var RegistreringHentResultat = SerializeHelper.DeserializeXml<RegistreringHentResultat>(RegistreringHentResultatPayload.PayloadAsString);
+            var registreringHentResultat = SerializeHelper.DeserializeXml<RegistreringHentResultat>(registreringHentResultatPayload.PayloadAsString);
 
-            Assert.AreEqual(RegistreringHentResultat.Journalpost.ReferanseEksternNoekkel.Fagsystem, arkivmelding.Registrering.ReferanseEksternNoekkel.Fagsystem);
-            Assert.AreEqual(RegistreringHentResultat.Journalpost.ReferanseEksternNoekkel.Noekkel, arkivmelding.Registrering.ReferanseEksternNoekkel.Noekkel);
+            Assert.AreEqual(registreringHentResultat.Journalpost.ReferanseEksternNoekkel.Fagsystem, arkivmelding.Registrering.ReferanseEksternNoekkel.Fagsystem);
+            Assert.AreEqual(registreringHentResultat.Journalpost.ReferanseEksternNoekkel.Noekkel, arkivmelding.Registrering.ReferanseEksternNoekkel.Noekkel);
         }
         
 
@@ -199,7 +201,11 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
                 SystemID = saksmappeSystemID
             };
 
-            var journalpost = JournalpostGenerator.CreateJournalpost(referanseForelderMappe);
+            var journalpost = JournalpostBuilder
+                .Init()
+                .WithTittel("Test")
+                .WithReferanseTilForelderMappe(referanseForelderMappe)
+                .Build();
             journalpost.ReferanseEksternNoekkel = referanseEksternNoekkelNyJournalpost;
             var arkivmelding = MeldingGenerator.CreateArkivmelding();
             arkivmelding.Registrering = journalpost;
@@ -238,7 +244,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
              * Hent oppprettet journalpost igjen og valider
              * 
              */
-            var journalpostHent = MeldingGenerator.CreateJournalpostHent(referanseEksternNoekkelNyJournalpost);
+            var journalpostHent = RegistreringHentBuilder.Init().WithEksternNoekkel(referanseEksternNoekkelNyJournalpost).Build();
             
             var journalpostHentAsString = SerializeHelper.Serialize(journalpostHent);
             
@@ -260,19 +266,19 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
             SjekkForventetMelding(MottatMeldingArgsList, journalpostHentMeldingId, FiksArkivMeldingtype.RegistreringHentResultat);
             
             // Hent meldingen
-            var RegistreringHentResultatMelding = GetMottattMelding(MottatMeldingArgsList, journalpostHentMeldingId, FiksArkivMeldingtype.RegistreringHentResultat);
+            var registreringHentResultatMelding = GetMottattMelding(MottatMeldingArgsList, journalpostHentMeldingId, FiksArkivMeldingtype.RegistreringHentResultat);
 
-            Assert.IsNotNull(RegistreringHentResultatMelding);
+            Assert.IsNotNull(registreringHentResultatMelding);
             
-            var RegistreringHentResultatPayload = MeldingHelper.GetDecryptedMessagePayload(RegistreringHentResultatMelding).Result;
+            var registreringHentResultatPayload = MeldingHelper.GetDecryptedMessagePayload(registreringHentResultatMelding).Result;
             
             // Valider innhold (xml)
-            validator.Validate(RegistreringHentResultatPayload.PayloadAsString);
+            validator.Validate(registreringHentResultatPayload.PayloadAsString);
 
-            var RegistreringHentResultat = SerializeHelper.DeserializeXml<RegistreringHentResultat>(RegistreringHentResultatPayload.PayloadAsString);
+            var registreringHentResultat = SerializeHelper.DeserializeXml<RegistreringHentResultat>(registreringHentResultatPayload.PayloadAsString);
 
-            Assert.AreEqual(RegistreringHentResultat.Journalpost.ReferanseEksternNoekkel.Fagsystem, arkivmelding.Registrering.ReferanseEksternNoekkel.Fagsystem);
-            Assert.AreEqual(RegistreringHentResultat.Journalpost.ReferanseEksternNoekkel.Noekkel, arkivmelding.Registrering.ReferanseEksternNoekkel.Noekkel);
+            Assert.AreEqual(registreringHentResultat.Journalpost.ReferanseEksternNoekkel.Fagsystem, arkivmelding.Registrering.ReferanseEksternNoekkel.Fagsystem);
+            Assert.AreEqual(registreringHentResultat.Journalpost.ReferanseEksternNoekkel.Noekkel, arkivmelding.Registrering.ReferanseEksternNoekkel.Noekkel);
         }
         
         /*
@@ -316,7 +322,10 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
                 ReferanseEksternNoekkel = _saksmappeEksternNoekkel
             };
 
-            var journalpost = JournalpostGenerator.CreateJournalpost(referanseForelderMappe);
+            var journalpost = JournalpostBuilder.Init()
+                .WithTittel("Test tittel")
+                .WithReferanseTilForelderMappe(referanseForelderMappe)
+                .Build();
             journalpost.ReferanseEksternNoekkel = referanseEksternNoekkelNyJournalpost;
             var arkivmelding = MeldingGenerator.CreateArkivmelding();
             arkivmelding.Registrering = journalpost;
@@ -355,7 +364,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
              * Hent oppprettet journalpost igjen og valider
              * 
              */
-            var journalpostHent = MeldingGenerator.CreateJournalpostHent(referanseEksternNoekkelNyJournalpost);
+            var journalpostHent = RegistreringHentBuilder.Init().WithEksternNoekkel(referanseEksternNoekkelNyJournalpost).Build();
             
             var journalpostHentAsString = SerializeHelper.Serialize(journalpostHent);
             

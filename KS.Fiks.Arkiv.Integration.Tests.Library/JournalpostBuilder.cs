@@ -4,29 +4,57 @@ using KS.Fiks.Arkiv.Models.V1.Metadatakatalog;
 
 namespace KS.Fiks.Arkiv.Integration.Tests.Library
 {
-    public class JournalpostGenerator
+    public class JournalpostBuilder
     {
         public const string SaksansvarligDefault = "Sara Saksansvarlig";
         public const string SaksmappeTittelDefault = "En ny saksmappe fra integrasjonstest";
         public const string FagsystemDefault = "Fagsystem validatortester";
         public const string ArkivdelDefault = "Arkiv validatortester";
-            
 
-        public static Journalpost CreateJournalpost(ReferanseTilMappe referanseTilForelderMappe)
+        private ReferanseTilMappe _referanseTilMappe;
+        private string _tittel;
+        private string _arkivdel;
+        private Dokumentbeskrivelse _dokumentbeskrivelse;
+
+        public static JournalpostBuilder Init()
         {
-            var jp = CreateJournalpost();
-            jp.ReferanseForelderMappe = referanseTilForelderMappe;
-            return jp;
+            return new JournalpostBuilder();
         }
 
-        public static Journalpost CreateJournalpost(string referanseArkivdel, string tittel = null)
+        public JournalpostBuilder WithReferanseTilForelderMappe(ReferanseTilMappe referanseTilMappe)
+        {
+            _referanseTilMappe = referanseTilMappe;
+            return this;
+        }
+        
+        public JournalpostBuilder WithTittel(string tittel)
+        {
+            _tittel = tittel;
+            return this;
+        }
+        
+        public JournalpostBuilder WithArkivdel(string arkivdel)
+        {
+            _arkivdel = arkivdel;
+            return this;
+        }
+
+        public JournalpostBuilder WithDokumentbeskrivelse()
+        {
+            _dokumentbeskrivelse = CreateDokumentbeskrivelse();
+            return this;
+        }
+
+        public Journalpost Build()
         {
             var jp = CreateJournalpost();
-            jp.Arkivdel = new Kode() {KodeProperty = referanseArkivdel};
-            if (tittel != null)
+            jp.Dokumentbeskrivelse.Add(_dokumentbeskrivelse);
+            if (_arkivdel != null)
             {
-                jp.Tittel = tittel;
+                jp.Arkivdel = new Kode() {KodeProperty = _arkivdel};
             }
+            jp.ReferanseForelderMappe = _referanseTilMappe;
+            jp.Tittel = _tittel;
             return jp;
         }
         
@@ -68,48 +96,8 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
                 };
             return dokumentbeskrivelse;
         }
-        
-        private static Journalpost CreateJournalpostMedDokumenter()
-        {
-            var jp = CreateJournalpost();
-            jp.Dokumentbeskrivelse.Add(
-                new Dokumentbeskrivelse()
-                {
-                    Dokumenttype = new Dokumenttype()
-                    {
-                        KodeProperty= "SØKNAD"
-                    },
-                    Dokumentstatus = new Dokumentstatus()
-                    {
-                        KodeProperty= "F"
-                    },
-                    Tittel = "Rekvisisjon av oppmålingsforretning",
-                    TilknyttetRegistreringSom = new TilknyttetRegistreringSom()
-                    {
-                        KodeProperty= "H"
-                    },
-                    Dokumentobjekt =
-                    {
-                        new Dokumentobjekt()
-                        {
-                            Versjonsnummer = 1,
-                            Variantformat = new Variantformat()
-                            {
-                                KodeProperty= "P"
-                            },
-                            Format = new Format()
-                            {
-                                KodeProperty= "PDF"
-                            },
-                            Filnavn = "rekvisjon.pdf",
-                            ReferanseDokumentfil = "rekvisisjon.pdf"
-                        }
-                    }
-                });
-            return jp;
-        } 
-        
-        private static Journalpost CreateJournalpost()
+
+        private Journalpost CreateJournalpost()
         {
             return new Journalpost()
             {
