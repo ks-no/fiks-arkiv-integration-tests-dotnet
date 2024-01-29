@@ -120,7 +120,8 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdatering
             
             var mappeHentSerialized = SerializeHelper.Serialize(mappeHent);
             
-            File.WriteAllText("MappeHent.xml", mappeHentSerialized);
+            // Utkommenter dette hvis man vil å skrive til fil for å sjekke resultat manuelt
+            //File.WriteAllText("MappeHent.xml", mappeHentSerialized);
             
             // Valider innhold (xml)
             validator.Validate(mappeHentSerialized);

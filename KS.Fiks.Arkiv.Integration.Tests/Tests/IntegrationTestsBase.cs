@@ -150,7 +150,8 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
             
             var mappeHentSerialized = SerializeHelper.Serialize(mappeHent);
             
-            File.WriteAllText("MappeHent.xml", mappeHentSerialized);
+            // Utkommenter dette hvis man vil å skrive til fil for å sjekke resultat manuelt
+            //File.WriteAllText("MappeHent.xml", mappeHentSerialized);
             
             // Valider innhold (xml)
             validator.Validate(mappeHentSerialized);
@@ -197,7 +198,8 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
             // Valider arkivmelding
             validator.Validate(nySaksmappeSerialized);
 
-            File.WriteAllText("ArkivmeldingMedNySaksmappe2.xml", nySaksmappeSerialized);
+            // Utkommenter dette hvis man vil å skrive til fil for å sjekke resultat manuelt
+            //File.WriteAllText("ArkivmeldingMedNySaksmappe2.xml", nySaksmappeSerialized);
 
             // Send melding
             var nySaksmappeMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOpprett,

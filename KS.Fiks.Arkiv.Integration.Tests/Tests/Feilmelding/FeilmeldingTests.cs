@@ -59,7 +59,8 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Feilmelding
             // Valider innhold (xml)
             validator.Validate(journalpostHentSerialized);
             
-            File.WriteAllText("HentJournalpostEksternNoekkelIkkeGyldig.xml", journalpostHentSerialized);
+            // Utkommenter dette hvis man vil å skrive til fil for å sjekke resultat manuelt
+            //File.WriteAllText("HentJournalpostEksternNoekkelIkkeGyldig.xml", journalpostHentSerialized);
             
             // Nullstill meldingsliste
             MottatMeldingArgsList.Clear();

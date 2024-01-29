@@ -141,7 +141,8 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Sok
             // Valider arkivmelding
             validator.Validate(nyJournalpostSerialized);
 
-            File.WriteAllText("ArkivmeldingMedNyJournalpost.xml", nyJournalpostSerialized);
+            // Utkommenter dette hvis man vil å skrive til fil for å sjekke resultat manuelt
+            //File.WriteAllText("ArkivmeldingMedNyJournalpost.xml", nyJournalpostSerialized);
 
             // Send arkiver melding
             var nyJournalpostMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOpprett,

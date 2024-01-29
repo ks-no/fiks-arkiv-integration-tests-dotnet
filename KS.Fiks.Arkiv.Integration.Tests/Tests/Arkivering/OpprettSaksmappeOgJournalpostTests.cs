@@ -89,7 +89,8 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
 
             var nyJournalpostSerialized = SerializeHelper.Serialize(arkivmelding);
             
-            File.WriteAllText("ArkivmeldingMedNyJournalpostOgDokument.xml", nyJournalpostSerialized);
+            // Utkommenter dette hvis man vil å skrive til fil for å sjekke resultat manuelt
+            //File.WriteAllText("ArkivmeldingMedNyJournalpostOgDokument.xml", nyJournalpostSerialized);
             
             // Valider arkivmelding
             validator.Validate(nyJournalpostSerialized);
@@ -211,7 +212,8 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
 
             var nyJournalpostSerialized = SerializeHelper.Serialize(arkivmelding);
             
-            File.WriteAllText("ArkivmeldingMedNyJournalpostOgDokument.xml", nyJournalpostSerialized);
+            // Utkommenter dette hvis man vil å skrive til fil for å sjekke resultat manuelt
+            //File.WriteAllText("ArkivmeldingMedNyJournalpostOgDokument.xml", nyJournalpostSerialized);
             
             // Valider arkivmelding
             validator.Validate(nyJournalpostSerialized);
@@ -331,7 +333,8 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
 
             var nyJournalpostSerialized = SerializeHelper.Serialize(arkivmelding);
             
-            File.WriteAllText("ArkivmeldingMedNyJournalpostOgDokument.xml", nyJournalpostSerialized);
+            // Utkommenter dette hvis man vil å skrive til fil for å sjekke resultat manuelt
+            //File.WriteAllText("ArkivmeldingMedNyJournalpostOgDokument.xml", nyJournalpostSerialized);
             
             // Valider arkivmelding
             validator.Validate(nyJournalpostSerialized);

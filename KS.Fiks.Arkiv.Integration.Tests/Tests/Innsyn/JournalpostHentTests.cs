@@ -52,7 +52,8 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
             // Valider arkivmelding
             validator.Validate(nyJournalpostSerialized);
             
-            File.WriteAllText("ArkivmeldingMedNyJournalpost.xml", nyJournalpostSerialized);
+            // Utkommenter dette hvis man vil å skrive til fil for å sjekke resultat manuelt
+            //File.WriteAllText("ArkivmeldingMedNyJournalpost.xml", nyJournalpostSerialized);
 
             // Send arkiver melding
             var nyJournalpostMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOpprett, nyJournalpostSerialized, "arkivmelding.xml", null, testSessionId);
@@ -87,7 +88,8 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
             // Valider innhold (xml)
             validator.Validate(journalpostHentSerialized);
             
-            File.WriteAllText("HentJournalpost.xml", journalpostHentSerialized);
+            // Utkommenter dette hvis man vil å skrive til fil for å sjekke resultat manuelt
+            //File.WriteAllText("HentJournalpost.xml", journalpostHentSerialized);
             
             // Nullstill meldingsliste
             MottatMeldingArgsList.Clear();
@@ -147,7 +149,8 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
             // Valider arkivmelding
             validator.Validate(nyJournalpostSerialized);
             
-            File.WriteAllText("ArkivmeldingMedNyJournalpostEksternNoekkel.xml", nyJournalpostSerialized);
+            // Utkommenter dette hvis man vil å skrive til fil for å sjekke resultat manuelt
+            //File.WriteAllText("ArkivmeldingMedNyJournalpostEksternNoekkel.xml", nyJournalpostSerialized);
 
             // Send arkivering melding
             var nyJournalpostMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOpprett, nyJournalpostSerialized, "arkivmelding.xml", null, testSessionId);
@@ -182,7 +185,8 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
             // Valider innhold (xml)
             validator.Validate(journalpostHentSerialized);
             
-            File.WriteAllText("HentJournalpostEksternNoekkel.xml", journalpostHentSerialized);
+            // Utkommenter dette hvis man vil å skrive til fil for å sjekke resultat manuelt
+            //File.WriteAllText("HentJournalpostEksternNoekkel.xml", journalpostHentSerialized);
             
             // Nullstill meldingsliste
             MottatMeldingArgsList.Clear();
@@ -210,7 +214,8 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
 
             var journalpostHentResultat = SerializeHelper.DeserializeXml<RegistreringHentResultat>(journalpostHentResultatPayload.PayloadAsString);
             
-            File.WriteAllText("HentJournalpostResultatEksternNoekkel.xml", journalpostHentSerialized);
+            // Utkommenter dette hvis man vil å skrive til fil for å sjekke resultat manuelt
+            //File.WriteAllText("HentJournalpostResultatEksternNoekkel.xml", journalpostHentSerialized);
             
             Assert.AreEqual(journalpostHentResultat.Journalpost.Tittel, arkivmelding.Registrering.Tittel);
             Assert.AreEqual(journalpostHentResultat.Journalpost.ReferanseEksternNoekkel.Fagsystem, arkivmelding.Registrering.ReferanseEksternNoekkel.Fagsystem);

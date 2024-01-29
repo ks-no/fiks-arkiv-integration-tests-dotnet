@@ -1,8 +1,6 @@
-using System;
 using KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding;
 using KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding.Oppdatering;
 using KS.Fiks.Arkiv.Models.V1.Innsyn.Hent.Mappe;
-using KS.Fiks.Arkiv.Models.V1.Innsyn.Hent.Registrering;
 using KS.Fiks.Arkiv.Models.V1.Metadatakatalog;
 
 namespace KS.Fiks.Arkiv.Integration.Tests.Library
@@ -10,8 +8,6 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
     public class MeldingGenerator
     {
         private const string FagsystemDefault = "Fagsystem integrasjonstester";
-
-
         
         public static MappeHent CreateMappeHent(EksternNoekkel referanseEksternNoekkel)
         {
@@ -28,7 +24,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
             };
         }
 
-        public static Arkivmelding CreateArkivmeldingMedNyJournalpost(string referanseEksternNoekkelNoekkel = null!, string tittel = null)
+        public static Arkivmelding CreateArkivmeldingMedNyJournalpost(string tittel = null)
          {
              var arkivmelding = new Arkivmelding()
              {
@@ -51,37 +47,6 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
             return arkivmelding;
         }
 
-        public static Arkivmelding CreateArkivmeldingMedNyttHovedDokument(EksternNoekkel referanseEksternNoekkelNoekkel)
-        {
-            var journalpost = JournalpostBuilder.Init().WithArkivdel(JournalpostBuilder.ArkivdelDefault).Build();
-            journalpost.ReferanseEksternNoekkel = referanseEksternNoekkelNoekkel;
-            journalpost.Dokumentbeskrivelse.Add(JournalpostBuilder.CreateDokumentbeskrivelse());
-
-            var arkivmelding = new Arkivmelding()
-            {
-                System = FagsystemDefault,
-                AntallFiler = 1,
-                Registrering = journalpost
-            };
-
-            return arkivmelding;
-        }
-
-        public static Arkivmelding CreateArkivmeldingPåEksisterendeJournalpostMedNyttVedlegg(EksternNoekkel referanseEksternNoekkelNoekkel)
-        {
-            var journalpost = JournalpostBuilder.Init().WithArkivdel(JournalpostBuilder.ArkivdelDefault).Build();
-            journalpost.ReferanseEksternNoekkel = referanseEksternNoekkelNoekkel;
-            
-            var arkivmelding = new Arkivmelding()
-            {
-                System = FagsystemDefault,
-                AntallFiler = 1,
-                Registrering = journalpost
-            };
-             
-            return arkivmelding;
-        }
-        
         public static Arkivmelding CreateArkivmeldingMedSaksmappe(EksternNoekkel referanseEksternNoekkelNoekkel)
         {
             var arkivmelding = new Arkivmelding()
