@@ -16,8 +16,7 @@ using NUnit.Framework;
 namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
 {
     /**
-     * Disse testene sender først en arkivmelding for å hente en saksmappe og eventuelt opprette saksmappen hvis den ikke eksisterer.
-     * For så å sende inn journalposter og eventuelt dokumenter på saksmappen
+     * Disse testene er for å opprette saksmappe og journalposter.
      */
     public class OpprettSaksmappeOgJournalpostTests : IntegrationTestsBase
     {
