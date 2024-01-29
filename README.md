@@ -8,6 +8,9 @@ Fiks-Protokoll-Validator tester enkeltvis meldinger som f.eks. at man kan arkive
 ## Oppsett
 For å kunne kjøre testene må man ha satt opp en Fiks-Protokoll konto som igjen er en FIks-IO konto. Se gjerne dokumentasjon [her](https://ks-no.github.io/fiks-plattform/tjenester/fiksio/) for nærmere forklaring rundt Fiks-Protokoller, Fiks-Arkiv, Fiks-IO og hvordan det henger sammen.
 
+Husk også å sørge for at kontoen som kjører integrasjonstesten har satt opp å kunne sende og motta meldinger fra "Arkiv-kontoen".
+Altså at de to kontoene har godkjent å kommunisere sammen via Fiks Protokoll. 
+
 ### Config
 
 I prosjektet ligger det en appsettings.json. Kopier denne og gi den nye filen navnet **appsettings.Local.json**
@@ -38,6 +41,10 @@ Den nye filen skal man da putte inn sine konfigurasjonsdetaljer for Fiks-Protoko
   }
 }
 ```
+
+#### Forklaring
+`TestConfig:ArkivAccountId`: Fiks Protokoll kontoen for arkivet som skal motta meldingene.
+
 
 ### Test oppsett
 Hver test sender inn en unik id som header på Fiks-IO meldingen med navnet **testSessionId**. Dette er kun for at vår arkiv-simulator skal kunne se hvilke meldinger som hører sammen når man kjører disse testene mot simulatoren. Hvis man kjører disse testene mot en arkiv implementasjon kan arkivet ignorere denne id'en. Den er kun for intern validering av integrasjonstestene.
