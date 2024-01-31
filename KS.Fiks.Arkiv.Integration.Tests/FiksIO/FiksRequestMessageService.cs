@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using KS.Fiks.Arkiv.Models.V1.Meldingstyper;
 using KS.Fiks.IO.Client;
 using KS.Fiks.IO.Client.Configuration;
 using KS.Fiks.IO.Client.Models;
@@ -30,9 +31,13 @@ namespace KS.Fiks.Arkiv.Integration.Tests.FiksIO
         
         private Task Initialization { get; set; }
 
-        public async Task<Guid> Send(Guid mottakerKontoId, string meldingsType, string payloadContent, string payloadFilename, List<KeyValuePair<string, FileStream>>? attachments, string testSessionId)
+        public async Task<Guid> Send(Guid mottakerKontoId, string meldingsType, string payloadContent, List<KeyValuePair<string, FileStream>>? attachments, string testSessionId, string payloadFilename = null)
         {
             await Initialization;
+            if (payloadFilename == null)
+            {
+                payloadFilename = FiksArkivPayloadHelper.GetPayloadFilnavn(meldingsType);
+            }
             
             var headere = new Dictionary<string, string>() { { "testSessionId", testSessionId } };
             var ttl = new TimeSpan(0, TTLMinutes, 0);

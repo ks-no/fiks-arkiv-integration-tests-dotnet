@@ -100,7 +100,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Sok
             // Send søk melding
             var sokSerialized = SerializeHelper.Serialize(sok);
             var sokMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.Sok,
-                sokSerialized, "sok.xml", null, testSessionId);
+                sokSerialized, null, testSessionId);
             
             // Vent på respons
             VentPaSvar(1, 10);
@@ -146,7 +146,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Sok
 
             // Send arkiver melding
             var nyJournalpostMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOpprett,
-                nyJournalpostSerialized, "arkivmelding.xml", null, testSessionId);
+                nyJournalpostSerialized, null, testSessionId);
 
             Console.Out.WriteLineAsync($"Arkivmelding med ny journalpost med tittel {tittel} sendt");
 
