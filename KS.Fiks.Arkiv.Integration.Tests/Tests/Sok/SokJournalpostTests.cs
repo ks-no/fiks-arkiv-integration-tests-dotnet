@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using KS.Fiks.Arkiv.Integration.Tests.FiksIO;
 using KS.Fiks.Arkiv.Integration.Tests.Helpers;
@@ -37,6 +36,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Sok
             FiksRequestService = new FiksRequestMessageService(config);
             MottakerKontoId = Guid.Parse(config["TestConfig:ArkivAccountId"]);
             validator = new SimpleXsdValidator();
+            FagsystemNavn = config["TestConfig:FagsystemName"];
         }
 
         [Test]
@@ -49,7 +49,6 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Sok
              * STEG 1:
              * Opprett arkivmeldinger med journalpost med forskjellige titler og send inn til arkiv
              */
-
 
             var tittel1 = "Tittel 1";
             var tittel2 = "Denne skal vi ikke få tilbake da den ikke inneholder søkeordet";
@@ -132,7 +131,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Sok
 
         private async Task<Arkivmelding> ArkiverJournalpost(string testSessionId, string tittel)
         {
-            var arkivmelding = MeldingGenerator.CreateArkivmeldingMedNyJournalpost(tittel: tittel);
+            var arkivmelding = MeldingGenerator.CreateArkivmeldingMedNyJournalpost(FagsystemNavn, tittel: tittel);
 
             var nyJournalpostSerialized = SerializeHelper.Serialize(arkivmelding);
             

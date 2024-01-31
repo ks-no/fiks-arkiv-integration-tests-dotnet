@@ -37,6 +37,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdatering
             Client.NewSubscription(OnMottattMelding);
             FiksRequestService = new FiksRequestMessageService(config);
             MottakerKontoId = Guid.Parse(config["TestConfig:ArkivAccountId"]);
+            FagsystemNavn = config["TestConfig:FagsystemName"];
         }
 
         [Test]
@@ -47,7 +48,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdatering
 
             var referanseEksternNoekkel = new EksternNoekkel()
             {
-                Fagsystem = "Fiks arkiv integrasjonstest for arkivmeldingoppdatering på saksmappe med eksternnoekkel",
+                Fagsystem = FagsystemNavn,
                 Noekkel = Guid.NewGuid().ToString()
             };
 
@@ -55,7 +56,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdatering
                 $"Sender arkivmelding med ny saksmappe med EksternNoekkel fagsystem {referanseEksternNoekkel.Fagsystem} og noekkel {referanseEksternNoekkel.Noekkel}");
             
             // STEG 1: Opprett arkivmelding med en saksmappe og send inn
-            var arkivmelding = MeldingGenerator.CreateArkivmeldingMedSaksmappe(referanseEksternNoekkel);
+            var arkivmelding = MeldingGenerator.CreateArkivmeldingMedSaksmappe(referanseEksternNoekkel, FagsystemNavn);
 
             var nySaksmappeAsSerialized = SerializeHelper.Serialize(arkivmelding);
             var validator = new SimpleXsdValidator();
@@ -116,7 +117,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdatering
             Assert.IsNotNull(arkivmeldingOppdaterKvittering);
             
             // STEG 3: Henting av saksmappe
-            var mappeHent = MeldingGenerator.CreateMappeHent(referanseEksternNoekkel);
+            var mappeHent = MeldingGenerator.CreateMappeHent(referanseEksternNoekkel, FagsystemNavn);
             
             var mappeHentSerialized = SerializeHelper.Serialize(mappeHent);
             

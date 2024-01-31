@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using KS.Fiks.Arkiv.Integration.Tests.FiksIO;
 using KS.Fiks.Arkiv.Integration.Tests.Helpers;
@@ -35,6 +34,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
             Client.NewSubscription(OnMottattMelding);
             FiksRequestService = new FiksRequestMessageService(config);
             MottakerKontoId = Guid.Parse(config["TestConfig:ArkivAccountId"]);
+            FagsystemNavn = config["TestConfig:FagsystemName"];
         }
         
         [Test]
@@ -44,7 +44,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
             var testSessionId = Guid.NewGuid().ToString();
             
             // STEG 1: Opprett arkivmelding og send inn
-            var arkivmelding = MeldingGenerator.CreateArkivmeldingMedNyJournalpost();
+            var arkivmelding = MeldingGenerator.CreateArkivmeldingMedNyJournalpost(FagsystemNavn);
             
             var nyJournalpostSerialized = SerializeHelper.Serialize(arkivmelding);
             var validator = new SimpleXsdValidator();
@@ -141,7 +141,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
              * STEG 1:
              * Opprett arkivmelding med en journalpost og send inn
              */
-            var arkivmelding = MeldingGenerator.CreateArkivmeldingMedNyJournalpost(referanseEksternNoekkel);
+            var arkivmelding = MeldingGenerator.CreateArkivmeldingMedNyJournalpost(referanseEksternNoekkel, FagsystemNavn);
 
             var nyJournalpostSerialized = SerializeHelper.Serialize(arkivmelding);
             var validator = new SimpleXsdValidator();

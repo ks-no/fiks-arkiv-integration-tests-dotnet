@@ -7,13 +7,11 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
 {
     public class MeldingGenerator
     {
-        private const string FagsystemDefault = "Fagsystem integrasjonstester";
-        
-        public static MappeHent CreateMappeHent(EksternNoekkel referanseEksternNoekkel)
+        public static MappeHent CreateMappeHent(EksternNoekkel referanseEksternNoekkel, string fagsystem)
         {
             return new MappeHent()
             {
-                System = FagsystemDefault,
+                System = fagsystem,
                 ReferanseTilMappe = new ReferanseTilMappe()
                 {
                     ReferanseEksternNoekkel = new EksternNoekkel() {
@@ -24,11 +22,11 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
             };
         }
 
-        public static Arkivmelding CreateArkivmeldingMedNyJournalpost(string tittel = null)
+        public static Arkivmelding CreateArkivmeldingMedNyJournalpost(string fagsystem, string tittel = null)
          {
              var arkivmelding = new Arkivmelding()
              {
-                 System = FagsystemDefault,
+                 System = fagsystem,
                  AntallFiler = 1,
                  Registrering = JournalpostBuilder.Init().WithArkivdel(JournalpostBuilder.ArkivdelDefault).WithTittel(tittel).Build(),
              };
@@ -36,22 +34,22 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
              return arkivmelding;
          }
         
-        public static Arkivmelding CreateArkivmelding()
+        public static Arkivmelding CreateArkivmelding(string fagsystem)
         {
             var arkivmelding = new Arkivmelding()
             {
-                System = FagsystemDefault,
+                System = fagsystem,
                 AntallFiler = 1,
             };
              
             return arkivmelding;
         }
 
-        public static Arkivmelding CreateArkivmeldingMedSaksmappe(EksternNoekkel referanseEksternNoekkelNoekkel)
+        public static Arkivmelding CreateArkivmeldingMedSaksmappe(EksternNoekkel referanseEksternNoekkelNoekkel, string fagsystem)
         {
             var arkivmelding = new Arkivmelding()
             {
-                System = FagsystemDefault,
+                System = fagsystem,
                 AntallFiler = 1,
                 Mappe = MappeBuilder.Init().BuildSaksmappe(referanseEksternNoekkelNoekkel)
             };
@@ -95,7 +93,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
             };
         }
 
-        public static Arkivmelding CreateArkivmeldingMedNyJournalpost(EksternNoekkel referanseEksternNoekkelNoekkel)
+        public static Arkivmelding CreateArkivmeldingMedNyJournalpost(EksternNoekkel referanseEksternNoekkelNoekkel, string fagsystem)
         {
             var journalpost = JournalpostBuilder
                 .Init()
@@ -109,7 +107,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
             
             var arkivmelding = new Arkivmelding()
             {
-                System = FagsystemDefault,
+                System = fagsystem,
                 AntallFiler = 1,
                 Registrering = journalpost
             };

@@ -35,6 +35,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdatering
             Client.NewSubscription(OnMottattMelding);
             FiksRequestService = new FiksRequestMessageService(config);
             MottakerKontoId = Guid.Parse(config["TestConfig:ArkivAccountId"]);
+            FagsystemNavn = config["TestConfig:FagsystemName"];
         }
         
         [Test]
@@ -45,7 +46,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdatering
 
             var referanseEksternNoekkel = new EksternNoekkel()
             {
-                Fagsystem = "Integrasjonstest for arkivmeldingoppdatering med eksternnoekkel",
+                Fagsystem = FagsystemNavn,
                 Noekkel = Guid.NewGuid().ToString()
             };
 
@@ -56,7 +57,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdatering
              * STEG 1:
              * Opprett arkivmelding og send inn
              */
-            var arkivmelding = MeldingGenerator.CreateArkivmeldingMedNyJournalpost(referanseEksternNoekkel);
+            var arkivmelding = MeldingGenerator.CreateArkivmeldingMedNyJournalpost(referanseEksternNoekkel, FagsystemNavn);
 
             var nyJournalpostSerialized = SerializeHelper.Serialize(arkivmelding);
             

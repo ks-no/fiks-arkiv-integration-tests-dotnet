@@ -29,6 +29,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
         protected IFiksIOClient? Client;
         protected FiksRequestMessageService? FiksRequestService;
         protected Guid MottakerKontoId;
+        protected string FagsystemNavn;
         protected SimpleXsdValidator validator;
 
         protected async Task Init()
@@ -42,6 +43,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
             Client.NewSubscription(OnMottattMelding);
             FiksRequestService = new FiksRequestMessageService(config);
             MottakerKontoId = Guid.Parse(config["TestConfig:ArkivAccountId"]);
+            FagsystemNavn = config["TestConfig:FagsystemName"];
         }
         
         protected static void VentPaSvar(int antallForventet, int antallVenter)
@@ -146,7 +148,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
 
         protected async Task<Saksmappe?> HentSaksmappe(string testSessionId, EksternNoekkel referanseEksternNoekkel)
         {
-            var mappeHent = MeldingGenerator.CreateMappeHent(referanseEksternNoekkel);
+            var mappeHent = MeldingGenerator.CreateMappeHent(referanseEksternNoekkel, FagsystemNavn);
             
             var mappeHentSerialized = SerializeHelper.Serialize(mappeHent);
             
@@ -191,7 +193,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
         {
             Console.Out.WriteLine($"Sender arkivmelding med ny saksmappe med EksternNoekkel fagsystem {referanseEksternNoekkel.Fagsystem} og noekkel {referanseEksternNoekkel.Noekkel}");
 
-            var arkivmeldingNySaksmappe = MeldingGenerator.CreateArkivmeldingMedSaksmappe(referanseEksternNoekkel);
+            var arkivmeldingNySaksmappe = MeldingGenerator.CreateArkivmeldingMedSaksmappe(referanseEksternNoekkel, FagsystemNavn);
 
             var nySaksmappeSerialized = SerializeHelper.Serialize(arkivmeldingNySaksmappe);
 
