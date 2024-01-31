@@ -17,9 +17,11 @@ I prosjektet ligger det en appsettings.json. Kopier denne og gi den nye filen na
 Den nye filen skal man da putte inn sine konfigurasjonsdetaljer for Fiks-Protokoller/Fiks-IO.  
 
 ```json
+
 {
   "TestConfig": {
-    "ArkivAccountId" : "RECEIVING_ACCOUNT_GUID_IN_FIKSIO_HERE"
+    "ArkivAccountId" : "RECEIVING_ACCOUNT_GUID_IN_FIKSIO_HERE",
+    "FagsystemName" : ""
   },
   "FiksIOConfig": {
     "ApiHost": "api.fiks.test.ks.no",
@@ -37,7 +39,9 @@ Den nye filen skal man da putte inn sine konfigurasjonsdetaljer for Fiks-Protoko
     "MaskinPortenCompanyCertificatePath": "PATH\\TO\\MASKINPORTENCERT.p12",
     "MaskinPortenCompanyCertificatePassword": "PASSWORD_FOR_MASKINPORTENCERT",
     "MaskinPortenIssuer": "dummyIssuer",
-    "MaskinPortenTokenUrl": "https://test.maskinporten.no/token"
+    "MaskinPortenTokenUrl": "https://oidc-ver2.difi.no/idporten-oidc-provider/token",
+    "AsiceSigningPrivateKey": "PATH\\TO\\SIGNING_PRIVATEKEY.PEM",
+    "AsiceSigningPublicKey": "PATH\\TO\\SIGNING_PUBLICKEY.PEM"
   }
 }
 ```
