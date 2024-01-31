@@ -49,6 +49,10 @@ Den nye filen skal man da putte inn sine konfigurasjonsdetaljer for Fiks-Protoko
 #### Forklaring
 `TestConfig:ArkivAccountId`: Fiks Protokoll kontoen for arkivet som skal motta meldingene.
 
+For å forenkle test-oppsett kan man la være å oppgi `AsiceSigningPublicKey` og
+`AsiceSigningPrivateKey` hvor den da vil forsøke å benytte sertifikatet oppgitt
+for MaskinPorten. Merk at dette ikke er anbefalt i produksjon.
+
 
 ### Test oppsett
 Hver test sender inn en unik id som header på Fiks-IO meldingen med navnet **testSessionId**. Dette er kun for at vår arkiv-simulator skal kunne se hvilke meldinger som hører sammen når man kjører disse testene mot simulatoren. Hvis man kjører disse testene mot en arkiv implementasjon kan arkivet ignorere denne id'en. Den er kun for intern validering av integrasjonstestene.
