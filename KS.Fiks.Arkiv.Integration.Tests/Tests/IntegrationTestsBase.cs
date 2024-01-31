@@ -160,7 +160,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
             MottatMeldingArgsList.Clear();
             
             // Send hent melding
-            var mappeHentMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.MappeHent, mappeHentSerialized, "arkivmelding.xml", null, testSessionId);
+            var mappeHentMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.MappeHent, mappeHentSerialized, null, testSessionId);
 
             // Vent på 1 respons meldinger 
             VentPaSvar(1, 10);
@@ -203,7 +203,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
 
             // Send melding
             var nySaksmappeMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOpprett,
-                nySaksmappeSerialized, "arkivmelding.xml", null, testSessionId);
+                nySaksmappeSerialized, null, testSessionId);
 
             // Vent på 2 første response meldinger (mottatt og kvittering)
             VentPaSvar(2, 10);
