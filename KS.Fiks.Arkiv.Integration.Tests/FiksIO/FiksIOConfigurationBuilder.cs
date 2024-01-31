@@ -19,6 +19,10 @@ namespace KS.Fiks.Arkiv.Integration.Tests.FiksIO
                 kontoId: Guid.Parse(config["FiksIOConfig:FiksIoAccountId"]),
                 privatNokkel: File.ReadAllText(config["FiksIOConfig:FiksIoPrivateKey"])
             );
+            var certificate = GetCertificate(
+                config["FiksIOConfig:MaskinPortenCompanyCertificateThumbprint"],
+                config["FiksIOConfig:MaskinPortenCompanyCertificatePath"],
+                config["FiksIOConfig:MaskinPortenCompanyCertificatePassword"]);
 
             // Id and password for integration associated to the Fiks IO account.
             var integrationConfiguration = new IntegrasjonConfiguration(
@@ -32,7 +36,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.FiksIO
                 tokenEndpoint: config["FiksIOConfig:MaskinPortenTokenUrl"],
                 issuer: config["FiksIOConfig:MaskinPortenIssuer"],
                 numberOfSecondsLeftBeforeExpire: 10, // The token will be refreshed 10 seconds before it expires
-                certificate: GetCertificate(config["FiksIOConfig:MaskinPortenCompanyCertificateThumbprint"], config["FiksIOConfig:MaskinPortenCompanyCertificatePath"], config["FiksIOConfig:MaskinPortenCompanyCertificatePassword"]));
+                certificate);
 
             // Optional: Use custom api host (i.e. for connecting to test api)
             var apiConfiguration = new ApiConfiguration(
@@ -56,11 +60,23 @@ namespace KS.Fiks.Arkiv.Integration.Tests.FiksIO
                 port: int.Parse(config["FiksIOConfig:AmqpPort"]),
                 sslOption1,
                 "Fiks-Arkiv Integration-Tests");
-            
+
             // Asice signing
-            var asiceSigningConfiguration = new AsiceSigningConfiguration(
-                config["FiksIOConfig:AsiceSigningPublicKey"], 
-                config["FiksIOConfig:AsiceSigningPrivateKey"]);
+            var acicePubKey = config["FiksIOConfig:AsiceSigningPublicKey"];
+            var acicePrivKey = config["FiksIOConfig:AsiceSigningPrivateKey"];
+            AsiceSigningConfiguration asiceSigningConfiguration;
+            if (!string.IsNullOrEmpty(acicePubKey) && !string.IsNullOrEmpty(acicePrivKey))
+            {
+                asiceSigningConfiguration = new AsiceSigningConfiguration(acicePubKey, acicePrivKey);
+            }
+            else if (certificate.HasPrivateKey)
+            {
+                asiceSigningConfiguration = new AsiceSigningConfiguration(certificate);
+            }
+            else
+            {
+                throw new InvalidOperationException("AciceSigning-configuration was not provided. Fallback for testing by using the default certificate failed.");
+            }
 
             // Combine all configurations
             return new FiksIOConfiguration(
