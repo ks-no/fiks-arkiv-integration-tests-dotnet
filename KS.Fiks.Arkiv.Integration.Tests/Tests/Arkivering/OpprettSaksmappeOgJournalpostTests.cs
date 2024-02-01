@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.Threading.Tasks;
 using KS.Fiks.Arkiv.Integration.Tests.Helpers;
 using KS.Fiks.Arkiv.Integration.Tests.Library;
@@ -20,7 +19,6 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
      */
     public class OpprettSaksmappeOgJournalpostTests : IntegrationTestsBase
     {
-        private const string EksternNoekkelFagsystem = "Validatortester saksmappe";
         private const string SaksmappeEksternNoekkelNoekkel = "4950bac7-79f2-4ec4-90bf-0c41e8d9ce78";
         private EksternNoekkel _saksmappeEksternNoekkel;
 
@@ -33,7 +31,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
             
             _saksmappeEksternNoekkel = new EksternNoekkel()
             {
-                Fagsystem = EksternNoekkelFagsystem,
+                Fagsystem = FagsystemNavn,
                 Noekkel = SaksmappeEksternNoekkelNoekkel
             };
         }
@@ -72,7 +70,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
             
             var referanseEksternNoekkelNyJournalpost= new EksternNoekkel()
             {
-                Fagsystem = EksternNoekkelFagsystem,
+                Fagsystem = FagsystemNavn,
                 Noekkel = Guid.NewGuid().ToString()
             };
 
@@ -83,7 +81,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
                 .WithReferanseTilForelderMappe(referanseTilSaksmappe)
                 .Build();
             journalpost.ReferanseEksternNoekkel = referanseEksternNoekkelNyJournalpost;
-            var arkivmelding = MeldingGenerator.CreateArkivmelding();
+            var arkivmelding = MeldingGenerator.CreateArkivmelding(FagsystemNavn);
             arkivmelding.Registrering = journalpost;
             arkivmelding.Mappe = mappe;
 
@@ -192,7 +190,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
             
             var referanseEksternNoekkelNyJournalpost= new EksternNoekkel()
             {
-                Fagsystem = EksternNoekkelFagsystem,
+                Fagsystem = FagsystemNavn,
                 Noekkel = Guid.NewGuid().ToString()
             };
 
@@ -207,7 +205,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
                 .WithReferanseTilForelderMappe(referanseForelderMappe)
                 .Build();
             journalpost.ReferanseEksternNoekkel = referanseEksternNoekkelNyJournalpost;
-            var arkivmelding = MeldingGenerator.CreateArkivmelding();
+            var arkivmelding = MeldingGenerator.CreateArkivmelding(FagsystemNavn);
             arkivmelding.Registrering = journalpost;
 
             var nyJournalpostSerialized = SerializeHelper.Serialize(arkivmelding);
@@ -314,7 +312,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
             
             var referanseEksternNoekkelNyJournalpost= new EksternNoekkel()
             {
-                Fagsystem = EksternNoekkelFagsystem,
+                Fagsystem = FagsystemNavn,
                 Noekkel = Guid.NewGuid().ToString()
             };
 
@@ -328,7 +326,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
                 .WithReferanseTilForelderMappe(referanseForelderMappe)
                 .Build();
             journalpost.ReferanseEksternNoekkel = referanseEksternNoekkelNyJournalpost;
-            var arkivmelding = MeldingGenerator.CreateArkivmelding();
+            var arkivmelding = MeldingGenerator.CreateArkivmelding(FagsystemNavn);
             arkivmelding.Registrering = journalpost;
 
             var nyJournalpostSerialized = SerializeHelper.Serialize(arkivmelding);
@@ -406,7 +404,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
         private async Task<SystemID> OpprettEllerHentSaksmappe(string testSessionId)
         {
             Console.Out.WriteLine(
-                $"Forsøker hente saksmappe med referanseEksternNoekkel Fagsystem {EksternNoekkelFagsystem} og Noekkel {SaksmappeEksternNoekkelNoekkel}");
+                $"Forsøker hente saksmappe med referanseEksternNoekkel Fagsystem {FagsystemNavn} og Noekkel {SaksmappeEksternNoekkelNoekkel}");
 
             var saksmappe = await HentSaksmappe(testSessionId, _saksmappeEksternNoekkel);
 
@@ -415,7 +413,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
             if (saksmappe == null)
             {
                 Console.Out.WriteLine(
-                    $"Fant ikke noen saksmappe med referanseEksternNoekkel Fagsystem {EksternNoekkelFagsystem} og Noekkel {SaksmappeEksternNoekkelNoekkel}. Oppretter ny i stedet.");
+                    $"Fant ikke noen saksmappe med referanseEksternNoekkel Fagsystem {FagsystemNavn} og Noekkel {SaksmappeEksternNoekkelNoekkel}. Oppretter ny i stedet.");
                 var arkivmeldingKvittering = await OpprettSaksmappe(testSessionId, _saksmappeEksternNoekkel);
                 saksmappeSystemId = new SystemID()
                 {

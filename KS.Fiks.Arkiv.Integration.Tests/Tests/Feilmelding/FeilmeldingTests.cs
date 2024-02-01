@@ -34,6 +34,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Feilmelding
             Client.NewSubscription(OnMottattMelding);
             FiksRequestService = new FiksRequestMessageService(config);
             MottakerKontoId = Guid.Parse(config["TestConfig:ArkivAccountId"]);
+            FagsystemNavn = config["TestConfig:FagsystemName"];
         }
 
         [Test] 
@@ -45,7 +46,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Feilmelding
             
             var referanseEksternNoekkelIkkeGyldig = new EksternNoekkel()
             {
-                Fagsystem = "Fiks arkiv integrasjonstest hent journalpost med ikke gyldig referanseEksternNoekkel",
+                Fagsystem = FagsystemNavn,
                 Noekkel = Guid.Empty.ToString() // Bør ikke kunne eksistere i Arkivet
             };
             

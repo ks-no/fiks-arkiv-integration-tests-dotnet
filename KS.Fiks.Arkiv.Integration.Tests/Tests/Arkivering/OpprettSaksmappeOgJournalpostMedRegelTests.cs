@@ -20,7 +20,6 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
      */
     public class OpprettSaksmappeOgJournalpostMedRegelTests : IntegrationTestsBase
     {
-        private const string EksternNoekkelFagsystem = "Validatortester saksmappe";
         private const string SaksmappeEksternNoekkelNoekkel = "4950bac7-79f2-4ec4-90bf-0c41e8d9ce78";
         private const string ArkivmeldingRegel = "FiksArkiv Integrasjonstest regel";
         private EksternNoekkel _saksmappeEksternNoekkel;
@@ -34,7 +33,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
             
             _saksmappeEksternNoekkel = new EksternNoekkel()
             {
-                Fagsystem = EksternNoekkelFagsystem,
+                Fagsystem = FagsystemNavn,
                 Noekkel = SaksmappeEksternNoekkelNoekkel
             };
         }
@@ -74,7 +73,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
             
             var referanseEksternNoekkelNyJournalpost= new EksternNoekkel()
             {
-                Fagsystem = EksternNoekkelFagsystem,
+                Fagsystem = FagsystemNavn,
                 Noekkel = Guid.NewGuid().ToString()
             };
 
@@ -87,7 +86,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
             
             journalpost.ReferanseEksternNoekkel = referanseEksternNoekkelNyJournalpost;
             
-            var arkivmelding = MeldingGenerator.CreateArkivmelding();
+            var arkivmelding = MeldingGenerator.CreateArkivmelding(FagsystemNavn);
             arkivmelding.Registrering = journalpost;
             arkivmelding.Mappe = mappe;
             arkivmelding.Regel = ArkivmeldingRegel;
