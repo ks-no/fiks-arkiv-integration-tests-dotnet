@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,30 +19,50 @@ using KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Validation;
 using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
+using Klassifikasjon = KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding.Klassifikasjon;
 
 namespace KS.Fiks.Arkiv.Integration.Tests.Tests
 {
     public class IntegrationTestsBase
     {
         protected static List<MottattMeldingArgs>? MottatMeldingArgsList;
+        protected static IConfigurationRoot config;
         protected IFiksIOClient? Client;
         protected FiksRequestMessageService? FiksRequestService;
         protected Guid MottakerKontoId;
-        protected string FagsystemNavn;
+        protected static string FagsystemNavn;
+        protected static string SaksbehandlerNavn;
+        protected static string KlassifikasjonKlasseID;
+        protected static string KlassifikasjonssystemID;
         protected SimpleXsdValidator validator;
 
         protected async Task Init()
         {
             //TODO En annen lokal lagring som kjørte for disse testene hadde vært stilig i stedet for en liste.
             MottatMeldingArgsList = new List<MottattMeldingArgs>();
-            var config = new ConfigurationBuilder()
+            config = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.Local.json")
                 .Build();
             Client = await FiksIOClient.CreateAsync(FiksIOConfigurationBuilder.CreateFiksIOConfiguration(config));
             Client.NewSubscription(OnMottattMelding);
             FiksRequestService = new FiksRequestMessageService(config);
-            MottakerKontoId = Guid.Parse(config["TestConfig:ArkivAccountId"]);
-            FagsystemNavn = config["TestConfig:FagsystemName"];
+            MottakerKontoId = Guid.Parse(GetTestConfig("ArkivAccountId"));
+            FagsystemNavn = GetTestConfig("FagsystemName");
+            SaksbehandlerNavn = GetTestConfig("SaksbehandlerName");
+            KlassifikasjonKlasseID = GetRequiredTestConfig("KlassifikasjonKlasseID") ;
+            KlassifikasjonssystemID = GetRequiredTestConfig("KlassifikasjonssystemID") ;
+        }
+        
+        private string GetTestConfig(string key) => config[$"TestConfig:{key}"] ;
+
+        private string GetRequiredTestConfig(string key)
+        {
+            var value = GetTestConfig(key);
+            if (string.IsNullOrEmpty(value))
+            {
+                throw new ArgumentException($"The config-key '{key}' is required. See you config-file ({string.Join(", ",config.Providers.OfType<FileConfigurationProvider>().Select(p => p.Source.Path) )})");
+            }
+            return value;
         }
         
         protected static void VentPaSvar(int antallForventet, int antallVenter)
@@ -78,9 +97,9 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
                         throw new UnexpectedAnswerException($"Uforventet feilmelding mottatt {mottatMeldingArgs.Melding.MeldingType}. Feilmelding: {feilmelding.Feilmelding}. Forventet meldingstypen {forventetMeldingstype}");
                     }
 
-                    var feilmeldingerString = string.Join("\n",
+                    var feilmeldingerString = string.Join(Environment.NewLine,
                         feilmeldinger.Select(m => HentUtFeilMelding(m).Feilmelding));
-                    throw new UnexpectedAnswerException($"Uforventet melding mottatt av typen {mottatMeldingArgs.Melding.MeldingType}. Forventet meldingstypen {forventetMeldingstype}. Feilmeldinger: {feilmeldingerString}");  
+                    throw new UnexpectedAnswerException($"Uforventet melding mottatt av typen {mottatMeldingArgs.Melding.MeldingType}. Forventet meldingstypen {forventetMeldingstype}.{Environment.NewLine} Feilmeldinger: {feilmeldinger.Count}{Environment.NewLine}{Environment.NewLine}{Environment.NewLine} {feilmeldingerString}");  
                 }
             }
             Console.Out.WriteLineAsync($"Forventet meldingstype {forventetMeldingstype} mottatt for meldingsid  {sendtMeldingsid}!");
@@ -243,5 +262,16 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
                 SerializeHelper.DeserializeXml<ArkivmeldingKvittering>(arkivmeldingKvitteringPayload.PayloadAsString);
             return arkivmeldingKvittering;
         }
+        
+        protected static Klassifikasjon GenererKlassifikasjon() => new ()
+            {
+                KlasseID = KlassifikasjonKlasseID,
+                KlassifikasjonssystemID = KlassifikasjonssystemID
+            };
+            protected static EksternNoekkel GenererEksternNoekkel( string? noekkel = null) => new ()
+            {
+                Fagsystem = FagsystemNavn,
+                Noekkel = noekkel ?? Guid.NewGuid().ToString()
+            };
     }
 }

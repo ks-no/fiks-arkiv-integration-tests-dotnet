@@ -28,12 +28,8 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
             await Init();
             
             validator = new SimpleXsdValidator();
-            
-            _saksmappeEksternNoekkel = new EksternNoekkel()
-            {
-                Fagsystem = FagsystemNavn,
-                Noekkel = SaksmappeEksternNoekkelNoekkel
-            };
+
+            _saksmappeEksternNoekkel = GenererEksternNoekkel(SaksmappeEksternNoekkelNoekkel);
         }
         
         /*
@@ -54,12 +50,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
              * Med klassifikasjon
              */
 
-            var klassifikasjon = new Klassifikasjon()
-            {
-                KlasseID = "En klasseID",
-            };
-            
-            var mappe = MappeBuilder.Init().WithKlassifikasjon(klassifikasjon).BuildSaksmappe(_saksmappeEksternNoekkel);
+            var mappe = MappeBuilder.Init().WithKlassifikasjon(GenererKlassifikasjon()).BuildSaksmappe(_saksmappeEksternNoekkel);
             var referanseTilSaksmappe = new ReferanseTilMappe()
             {
                 ReferanseEksternNoekkel = _saksmappeEksternNoekkel
@@ -67,19 +58,18 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
             
             MottattMeldingArgs? arkivmeldingKvitteringMelding;
             PayloadFile arkivmeldingKvitteringPayload;
-            
-            var referanseEksternNoekkelNyJournalpost= new EksternNoekkel()
-            {
-                Fagsystem = FagsystemNavn,
-                Noekkel = Guid.NewGuid().ToString()
-            };
+
+            var referanseEksternNoekkelNyJournalpost = GenererEksternNoekkel();
 
             // Legg til journalpost i arkivmelding
             var journalpost = JournalpostBuilder
                 .Init()
                 .WithTittel("Test tittel")
                 .WithReferanseTilForelderMappe(referanseTilSaksmappe)
-                .Build();
+                .Build(
+                    fagsystem: FagsystemNavn,
+                    saksbehandlerNavn: SaksbehandlerNavn
+                    );
             journalpost.ReferanseEksternNoekkel = referanseEksternNoekkelNyJournalpost;
             var arkivmelding = MeldingGenerator.CreateArkivmelding(FagsystemNavn);
             arkivmelding.Registrering = journalpost;
@@ -187,12 +177,8 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
             
             MottattMeldingArgs? arkivmeldingKvitteringMelding;
             PayloadFile arkivmeldingKvitteringPayload;
-            
-            var referanseEksternNoekkelNyJournalpost= new EksternNoekkel()
-            {
-                Fagsystem = FagsystemNavn,
-                Noekkel = Guid.NewGuid().ToString()
-            };
+
+            var referanseEksternNoekkelNyJournalpost = GenererEksternNoekkel();
 
             var referanseForelderMappe = new ReferanseTilMappe()
             {
@@ -203,7 +189,10 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
                 .Init()
                 .WithTittel("Test")
                 .WithReferanseTilForelderMappe(referanseForelderMappe)
-                .Build();
+                .Build(
+                    fagsystem: FagsystemNavn,
+                    saksbehandlerNavn: SaksbehandlerNavn
+                    );
             journalpost.ReferanseEksternNoekkel = referanseEksternNoekkelNyJournalpost;
             var arkivmelding = MeldingGenerator.CreateArkivmelding(FagsystemNavn);
             arkivmelding.Registrering = journalpost;
@@ -309,12 +298,8 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
             
             MottattMeldingArgs? arkivmeldingKvitteringMelding;
             PayloadFile arkivmeldingKvitteringPayload;
-            
-            var referanseEksternNoekkelNyJournalpost= new EksternNoekkel()
-            {
-                Fagsystem = FagsystemNavn,
-                Noekkel = Guid.NewGuid().ToString()
-            };
+
+            var referanseEksternNoekkelNyJournalpost = GenererEksternNoekkel();
 
             var referanseForelderMappe = new ReferanseTilMappe()
             {
@@ -324,7 +309,10 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
             var journalpost = JournalpostBuilder.Init()
                 .WithTittel("Test tittel")
                 .WithReferanseTilForelderMappe(referanseForelderMappe)
-                .Build();
+                .Build(
+                    fagsystem: FagsystemNavn,
+                    saksbehandlerNavn: SaksbehandlerNavn
+                    );
             journalpost.ReferanseEksternNoekkel = referanseEksternNoekkelNyJournalpost;
             var arkivmelding = MeldingGenerator.CreateArkivmelding(FagsystemNavn);
             arkivmelding.Registrering = journalpost;

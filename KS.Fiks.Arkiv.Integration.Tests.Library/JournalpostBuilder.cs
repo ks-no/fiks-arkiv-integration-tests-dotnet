@@ -45,9 +45,15 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
             return this;
         }
 
-        public Journalpost Build()
+        public Journalpost Build(
+            string? saksbehandlerNavn = null,
+            string? fagsystem = null
+            )
         {
-            var jp = CreateJournalpost();
+            var jp = CreateJournalpost(
+                saksbehandlerNavn: saksbehandlerNavn,
+                fagsystem: fagsystem
+                );
             jp.Dokumentbeskrivelse.Add(_dokumentbeskrivelse);
             if (_arkivdel != null)
             {
@@ -97,7 +103,10 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
             return dokumentbeskrivelse;
         }
 
-        private Journalpost CreateJournalpost()
+        private Journalpost CreateJournalpost(
+            string? saksbehandlerNavn = null,
+            string? fagsystem = null
+            )
         {
             return new Journalpost()
             {
@@ -105,7 +114,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
                 ArkivertAv = "En brukerid",
                 ReferanseEksternNoekkel = new EksternNoekkel()
                 {
-                    Fagsystem = FagsystemDefault,
+                    Fagsystem = fagsystem ?? FagsystemDefault,
                     Noekkel = Guid.NewGuid().ToString()
                 },
                 Tittel = "Internt notat",
@@ -123,7 +132,8 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
                             Navn = "Oppmålingsetaten",
                         },
                         Saksbehandler = new Saksbehandler() { 
-                            Navn = "Ingrid Mottaker"
+                            
+                            Navn = saksbehandlerNavn ?? "Ingrid Mottaker"
                         }
                     }
                 },

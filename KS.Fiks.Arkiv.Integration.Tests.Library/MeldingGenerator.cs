@@ -22,13 +22,20 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
             };
         }
 
-        public static Arkivmelding CreateArkivmeldingMedNyJournalpost(string fagsystem, string tittel = null)
+        public static Arkivmelding CreateArkivmeldingMedNyJournalpost(
+            string fagsystem, 
+            string? tittel = null,
+            string? saksbehandlerNavn = null
+            )
          {
              var arkivmelding = new Arkivmelding()
              {
                  System = fagsystem,
                  AntallFiler = 1,
-                 Registrering = JournalpostBuilder.Init().WithArkivdel(JournalpostBuilder.ArkivdelDefault).WithTittel(tittel).Build(),
+                 Registrering = JournalpostBuilder.Init().WithArkivdel(JournalpostBuilder.ArkivdelDefault).WithTittel(tittel).Build(
+                     fagsystem: fagsystem,
+                     saksbehandlerNavn: saksbehandlerNavn
+                     ),
              };
              
              return arkivmelding;

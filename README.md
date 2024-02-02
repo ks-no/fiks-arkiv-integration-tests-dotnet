@@ -21,7 +21,10 @@ Den nye filen skal man da putte inn sine konfigurasjonsdetaljer for Fiks-Protoko
 {
   "TestConfig": {
     "ArkivAccountId" : "RECEIVING_ACCOUNT_GUID_IN_FIKSIO_HERE",
-    "FagsystemName" : ""
+    "FagsystemName" : "Standard vagsystem-navn i ditt system",
+    "SaksbehandlerName": "Standard saksbehandler-navn i ditt system",
+    "KlassifikasjonKlasseID": "001",
+    "KlassifikasjonssystemID": "EMNE"
   },
   "FiksIOConfig": {
     "ApiHost": "api.fiks.test.ks.no",
