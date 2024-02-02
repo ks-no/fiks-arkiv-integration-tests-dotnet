@@ -66,35 +66,49 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
         protected static void SjekkForventetMelding(IEnumerable<MottattMeldingArgs>? mottattMeldingArgsList, Guid sendtMeldingsid, string forventetMeldingstype)
         {
             var found = mottattMeldingArgsList.Where(mottattMeldingArgs => mottattMeldingArgs.Melding.SvarPaMelding == sendtMeldingsid).Any(mottatMeldingArgs => mottatMeldingArgs.Melding.MeldingType == forventetMeldingstype);
+            var feilmeldinger =
+                mottattMeldingArgsList.Where(m => FiksArkivMeldingtype.IsFeilmelding(m.Melding.MeldingType)).ToList();
             if (!found)
             {
                 foreach (var mottatMeldingArgs in mottattMeldingArgsList)
                 {
                     if (FiksArkivMeldingtype.IsFeilmelding(mottatMeldingArgs.Melding.MeldingType))
                     {
-                        var melding = MeldingHelper.GetDecryptedMessagePayload(mottatMeldingArgs).Result;
-                        var xml = melding.PayloadAsString;
-                        FeilmeldingBase feilmelding = null;
-                        switch (mottatMeldingArgs.Melding.MeldingType)
-                        {
-                            case FiksArkivMeldingtype.Ugyldigforespørsel:
-                                feilmelding = SerializeHelper.DeserializeXml<Ugyldigforespoersel>(xml);
-                                throw new UnexpectedAnswerException($"Uforventet feilmelding mottatt {mottatMeldingArgs.Melding.MeldingType}. Feilmelding: {feilmelding.Feilmelding}. Forventet meldingstypen {forventetMeldingstype}");
-                            case FiksArkivMeldingtype.Serverfeil:
-                                feilmelding = SerializeHelper.DeserializeXml<Serverfeil>(xml);
-                                throw new UnexpectedAnswerException($"Uforventet feilmelding mottatt {mottatMeldingArgs.Melding.MeldingType}. Feilmelding: {feilmelding.Feilmelding}. Forventet meldingstypen {forventetMeldingstype}");
-                            case FiksArkivMeldingtype.Ikkefunnet:
-                                feilmelding = SerializeHelper.DeserializeXml<Ikkefunnet>(xml);
-                                throw new UnexpectedAnswerException($"Uforventet feilmelding mottatt {mottatMeldingArgs.Melding.MeldingType}. Feilmelding: {feilmelding.Feilmelding}. Forventet meldingstypen {forventetMeldingstype}");
-                            default:
-                                throw new UnexpectedAnswerException($"Uforventet feilmelding mottatt av typen {mottatMeldingArgs.Melding.MeldingType}. Klarte ikke parse den heller. Er det en ny feilmeldingstype?. Forventet meldingstypen {forventetMeldingstype}");
-                        }
+                        var feilmelding = HentUtFeilMelding(mottatMeldingArgs);
+                        throw new UnexpectedAnswerException($"Uforventet feilmelding mottatt {mottatMeldingArgs.Melding.MeldingType}. Feilmelding: {feilmelding.Feilmelding}. Forventet meldingstypen {forventetMeldingstype}");
                     }
-                    throw new UnexpectedAnswerException($"Uforventet melding mottatt av typen {mottatMeldingArgs.Melding.MeldingType}. Forventet meldingstypen {forventetMeldingstype}");  
+
+                    var feilmeldingerString = string.Join("\n",
+                        feilmeldinger.Select(m => HentUtFeilMelding(m).Feilmelding));
+                    throw new UnexpectedAnswerException($"Uforventet melding mottatt av typen {mottatMeldingArgs.Melding.MeldingType}. Forventet meldingstypen {forventetMeldingstype}. Feilmeldinger: {feilmeldingerString}");  
                 }
             }
             Console.Out.WriteLineAsync($"Forventet meldingstype {forventetMeldingstype} mottatt for meldingsid  {sendtMeldingsid}!");
         }
+
+        protected static FeilmeldingBase HentUtFeilMelding(MottattMeldingArgs mottatMeldingArgs)
+        {
+            var melding = MeldingHelper.GetDecryptedMessagePayload(mottatMeldingArgs).Result;
+            var xml = melding.PayloadAsString;
+            FeilmeldingBase feilmelding;
+            switch (mottatMeldingArgs.Melding.MeldingType)
+            {
+                case FiksArkivMeldingtype.Ugyldigforespørsel:
+                    feilmelding = SerializeHelper.DeserializeXml<Ugyldigforespoersel>(xml);
+                    break;
+                case FiksArkivMeldingtype.Serverfeil:
+                    feilmelding = SerializeHelper.DeserializeXml<Serverfeil>(xml);
+                    break;
+                case FiksArkivMeldingtype.Ikkefunnet:
+                    feilmelding = SerializeHelper.DeserializeXml<Ikkefunnet>(xml);
+                    break;
+                default:
+                    throw new NotImplementedException($"Ikke implementert for {mottatMeldingArgs.Melding.MeldingType}");
+            }
+
+            return feilmelding;
+        }
+        
 
         protected static MottattMeldingArgs? GetMottattMelding(List<MottattMeldingArgs>? mottattMeldingArgsList, Guid sendtMeldingsid, string forventetMeldingstype)
         {
