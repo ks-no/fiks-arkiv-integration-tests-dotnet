@@ -78,9 +78,9 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
                         throw new UnexpectedAnswerException($"Uforventet feilmelding mottatt {mottatMeldingArgs.Melding.MeldingType}. Feilmelding: {feilmelding.Feilmelding}. Forventet meldingstypen {forventetMeldingstype}");
                     }
 
-                    var feilmeldingerString = string.Join("\n",
+                    var feilmeldingerString = string.Join(Environment.NewLine,
                         feilmeldinger.Select(m => HentUtFeilMelding(m).Feilmelding));
-                    throw new UnexpectedAnswerException($"Uforventet melding mottatt av typen {mottatMeldingArgs.Melding.MeldingType}. Forventet meldingstypen {forventetMeldingstype}. Feilmeldinger: {feilmeldingerString}");  
+                    throw new UnexpectedAnswerException($"Uforventet melding mottatt av typen {mottatMeldingArgs.Melding.MeldingType}. Forventet meldingstypen {forventetMeldingstype}.{Environment.NewLine} Feilmeldinger: {feilmeldinger.Count}{Environment.NewLine}{Environment.NewLine}{Environment.NewLine} {feilmeldingerString}");  
                 }
             }
             Console.Out.WriteLineAsync($"Forventet meldingstype {forventetMeldingstype} mottatt for meldingsid  {sendtMeldingsid}!");
