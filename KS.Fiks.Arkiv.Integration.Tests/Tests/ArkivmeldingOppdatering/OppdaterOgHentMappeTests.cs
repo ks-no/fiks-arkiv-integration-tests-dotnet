@@ -28,16 +28,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdatering
         [SetUp]
         public async Task Setup()
         {
-            //TODO En annen lokal lagring som kjørte for disse testene hadde vært stilig i stedet for en liste. 
-            MottatMeldingArgsList = new List<MottattMeldingArgs>();
-            var config = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.Local.json")
-                .Build();
-            Client = await FiksIOClient.CreateAsync(FiksIOConfigurationBuilder.CreateFiksIOConfiguration(config));
-            Client.NewSubscription(OnMottattMelding);
-            FiksRequestService = new FiksRequestMessageService(config);
-            MottakerKontoId = Guid.Parse(config["TestConfig:ArkivAccountId"]);
-            FagsystemNavn = config["TestConfig:FagsystemName"];
+            await Init();
         }
 
         [Test]
