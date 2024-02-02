@@ -30,6 +30,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
         protected FiksRequestMessageService? FiksRequestService;
         protected Guid MottakerKontoId;
         protected string FagsystemNavn;
+        protected string SaksbehandlerNavn;
         protected SimpleXsdValidator validator;
 
         protected async Task Init()
@@ -44,6 +45,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
             FiksRequestService = new FiksRequestMessageService(config);
             MottakerKontoId = Guid.Parse(config["TestConfig:ArkivAccountId"]);
             FagsystemNavn = config["TestConfig:FagsystemName"];
+            SaksbehandlerNavn = config["TestConfig:SaksbehandlerName"] ;
         }
         
         protected static void VentPaSvar(int antallForventet, int antallVenter)

@@ -82,7 +82,9 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
                 .Init()
                 .WithTittel("Test tittel")
                 .WithReferanseTilForelderMappe(referanseTilSaksmappe)
-                .Build();
+                .Build(
+                    fagsystem: FagsystemNavn,
+                    saksbehandlerNavn: SaksbehandlerNavn);
             
             journalpost.ReferanseEksternNoekkel = referanseEksternNoekkelNyJournalpost;
             

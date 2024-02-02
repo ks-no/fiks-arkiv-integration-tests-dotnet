@@ -79,7 +79,10 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
                 .Init()
                 .WithTittel("Test tittel")
                 .WithReferanseTilForelderMappe(referanseTilSaksmappe)
-                .Build();
+                .Build(
+                    fagsystem: FagsystemNavn,
+                    saksbehandlerNavn: SaksbehandlerNavn
+                    );
             journalpost.ReferanseEksternNoekkel = referanseEksternNoekkelNyJournalpost;
             var arkivmelding = MeldingGenerator.CreateArkivmelding(FagsystemNavn);
             arkivmelding.Registrering = journalpost;
@@ -203,7 +206,10 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
                 .Init()
                 .WithTittel("Test")
                 .WithReferanseTilForelderMappe(referanseForelderMappe)
-                .Build();
+                .Build(
+                    fagsystem: FagsystemNavn,
+                    saksbehandlerNavn: SaksbehandlerNavn
+                    );
             journalpost.ReferanseEksternNoekkel = referanseEksternNoekkelNyJournalpost;
             var arkivmelding = MeldingGenerator.CreateArkivmelding(FagsystemNavn);
             arkivmelding.Registrering = journalpost;
@@ -324,7 +330,10 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
             var journalpost = JournalpostBuilder.Init()
                 .WithTittel("Test tittel")
                 .WithReferanseTilForelderMappe(referanseForelderMappe)
-                .Build();
+                .Build(
+                    fagsystem: FagsystemNavn,
+                    saksbehandlerNavn: SaksbehandlerNavn
+                    );
             journalpost.ReferanseEksternNoekkel = referanseEksternNoekkelNyJournalpost;
             var arkivmelding = MeldingGenerator.CreateArkivmelding(FagsystemNavn);
             arkivmelding.Registrering = journalpost;
