@@ -77,8 +77,9 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
 
         protected static async void OnMottattMelding(object sender, MottattMeldingArgs mottattMeldingArgs)
         {
-            await Console.Out.WriteLineAsync($"Mottatt melding med MeldingId: {mottattMeldingArgs.Melding.MeldingId}, SvarPaMeldingId: {mottattMeldingArgs.Melding.SvarPaMelding}, MeldingType: {mottattMeldingArgs.Melding.MeldingType} og lagrer i listen");
-            MottatMeldingArgsList.Add(mottattMeldingArgs);
+            var shortMsgType = MeldingHelper.ShortenMessageType(mottattMeldingArgs);
+            await Console.Out.WriteLineAsync($"Mottatt {shortMsgType}-melding med MeldingId: {mottattMeldingArgs.Melding.MeldingId}, SvarPaMeldingId: {mottattMeldingArgs.Melding.SvarPaMelding}, MeldingType: {mottattMeldingArgs.Melding.MeldingType} og lagrer i listen");
+            MottatMeldingArgsList?.Add(mottattMeldingArgs);
             mottattMeldingArgs.SvarSender?.Ack();
         }
 
