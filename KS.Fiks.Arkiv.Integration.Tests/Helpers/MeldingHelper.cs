@@ -35,7 +35,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Helpers
                         {
                             var streamReader = new StreamReader(entryStream);
                             var xml = streamReader.ReadToEndAsync().Result;
-                            payloadFiles.Add(new PayloadFile(asiceReadEntry.FileName, xml ));
+                            payloadFiles.Add(new PayloadFile(asiceReadEntry.FileName, xml));
                         }
                     }
                 }
@@ -47,6 +47,17 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Helpers
             }
 
             return payloadFiles;
+        }
+
+        public static string ShortenMessageType(MottattMeldingArgs mottattMeldingArgs) => 
+            ShortenMessageType(mottattMeldingArgs.Melding.MeldingType);
+        public static string ShortenMessageType(string MeldingType)
+        {
+
+            var last = MeldingType.LastIndexOf('.');
+            return last >= 0
+                ? MeldingType.Substring(last + 1)
+                : MeldingType;
         }
 
     }

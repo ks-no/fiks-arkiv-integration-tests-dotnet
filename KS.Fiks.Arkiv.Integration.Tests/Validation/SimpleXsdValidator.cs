@@ -134,7 +134,7 @@ namespace KS.FiksProtokollValidator.Tests.IntegrationTests.Validation
                 {
                     Console.Out.WriteLineAsync($"XSD validation error {error}");
                 }
-                Assert.Fail("Validering med xsd feilet");
+                Assert.Fail($"Validering med xsd feilet: {string.Join(Environment.NewLine, validationHandler.errors)}");
             }
         }
     }
