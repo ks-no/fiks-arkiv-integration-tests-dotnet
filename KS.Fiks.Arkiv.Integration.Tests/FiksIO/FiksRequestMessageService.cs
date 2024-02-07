@@ -34,7 +34,7 @@ using OnSendCallback = Action<Guid, Guid,  string>;
             {
                 AddOnSendCallback((s, m, t) =>
                 {
-                    Console.Out.WriteLine($"{Environment.NewLine}-> Sendte {MeldingHelper.ShortenMessageType(t)}-melding med id {m} til {s} ");
+                    Console.Out.WriteLine($"{Environment.NewLine}📡 Sendte {MeldingHelper.ShortenMessageType(t)}-melding med id {m} til {s} ");
                 });
                 
             }
