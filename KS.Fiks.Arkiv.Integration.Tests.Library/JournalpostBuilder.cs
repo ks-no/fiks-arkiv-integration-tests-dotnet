@@ -12,6 +12,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
         public const string ArkivdelDefault = "Arkiv validatortester";
 
         private ReferanseTilMappe _referanseTilMappe;
+        private EksternNoekkel _referanseEksternNoekkel;
         private string _tittel;
         private string _arkivdel;
         private Dokumentbeskrivelse _dokumentbeskrivelse;
@@ -21,6 +22,11 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
             return new JournalpostBuilder();
         }
 
+        public JournalpostBuilder WithReferanseEksternNoekkel(EksternNoekkel referanseEksternNoekkel)
+        {
+            _referanseEksternNoekkel = referanseEksternNoekkel;
+            return this;
+        }
         public JournalpostBuilder WithReferanseTilForelderMappe(ReferanseTilMappe referanseTilMappe)
         {
             _referanseTilMappe = referanseTilMappe;
@@ -60,6 +66,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
                 jp.Arkivdel = new Kode() {KodeProperty = _arkivdel};
             }
             jp.ReferanseForelderMappe = _referanseTilMappe;
+            jp.ReferanseEksternNoekkel = _referanseEksternNoekkel;
             jp.Tittel = _tittel;
             return jp;
         }

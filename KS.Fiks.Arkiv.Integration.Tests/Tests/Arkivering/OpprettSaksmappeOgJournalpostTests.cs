@@ -41,65 +41,38 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
         [Test]
         public async Task Opprett_Saksmappe_Og_Journalpost_I_En_Melding()
         {
-            // Denne id'en gjør at Arkiv-simulatoren ser hvilke meldinger som henger sammen. Har ingen funksjon ellers.  
-            var testSessionId = Guid.NewGuid().ToString();
-
             /*
              * STEG 1:
              * Opprett arkivmelding med saksmappe og journalpost og send til arkiv
              * Med klassifikasjon
              */
-
-            var mappe = MappeBuilder.Init().WithKlassifikasjon(GenererKlassifikasjon()).BuildSaksmappe(_saksmappeEksternNoekkel);
-            var referanseTilSaksmappe = new ReferanseTilMappe()
-            {
-                ReferanseEksternNoekkel = _saksmappeEksternNoekkel
-            };
+            var referanseTilSaksmappe = GenererReferanseTilMappe();
+            var arkivHarness = MeldingGenerator.CreateArkivmelding(
+                FagsystemNavn, 
+                JournalpostBuilder
+                    .Init()
+                    .WithTittel("Test tittel")
+                    .WithReferanseTilForelderMappe(referanseTilSaksmappe)
+                    .WithReferanseEksternNoekkel(GenererEksternNoekkel())
+                    .Build(
+                        fagsystem: FagsystemNavn,
+                        saksbehandlerNavn: SaksbehandlerNavn
+                        ),
+                MappeBuilder
+                    .Init()
+                    .WithKlassifikasjon(GenererKlassifikasjon())
+                    .BuildSaksmappe(referanseTilSaksmappe.ReferanseEksternNoekkel)
+                );
+            var archiveCreate =new TestHarness(this, FiksArkivMeldingtype.ArkivmeldingOpprett, arkivHarness)
+                .ExpectReceiveAllOfTypes(
+                    FiksArkivMeldingtype.ArkivmeldingOpprettMottatt, 
+                    FiksArkivMeldingtype.ArkivmeldingOpprettKvittering)
+                ;
             
-            MottattMeldingArgs? arkivmeldingKvitteringMelding;
-            PayloadFile arkivmeldingKvitteringPayload;
-
-            var referanseEksternNoekkelNyJournalpost = GenererEksternNoekkel();
-
-            // Legg til journalpost i arkivmelding
-            var journalpost = JournalpostBuilder
-                .Init()
-                .WithTittel("Test tittel")
-                .WithReferanseTilForelderMappe(referanseTilSaksmappe)
-                .Build(
-                    fagsystem: FagsystemNavn,
-                    saksbehandlerNavn: SaksbehandlerNavn
-                    );
-            journalpost.ReferanseEksternNoekkel = referanseEksternNoekkelNyJournalpost;
-            var arkivmelding = MeldingGenerator.CreateArkivmelding(FagsystemNavn);
-            arkivmelding.Registrering = journalpost;
-            arkivmelding.Mappe = mappe;
-
-            var nyJournalpostSerialized = SerializeHelper.Serialize(arkivmelding);
             
-            // Utkommenter dette hvis man vil å skrive til fil for å sjekke resultat manuelt
-            //File.WriteAllText("ArkivmeldingMedNyJournalpostOgDokument.xml", nyJournalpostSerialized);
             
-            // Valider arkivmelding
-            validator.Validate(nyJournalpostSerialized);
-
-            // Send melding
-            var nyJournalpostMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOpprett, nyJournalpostSerialized, null, testSessionId);
+            var (_, arkivmeldingKvitteringPayload) = archiveCreate.GetMelding( FiksArkivMeldingtype.ArkivmeldingOpprettKvittering);
             
-            // Vent på 2 første response meldinger (mottatt og kvittering)
-            VentPaSvar(2, 10);
-            Assert.True(MottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
-
-            // Verifiser at man får mottatt melding
-            SjekkForventetMelding(MottatMeldingArgsList, nyJournalpostMeldingId, FiksArkivMeldingtype.ArkivmeldingOpprettMottatt);
-
-            // Verifiser at man får arkivmeldingKvittering melding
-            SjekkForventetMelding(MottatMeldingArgsList, nyJournalpostMeldingId, FiksArkivMeldingtype.ArkivmeldingOpprettKvittering);
-            
-            // Hent meldingen
-            arkivmeldingKvitteringMelding = GetMottattMelding(MottatMeldingArgsList, nyJournalpostMeldingId, FiksArkivMeldingtype.ArkivmeldingOpprettKvittering);
-            
-            arkivmeldingKvitteringPayload = MeldingHelper.GetDecryptedMessagePayload(arkivmeldingKvitteringMelding).Result;
             Assert.True(arkivmeldingKvitteringPayload.Filename == "arkivmelding-kvittering.xml", "Filnavn ikke som forventet arkivmelding-kvittering.xml");
     
             // Valider innhold (xml)
@@ -110,43 +83,21 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
              * Hent oppprettet journalpost igjen og valider
              * 
              */
-            var journalpostHent = RegistreringHentBuilder.Init().WithEksternNoekkel(referanseEksternNoekkelNyJournalpost).Build();
-            
-            var journalpostHentAsString = SerializeHelper.Serialize(journalpostHent);
-            
-            // Valider innhold (xml)
-            validator.Validate(journalpostHentAsString);
-            
-            // Nullstill meldingsliste
-            MottatMeldingArgsList.Clear();
-            
-            // Send hent melding
-            var journalpostHentMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.RegistreringHent, journalpostHentAsString, null, testSessionId);
+            var hentHarness = new TestHarness(
+                        this, 
+                        FiksArkivMeldingtype.RegistreringHent, 
+                        RegistreringHentBuilder
+                            .Init()
+                            .WithEksternNoekkel(arkivHarness.Registrering.ReferanseEksternNoekkel)
+                            .Build()
+                        )
+                    .ExpectReturnOfType(FiksArkivMeldingtype.RegistreringHentResultat)
+                ;
+            var (registreringHentResultat, _, _) = hentHarness.GetMelding<RegistreringHentResultat>( FiksArkivMeldingtype.RegistreringHentResultat);
 
-            // Vent på 1 respons meldinger 
-            VentPaSvar(1, 10);
-
-            Assert.True(MottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
-            
-            // Verifiser at man får RegistreringHentResultat melding
-            SjekkForventetMelding(MottatMeldingArgsList, journalpostHentMeldingId, FiksArkivMeldingtype.RegistreringHentResultat);
-            
-            // Hent meldingen
-            var registreringHentResultatMelding = GetMottattMelding(MottatMeldingArgsList, journalpostHentMeldingId, FiksArkivMeldingtype.RegistreringHentResultat);
-
-            Assert.IsNotNull(registreringHentResultatMelding);
-            
-            var registreringHentResultatPayload = MeldingHelper.GetDecryptedMessagePayload(registreringHentResultatMelding).Result;
-            
-            // Valider innhold (xml)
-            validator.Validate(registreringHentResultatPayload.PayloadAsString);
-
-            var registreringHentResultat = SerializeHelper.DeserializeXml<RegistreringHentResultat>(registreringHentResultatPayload.PayloadAsString);
-
-            Assert.AreEqual(registreringHentResultat.Journalpost.ReferanseEksternNoekkel.Fagsystem, arkivmelding.Registrering.ReferanseEksternNoekkel.Fagsystem);
-            Assert.AreEqual(registreringHentResultat.Journalpost.ReferanseEksternNoekkel.Noekkel, arkivmelding.Registrering.ReferanseEksternNoekkel.Noekkel);
+            Assert.AreEqual(registreringHentResultat.Journalpost.ReferanseEksternNoekkel.Fagsystem, arkivHarness.Registrering.ReferanseEksternNoekkel.Fagsystem);
+            Assert.AreEqual(registreringHentResultat.Journalpost.ReferanseEksternNoekkel.Noekkel, arkivHarness.Registrering.ReferanseEksternNoekkel.Noekkel);
         }
-        
 
         /*
          * Denne testen sjekker om en saksmappe finnes og hvis ikke oppretter den saksmappen med referanseEksternNoekkel
@@ -213,10 +164,10 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
             Assert.True(MottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
 
             // Verifiser at man får mottatt melding
-            SjekkForventetMelding(MottatMeldingArgsList, nyJournalpostMeldingId, FiksArkivMeldingtype.ArkivmeldingOpprettMottatt);
+            SjekkForventetMelding(nyJournalpostMeldingId, FiksArkivMeldingtype.ArkivmeldingOpprettMottatt);
 
             // Verifiser at man får arkivmeldingKvittering melding
-            SjekkForventetMelding(MottatMeldingArgsList, nyJournalpostMeldingId, FiksArkivMeldingtype.ArkivmeldingOpprettKvittering);
+            SjekkForventetMelding(nyJournalpostMeldingId, FiksArkivMeldingtype.ArkivmeldingOpprettKvittering);
             
             // Hent meldingen
             arkivmeldingKvitteringMelding = GetMottattMelding(MottatMeldingArgsList, nyJournalpostMeldingId, FiksArkivMeldingtype.ArkivmeldingOpprettKvittering);
@@ -251,7 +202,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
             Assert.True(MottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
             
             // Verifiser at man får RegistreringHentResultat melding
-            SjekkForventetMelding(MottatMeldingArgsList, journalpostHentMeldingId, FiksArkivMeldingtype.RegistreringHentResultat);
+            SjekkForventetMelding(journalpostHentMeldingId, FiksArkivMeldingtype.RegistreringHentResultat);
             
             // Hent meldingen
             var registreringHentResultatMelding = GetMottattMelding(MottatMeldingArgsList, journalpostHentMeldingId, FiksArkivMeldingtype.RegistreringHentResultat);
@@ -333,10 +284,10 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
             Assert.True(MottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
 
             // Verifiser at man får mottatt melding
-            SjekkForventetMelding(MottatMeldingArgsList, nyJournalpostMeldingId, FiksArkivMeldingtype.ArkivmeldingOpprettMottatt);
+            SjekkForventetMelding(nyJournalpostMeldingId, FiksArkivMeldingtype.ArkivmeldingOpprettMottatt);
 
             // Verifiser at man får arkivmeldingKvittering melding
-            SjekkForventetMelding(MottatMeldingArgsList, nyJournalpostMeldingId, FiksArkivMeldingtype.ArkivmeldingOpprettKvittering);
+            SjekkForventetMelding(nyJournalpostMeldingId, FiksArkivMeldingtype.ArkivmeldingOpprettKvittering);
             
             // Hent melding
             arkivmeldingKvitteringMelding = GetMottattMelding(MottatMeldingArgsList, nyJournalpostMeldingId, FiksArkivMeldingtype.ArkivmeldingOpprettKvittering);
@@ -371,7 +322,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
             Assert.True(MottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
             
             // Verifiser at man får RegistreringHentResultat melding
-            SjekkForventetMelding(MottatMeldingArgsList, journalpostHentMeldingId, FiksArkivMeldingtype.RegistreringHentResultat);
+            SjekkForventetMelding(journalpostHentMeldingId, FiksArkivMeldingtype.RegistreringHentResultat);
             
             // Hent melding
             var registreringHentResultatMelding = GetMottattMelding(MottatMeldingArgsList, journalpostHentMeldingId, FiksArkivMeldingtype.RegistreringHentResultat);

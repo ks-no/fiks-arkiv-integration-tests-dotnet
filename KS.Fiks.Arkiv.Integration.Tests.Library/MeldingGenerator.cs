@@ -40,14 +40,22 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
              
              return arkivmelding;
          }
-        
-        public static Arkivmelding CreateArkivmelding(string fagsystem)
+
+        public static Arkivmelding CreateArkivmelding(string fagsystem, Journalpost? journalpost = null, Mappe? mappe = null)
         {
             var arkivmelding = new Arkivmelding()
             {
                 System = fagsystem,
                 AntallFiler = 1,
             };
+            if (journalpost != null)
+            {
+                arkivmelding.Registrering = journalpost;
+            }
+            if (mappe != null)
+            {
+                arkivmelding.Mappe = mappe;
+            }
              
             return arkivmelding;
         }
