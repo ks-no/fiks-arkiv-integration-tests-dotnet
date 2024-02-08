@@ -96,7 +96,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Sok
             Assert.True(MottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
             
             // Verifiser at man får mottatt melding
-            SjekkForventetMelding(MottatMeldingArgsList, sokMeldingId, FiksArkivMeldingtype.SokResultatUtvidet);
+            SjekkForventetMelding(sokMeldingId, FiksArkivMeldingtype.SokResultatUtvidet);
 
             // Hent melding
             var sokeresultatUtvidetMelding = GetMottattMelding(MottatMeldingArgsList, sokMeldingId,
@@ -121,7 +121,10 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Sok
 
         private async Task<Arkivmelding> ArkiverJournalpost(string testSessionId, string tittel)
         {
-            var arkivmelding = MeldingGenerator.CreateArkivmeldingMedNyJournalpost(FagsystemNavn, tittel: tittel);
+            var arkivmelding = MeldingGenerator.CreateArkivmelding(FagsystemNavn);
+            var referanse = GenererEksternNoekkel();
+            arkivmelding.Mappe = MappeBuilder.Init().WithKlassifikasjon(GenererKlassifikasjon()).BuildSaksmappe(referanse);
+            arkivmelding.Mappe.Tittel = tittel;
 
             var nyJournalpostSerialized = SerializeHelper.Serialize(arkivmelding);
             
@@ -144,10 +147,10 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Sok
             Assert.True(MottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
 
             // Verifiser at man får mottatt melding
-            SjekkForventetMelding(MottatMeldingArgsList, nyJournalpostMeldingId, FiksArkivMeldingtype.ArkivmeldingOpprettMottatt);
+            SjekkForventetMelding(nyJournalpostMeldingId, FiksArkivMeldingtype.ArkivmeldingOpprettMottatt);
 
             // Verifiser at man får arkivmeldingKvittering melding
-            SjekkForventetMelding(MottatMeldingArgsList, nyJournalpostMeldingId, FiksArkivMeldingtype.ArkivmeldingOpprettKvittering);
+            SjekkForventetMelding(nyJournalpostMeldingId, FiksArkivMeldingtype.ArkivmeldingOpprettKvittering);
 
             // Hent melding
             var arkivmeldingKvitteringMelding = GetMottattMelding(MottatMeldingArgsList, nyJournalpostMeldingId,
