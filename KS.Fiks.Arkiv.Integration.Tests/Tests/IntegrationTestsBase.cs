@@ -77,8 +77,9 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
 
         protected static async void OnMottattMelding(object sender, MottattMeldingArgs mottattMeldingArgs)
         {
-            await Console.Out.WriteLineAsync($"Mottatt melding med MeldingId: {mottattMeldingArgs.Melding.MeldingId}, SvarPaMeldingId: {mottattMeldingArgs.Melding.SvarPaMelding}, MeldingType: {mottattMeldingArgs.Melding.MeldingType} og lagrer i listen");
-            MottatMeldingArgsList.Add(mottattMeldingArgs);
+            var shortMsgType = MeldingHelper.ShortenMessageType(mottattMeldingArgs);
+            await Console.Out.WriteLineAsync($"📨 Mottatt {shortMsgType}-melding med MeldingId: {mottattMeldingArgs.Melding.MeldingId}, SvarPaMeldingId: {mottattMeldingArgs.Melding.SvarPaMelding}, MeldingType: {mottattMeldingArgs.Melding.MeldingType} og lagrer i listen");
+            MottatMeldingArgsList?.Add(mottattMeldingArgs);
             mottattMeldingArgs.SvarSender?.Ack();
         }
 
@@ -102,7 +103,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
                     throw new UnexpectedAnswerException($"Uforventet melding mottatt av typen {mottatMeldingArgs.Melding.MeldingType}. Forventet meldingstypen {forventetMeldingstype}.{Environment.NewLine} Feilmeldinger: {feilmeldinger.Count}{Environment.NewLine}{Environment.NewLine}{Environment.NewLine} {feilmeldingerString}");  
                 }
             }
-            Console.Out.WriteLineAsync($"Forventet meldingstype {forventetMeldingstype} mottatt for meldingsid  {sendtMeldingsid}!");
+            Console.Out.WriteLineAsync($"🎉 Forventet meldingstype {forventetMeldingstype} mottatt for meldingsid  {sendtMeldingsid}!");
         }
 
         protected static FeilmeldingBase HentUtFeilMelding(MottattMeldingArgs mottatMeldingArgs)
