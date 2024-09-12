@@ -25,27 +25,35 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
 {
     public class IntegrationTestsBase
     {
-        protected static List<MottattMeldingArgs>? MottatMeldingArgsList;
-        protected static IConfigurationRoot config;
-        protected IFiksIOClient? Client;
-        protected FiksRequestMessageService? FiksRequestService;
-        protected Guid MottakerKontoId;
-        protected static string FagsystemNavn;
-        protected static string SaksbehandlerNavn;
-        protected static string KlassifikasjonKlasseID;
-        protected static string KlassifikasjonssystemID;
-        protected SimpleXsdValidator validator;
+        public List<MottattMeldingArgs>? MottatMeldingArgsList;
+        public string TestSessionId;
+        public static IConfigurationRoot config;
+        public IFiksIOClient? Client;
+        public FiksRequestMessageService? FiksRequestService;
+        public Guid MottakerKontoId;
+        public static string FagsystemNavn;
+        public static string SaksbehandlerNavn;
+        public static string KlassifikasjonKlasseID;
+        public static string KlassifikasjonssystemID;
+        public SimpleXsdValidator validator;
+        public Action<object, MottattMeldingArgs>? onMottatMelding;
 
         protected async Task Init()
         {
             //TODO En annen lokal lagring som kjørte for disse testene hadde vært stilig i stedet for en liste.
+            await ConfInit();
+            MottatMeldingArgsList = new List<MottattMeldingArgs>();
+            Client = await FiksIOClient.CreateAsync(FiksIOConfigurationBuilder.CreateFiksIOConfiguration(config));
+            Client.NewSubscription(OnMottattMelding);
+        }
+        protected async Task ConfInit()
+        {
             MottatMeldingArgsList = new List<MottattMeldingArgs>();
             config = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.Local.json")
                 .Build();
-            Client = await FiksIOClient.CreateAsync(FiksIOConfigurationBuilder.CreateFiksIOConfiguration(config));
-            Client.NewSubscription(OnMottattMelding);
             FiksRequestService = new FiksRequestMessageService(config);
+            TestSessionId = Guid.NewGuid().ToString();
             MottakerKontoId = Guid.Parse(GetTestConfig("ArkivAccountId"));
             FagsystemNavn = GetTestConfig("FagsystemName");
             SaksbehandlerNavn = GetTestConfig("SaksbehandlerName");
@@ -65,45 +73,71 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
             return value;
         }
         
-        protected static void VentPaSvar(int antallForventet, int antallVenter)
+        public void VentPaSvar(int antallForventet, int antallVenter, List<MottattMeldingArgs>? mottattMeldingArgsEnumerable = null)
         {
             var counter = 0;
-            while (MottatMeldingArgsList != null && MottatMeldingArgsList.Count <= antallForventet && counter < antallVenter)
+            if (mottattMeldingArgsEnumerable == null)
+            {
+                mottattMeldingArgsEnumerable = MottatMeldingArgsList;
+
+            }
+            while (mottattMeldingArgsEnumerable != null && mottattMeldingArgsEnumerable.Count <= antallForventet && counter < antallVenter)
             {
                 Thread.Sleep(500);
                 counter++;
             }
         }
 
-        protected static async void OnMottattMelding(object sender, MottattMeldingArgs mottattMeldingArgs)
+         async void OnMottattMelding(object sender, MottattMeldingArgs mottattMeldingArgs)
         {
-            var shortMsgType = MeldingHelper.ShortenMessageType(mottattMeldingArgs);
-            await Console.Out.WriteLineAsync($"📨 Mottatt {shortMsgType}-melding med MeldingId: {mottattMeldingArgs.Melding.MeldingId}, SvarPaMeldingId: {mottattMeldingArgs.Melding.SvarPaMelding}, MeldingType: {mottattMeldingArgs.Melding.MeldingType} og lagrer i listen");
+            if (onMottatMelding != null)
+            {
+                onMottatMelding(sender, mottattMeldingArgs);
+            }
+            else
+            {
+                var shortMsgType = MeldingHelper.ShortenMessageType(mottattMeldingArgs);
+                await Console.Out.WriteLineAsync($"📨 Mottatt {shortMsgType}-melding med MeldingId: {mottattMeldingArgs.Melding.MeldingId}, SvarPaMeldingId: {mottattMeldingArgs.Melding.SvarPaMelding}, MeldingType: {mottattMeldingArgs.Melding.MeldingType} og lagrer i listen");
+            }
             MottatMeldingArgsList?.Add(mottattMeldingArgs);
             mottattMeldingArgs.SvarSender?.Ack();
         }
 
-        protected static void SjekkForventetMelding(IEnumerable<MottattMeldingArgs>? mottattMeldingArgsList, Guid sendtMeldingsid, string forventetMeldingstype)
+        public void SjekkForventetMelding(Guid sendtMeldingsid, string forventetMeldingstype, IEnumerable<MottattMeldingArgs>? mottattMeldingArgsEnumerable = null)
         {
-            var found = mottattMeldingArgsList.Where(mottattMeldingArgs => mottattMeldingArgs.Melding.SvarPaMelding == sendtMeldingsid).Any(mottatMeldingArgs => mottatMeldingArgs.Melding.MeldingType == forventetMeldingstype);
+            SjekkForventetMelding(mottattMeldingArgsEnumerable ?? MottatMeldingArgsList, sendtMeldingsid, new []{forventetMeldingstype}, 1);
+        }
+
+        public void SjekkForventetMelding(Guid sendtMeldingsid, IEnumerable<string> forventetEnAvMeldingstype,
+            int minstForventetAntall, IEnumerable<MottattMeldingArgs>? mottattMeldingArgsEnumerable = null)
+        {
+            SjekkForventetMelding(mottattMeldingArgsEnumerable, sendtMeldingsid, forventetEnAvMeldingstype, minstForventetAntall);
+        }
+        public static void SjekkForventetMelding(IEnumerable<MottattMeldingArgs>? mottattMeldingArgsList, Guid sendtMeldingsid, IEnumerable<string> forventetEnAvMeldingstype, int minstForventetAntall)
+        {
+            var found = mottattMeldingArgsList
+                .Where( mottattMeldingArgs => mottattMeldingArgs.Melding.SvarPaMelding == sendtMeldingsid)
+                .Where(mottatMeldingArgs => forventetEnAvMeldingstype.Contains(mottatMeldingArgs.Melding.MeldingType))
+                .DistinctBy(m => m.Melding.MeldingId)
+                ;
             var feilmeldinger =
                 mottattMeldingArgsList.Where(m => FiksArkivMeldingtype.IsFeilmelding(m.Melding.MeldingType)).ToList();
-            if (!found)
+            if (found.Count() < minstForventetAntall)
             {
                 foreach (var mottatMeldingArgs in mottattMeldingArgsList)
                 {
                     if (FiksArkivMeldingtype.IsFeilmelding(mottatMeldingArgs.Melding.MeldingType))
                     {
                         var feilmelding = HentUtFeilMelding(mottatMeldingArgs);
-                        throw new UnexpectedAnswerException($"Uforventet feilmelding mottatt {mottatMeldingArgs.Melding.MeldingType}. Feilmelding: {feilmelding.Feilmelding}. Forventet meldingstypen {forventetMeldingstype}");
+                        throw new UnexpectedAnswerException($"Uforventet feilmelding mottatt {mottatMeldingArgs.Melding.MeldingType}. Feilmelding: {feilmelding.Feilmelding}. Forventet meldingstypen {string.Join(",", forventetEnAvMeldingstype)}");
                     }
 
                     var feilmeldingerString = string.Join(Environment.NewLine,
                         feilmeldinger.Select(m => HentUtFeilMelding(m).Feilmelding));
-                    throw new UnexpectedAnswerException($"Uforventet melding mottatt av typen {mottatMeldingArgs.Melding.MeldingType}. Forventet meldingstypen {forventetMeldingstype}.{Environment.NewLine} Feilmeldinger: {feilmeldinger.Count}{Environment.NewLine}{Environment.NewLine}{Environment.NewLine} {feilmeldingerString}");  
+                    throw new UnexpectedAnswerException($"Uforventet melding mottatt av typen {mottatMeldingArgs.Melding.MeldingType}. Forventet meldingstypen {string.Join(", ", forventetEnAvMeldingstype)}.{Environment.NewLine} Feilmeldinger: {feilmeldinger.Count}{Environment.NewLine}{Environment.NewLine}{Environment.NewLine} {feilmeldingerString}");  
                 }
             }
-            Console.Out.WriteLineAsync($"🎉 Forventet meldingstype {forventetMeldingstype} mottatt for meldingsid  {sendtMeldingsid}!");
+            Console.Out.WriteLineAsync($"🎉 Forventet meldingstype {string.Join(", ", forventetEnAvMeldingstype)} mottatt for meldingsid  {sendtMeldingsid}!");
         }
 
         protected static FeilmeldingBase HentUtFeilMelding(MottattMeldingArgs mottatMeldingArgs)
@@ -130,7 +164,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
         }
         
 
-        protected static MottattMeldingArgs? GetMottattMelding(List<MottattMeldingArgs>? mottattMeldingArgsList, Guid sendtMeldingsid, string forventetMeldingstype)
+        public static MottattMeldingArgs? GetMottattMelding(List<MottattMeldingArgs>? mottattMeldingArgsList, Guid sendtMeldingsid, string forventetMeldingstype)
         {
             foreach (var mottatMeldingArgs in mottattMeldingArgsList)
             {
@@ -273,6 +307,10 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
             {
                 Fagsystem = FagsystemNavn,
                 Noekkel = noekkel ?? Guid.NewGuid().ToString()
+            };
+            protected static ReferanseTilMappe GenererReferanseTilMappe( string? noekkel = null) => new ()
+            {
+                ReferanseEksternNoekkel = GenererEksternNoekkel(noekkel)
             };
     }
 }
