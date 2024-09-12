@@ -1,4 +1,5 @@
 using System;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using KS.Fiks.Arkiv.Integration.Tests.Helpers;
 using KS.Fiks.Arkiv.Integration.Tests.Library;
@@ -71,6 +72,20 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
                     saksbehandlerNavn: SaksbehandlerNavn
                     );
             journalpost.ReferanseEksternNoekkel = referanseEksternNoekkelNyJournalpost;
+
+            journalpost.Dokumentbeskrivelse.Add(
+                new Dokumentbeskrivelse()
+                {
+                    Tittel = "Tittel ",
+                    Dokumentobjekt =
+                    {
+                        new Dokumentobjekt()
+                        {
+                            Filnavn = "FilnavnTilVedlegg.pdf",
+                        }
+                    }
+                });
+        
             var arkivmelding = MeldingGenerator.CreateArkivmelding(FagsystemNavn);
             arkivmelding.Registrering = journalpost;
             arkivmelding.Mappe = mappe;

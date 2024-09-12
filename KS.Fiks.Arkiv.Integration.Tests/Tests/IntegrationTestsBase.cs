@@ -35,6 +35,8 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
         protected static string KlassifikasjonKlasseID;
         protected static string KlassifikasjonssystemID;
         protected SimpleXsdValidator validator;
+        // Tidsavbrudd message is received when a message sent from these tests has not been consumed and the TTL has been reached
+        protected const string TidsavbruddMelding = "no.ks.fiks.kvittering.tidsavbrudd";
 
         protected async Task Init()
         {
@@ -78,6 +80,11 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
         protected static async void OnMottattMelding(object sender, MottattMeldingArgs mottattMeldingArgs)
         {
             var shortMsgType = MeldingHelper.ShortenMessageType(mottattMeldingArgs);
+            // Log Tidsavbrudd messages and discard them
+            if (mottattMeldingArgs.Melding.MeldingType == TidsavbruddMelding)
+            {
+                await Console.Out.WriteLineAsync($"Mottatt {TidsavbruddMelding}. SvarPaMeldingId: {mottattMeldingArgs.Melding.SvarPaMelding}. Ignorerer denne meldingen.");
+            }
             await Console.Out.WriteLineAsync($"📨 Mottatt {shortMsgType}-melding med MeldingId: {mottattMeldingArgs.Melding.MeldingId}, SvarPaMeldingId: {mottattMeldingArgs.Melding.SvarPaMelding}, MeldingType: {mottattMeldingArgs.Melding.MeldingType} og lagrer i listen");
             MottatMeldingArgsList?.Add(mottattMeldingArgs);
             mottattMeldingArgs.SvarSender?.Ack();
