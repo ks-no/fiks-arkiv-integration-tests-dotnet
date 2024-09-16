@@ -1,18 +1,13 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using KS.Fiks.Arkiv.Integration.Tests.FiksIO;
 using KS.Fiks.Arkiv.Integration.Tests.Helpers;
 using KS.Fiks.Arkiv.Integration.Tests.Library;
 using KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding;
 using KS.Fiks.Arkiv.Models.V1.Arkivstruktur;
 using KS.Fiks.Arkiv.Models.V1.Innsyn.Sok;
 using KS.Fiks.Arkiv.Models.V1.Meldingstyper;
-using KS.Fiks.IO.Client;
-using KS.Fiks.IO.Client.Models;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Validation;
-using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
 
 namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Sok
@@ -93,7 +88,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Sok
             
             // Vent på respons
             VentPaSvar(1, 10);
-            Assert.True(MottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
+            Assert.That(MottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
             
             // Verifiser at man får mottatt melding
             SjekkForventetMelding(MottatMeldingArgsList, sokMeldingId, FiksArkivMeldingtype.SokResultatUtvidet);
@@ -141,7 +136,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Sok
 
             // Vent på 2 første response meldinger (mottatt og kvittering)
             VentPaSvar(2, 10);
-            Assert.True(MottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
+            Assert.That(MottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
 
             // Verifiser at man får mottatt melding
             SjekkForventetMelding(MottatMeldingArgsList, nyJournalpostMeldingId, FiksArkivMeldingtype.ArkivmeldingOpprettMottatt);
@@ -154,7 +149,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Sok
                 FiksArkivMeldingtype.ArkivmeldingOpprettKvittering);
 
             var arkivmeldingKvitteringPayload = MeldingHelper.GetDecryptedMessagePayload(arkivmeldingKvitteringMelding).Result;
-            Assert.True(arkivmeldingKvitteringPayload.Filename == "arkivmelding-kvittering.xml",
+            Assert.That(arkivmeldingKvitteringPayload.Filename == "arkivmelding-kvittering.xml",
                 "Filnavn ikke som forventet arkivmelding-kvittering.xml");
 
             // Valider innhold (xml)

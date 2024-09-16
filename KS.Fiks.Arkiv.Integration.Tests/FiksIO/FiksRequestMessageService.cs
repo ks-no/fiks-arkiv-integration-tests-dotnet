@@ -9,6 +9,7 @@ using KS.Fiks.Arkiv.Models.V1.Meldingstyper;
 using KS.Fiks.IO.Client;
 using KS.Fiks.IO.Client.Configuration;
 using KS.Fiks.IO.Client.Models;
+using KS.FiksProtokollValidator.Tests.IntegrationTests.Models;
 using Microsoft.Extensions.Configuration;
 
 namespace KS.Fiks.Arkiv.Integration.Tests.FiksIO
@@ -52,7 +53,7 @@ using OnSendCallback = Action<Guid, Guid,  string>;
         
         private Task Initialization { get; set; }
 
-        public async Task<Guid> Send(Guid mottakerKontoId, string meldingsType, string payloadContent, List<KeyValuePair<string, FileStream>>? attachments, string testSessionId, string payloadFilename = null)
+        public async Task<Guid> Send(Guid mottakerKontoId, string meldingsType, string payloadContent, List<MeldingAttachment>? attachments, string testSessionId, string payloadFilename = null)
         {
             var stackTrace = new StackTrace();
             await Initialization;
@@ -72,10 +73,7 @@ using OnSendCallback = Action<Guid, Guid,  string>;
 
             if(attachments != null)
             {
-                foreach (var (filename, fileStream) in attachments)
-                {
-                    payloads.Add(new StreamPayload(fileStream, filename));
-                }    
+                payloads.AddRange(attachments.Select(attachment => new StreamPayload(attachment.Filestream, attachment.Filename)).Cast<IPayload>());
             }
 
             var result = await _client.Send(messageRequest, payloads);

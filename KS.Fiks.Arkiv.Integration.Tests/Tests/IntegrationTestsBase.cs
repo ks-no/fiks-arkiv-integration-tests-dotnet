@@ -113,6 +113,37 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
             Console.Out.WriteLineAsync($"🎉 Forventet meldingstype {forventetMeldingstype} mottatt for meldingsid  {sendtMeldingsid}!");
         }
 
+        protected static void SjekkForventetMeldinger(IEnumerable<MottattMeldingArgs>? mottattMeldingArgsList, Guid sendtMeldingsid, string[] forventetMeldingstyper)
+        {
+            foreach (var forventetMeldingstype in forventetMeldingstyper)
+            {
+                var found = mottattMeldingArgsList.Where(mottattMeldingArgs => mottattMeldingArgs.Melding.SvarPaMelding == sendtMeldingsid).Any(mottatMeldingArgs => mottatMeldingArgs.Melding.MeldingType == forventetMeldingstype);
+                var feilmeldinger =
+                    mottattMeldingArgsList.Where(m => FiksArkivMeldingtype.IsFeilmelding(m.Melding.MeldingType)).ToList();
+                
+                if (!found)
+                {
+                    foreach (var mottatMeldingArgs in mottattMeldingArgsList)
+                    {
+                        if (forventetMeldingstyper.Contains(mottatMeldingArgs.Melding.MeldingType))
+                        {
+                            continue;
+                        }
+                        if (FiksArkivMeldingtype.IsFeilmelding(mottatMeldingArgs.Melding.MeldingType))
+                        {
+                            var feilmelding = HentUtFeilMelding(mottatMeldingArgs);
+                            throw new UnexpectedAnswerException($"Uforventet feilmelding mottatt {mottatMeldingArgs.Melding.MeldingType}. Feilmelding: {feilmelding.Feilmelding}. Forventet meldingstypen {forventetMeldingstype}");
+                        }
+
+                        var feilmeldingerString = string.Join(Environment.NewLine,
+                            feilmeldinger.Select(m => HentUtFeilMelding(m).Feilmelding));
+                        throw new UnexpectedAnswerException($"Uforventet melding mottatt av typen {mottatMeldingArgs.Melding.MeldingType}. Forventet meldingstypen {forventetMeldingstype}.{Environment.NewLine} Feilmeldinger: {feilmeldinger.Count}{Environment.NewLine}{Environment.NewLine}{Environment.NewLine} {feilmeldingerString}");  
+                    }
+                }
+                Console.Out.WriteLineAsync($"🎉 Forventet meldingstype {forventetMeldingstype} mottatt for meldingsid  {sendtMeldingsid}!");
+            }
+        }
+
         protected static FeilmeldingBase HentUtFeilMelding(MottattMeldingArgs mottatMeldingArgs)
         {
             var melding = MeldingHelper.GetDecryptedMessagePayload(mottatMeldingArgs).Result;
@@ -208,7 +239,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
             // Vent på 1 respons meldinger 
             VentPaSvar(1, 10);
 
-            Assert.True(MottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
+            Assert.That(MottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
 
             if( Ikkfunnet(MottatMeldingArgsList, mappeHentMeldingId) )
             {
@@ -218,7 +249,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
             // Verifiser at man får mappeHentResultat melding
             var mappeHentResultatMelding = GetMottattMelding(MottatMeldingArgsList, mappeHentMeldingId, FiksArkivMeldingtype.MappeHentResultat);
 
-            Assert.IsNotNull(mappeHentResultatMelding);
+            Assert.That(mappeHentResultatMelding != null);
             
             var mappeHentResultatPayload = await MeldingHelper.GetDecryptedMessagePayload(mappeHentResultatMelding);
             
@@ -250,7 +281,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
 
             // Vent på 2 første response meldinger (mottatt og kvittering)
             VentPaSvar(2, 10);
-            Assert.True(MottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
+            Assert.That(MottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
 
             // Verifiser at man får mottatt melding
             GetMottattMelding(MottatMeldingArgsList, nySaksmappeMeldingId, FiksArkivMeldingtype.ArkivmeldingOpprettMottatt);
@@ -260,7 +291,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
                 FiksArkivMeldingtype.ArkivmeldingOpprettKvittering);
 
             var arkivmeldingKvitteringPayload = MeldingHelper.GetDecryptedMessagePayload(arkivmeldingKvitteringMelding).Result;
-            Assert.True(arkivmeldingKvitteringPayload.Filename == "arkivmelding-kvittering.xml",
+            Assert.That(arkivmeldingKvitteringPayload.Filename == "arkivmelding-kvittering.xml",
                 "Filnavn ikke som forventet arkivmelding-kvittering.xml");
 
             // Valider innhold i kvitteringen (xml)

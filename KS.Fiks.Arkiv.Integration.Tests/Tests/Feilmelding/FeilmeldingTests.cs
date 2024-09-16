@@ -1,18 +1,10 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
-using KS.Fiks.Arkiv.Integration.Tests.FiksIO;
 using KS.Fiks.Arkiv.Integration.Tests.Library;
-using KS.Fiks.Arkiv.Models.V1.Arkivstruktur;
 using KS.Fiks.Arkiv.Models.V1.Meldingstyper;
 using KS.Fiks.Arkiv.Models.V1.Metadatakatalog;
-using KS.Fiks.IO.Client;
-using KS.Fiks.IO.Client.Models;
-using KS.Fiks.IO.Send.Client.Models;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Validation;
-using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
 
 namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Feilmelding
@@ -64,12 +56,12 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Feilmelding
             // Vent på 1 respons meldinger 
             VentPaSvar(1, 10);
 
-            Assert.True(MottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
+            Assert.That(MottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
             
             // Verifiser at man får en Ikkefunnet feil-melding
             var ikkefunnetFeilmelding = GetMottattMelding(MottatMeldingArgsList, journalpostHentMeldingId, FiksArkivMeldingtype.Ikkefunnet);
 
-            Assert.IsNotNull(ikkefunnetFeilmelding);
+            Assert.That(ikkefunnetFeilmelding != null);
         }
     }
 }
