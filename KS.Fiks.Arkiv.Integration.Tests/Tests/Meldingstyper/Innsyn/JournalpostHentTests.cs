@@ -9,7 +9,7 @@ using KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Validation;
 using NUnit.Framework;
 
-namespace KS.Fiks.Arkiv.Integration.Tests.Tests.InnsynTests
+namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Innsyn
 {
     /**
      * Disse testene sender først en arkivmelding for å opprette en journalpost for så

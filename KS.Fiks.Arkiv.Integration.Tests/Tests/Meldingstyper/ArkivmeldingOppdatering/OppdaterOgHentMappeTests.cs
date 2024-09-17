@@ -10,7 +10,7 @@ using KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Validation;
 using NUnit.Framework;
 
-namespace KS.Fiks.Arkiv.Integration.Tests.Tests.ArkivmeldingOppdatering
+namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.ArkivmeldingOppdatering
 {
     /**
      * Disse testene sender først en arkivmelding for å opprette en mappe (evt med journalpost i mappe) for så

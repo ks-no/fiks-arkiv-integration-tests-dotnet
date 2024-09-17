@@ -11,7 +11,7 @@ using KS.FiksProtokollValidator.Tests.IntegrationTests.Models;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Validation;
 using NUnit.Framework;
 
-namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Arkivering
+namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Arkivering
 {
     /**
      * Disse testene er for å opprette saksmappe og journalposter.

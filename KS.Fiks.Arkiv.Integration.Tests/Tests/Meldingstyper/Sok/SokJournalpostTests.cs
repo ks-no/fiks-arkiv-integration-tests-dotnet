@@ -10,7 +10,7 @@ using KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Validation;
 using NUnit.Framework;
 
-namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Sok
+namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Sok
 {
     /**
      * Disse testene sender først en arkivmelding for å opprette flere journalposter for så
