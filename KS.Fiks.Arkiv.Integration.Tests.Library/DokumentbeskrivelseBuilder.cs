@@ -11,10 +11,11 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
         private string _dokumenttype = "SØKNAD";
         private string _dokumentstatus = "F";
         private string _tilknyttetRegistreringSom = "F";
-        private List<Dokumentobjekt> _dokumentobjekter;
+        private static List<Dokumentobjekt>? _dokumentobjekter;
 
         public static DokumentbeskrivelseBuilder Init()
         {
+            _dokumentobjekter = new List<Dokumentobjekt>();
             return new DokumentbeskrivelseBuilder();
         }
 

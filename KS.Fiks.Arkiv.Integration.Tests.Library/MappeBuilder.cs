@@ -11,11 +11,11 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
         private string _tittel = "En ny saksmappe fra integrasjonstest";
         private AdministrativEnhet _administrativEnhet;
         private Saksansvarlig _saksansvarlig;
-
-        private List<Klassifikasjon> SaksmappeKlassifikasjoner;
+        private static List<Klassifikasjon> SaksmappeKlassifikasjoner;
 
         public static MappeBuilder Init()
         {
+            SaksmappeKlassifikasjoner = new List<Klassifikasjon>();
             return new MappeBuilder();
         }
         

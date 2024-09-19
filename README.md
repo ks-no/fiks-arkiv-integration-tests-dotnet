@@ -21,7 +21,7 @@ Den nye filen skal man da putte inn sine konfigurasjonsdetaljer for Fiks-Protoko
 {
   "TestConfig": {
     "ArkivAccountId" : "RECEIVING_ACCOUNT_GUID_IN_FIKSIO_HERE",
-    "FagsystemName" : "Standard vagsystem-navn i ditt system",
+    "FagsystemName" : "Standard fagsystem-navn i ditt system",
     "SaksbehandlerName": "Standard saksbehandler-navn i ditt system",
     "KlassifikasjonKlasseID": "001",
     "KlassifikasjonssystemID": "EMNE"
@@ -50,7 +50,8 @@ Den nye filen skal man da putte inn sine konfigurasjonsdetaljer for Fiks-Protoko
 ```
 
 #### Forklaring
-`TestConfig:ArkivAccountId`: Fiks Protokoll kontoen for arkivet som skal motta meldingene.
+- `TestConfig:ArkivAccountId`: Fiks Protokoll kontoen for arkivet som skal motta meldingene.
+- `TestConfig:FagsystemName`: Verdien her brukes som standard i `system` i arkivmelding
 
 For å forenkle test-oppsett kan man la være å oppgi `AsiceSigningPublicKey` og
 `AsiceSigningPrivateKey` hvor den da vil forsøke å benytte sertifikatet oppgitt
