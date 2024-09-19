@@ -15,6 +15,8 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
         private string _tittel;
         private string _arkivdel;
         private Dokumentbeskrivelse _dokumentbeskrivelse;
+        private string _journalposttype;
+        private string _journalstatus;
 
         public static JournalpostBuilder Init()
         {
@@ -39,9 +41,9 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
             return this;
         }
 
-        public JournalpostBuilder WithDokumentbeskrivelse()
+        public JournalpostBuilder WithDokumentbeskrivelse(Dokumentbeskrivelse dokumentbeskrivelse)
         {
-            _dokumentbeskrivelse = CreateDokumentbeskrivelse();
+            _dokumentbeskrivelse = dokumentbeskrivelse;
             return this;
         }
 
@@ -60,47 +62,28 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
                 jp.Arkivdel = new Kode() {KodeProperty = _arkivdel};
             }
             jp.ReferanseForelderMappe = _referanseTilMappe;
-            jp.Tittel = _tittel;
-            return jp;
-        }
-        
-        public static Dokumentbeskrivelse CreateDokumentbeskrivelse()
-        {
-            var dokumentbeskrivelse = 
-                new Dokumentbeskrivelse()
+            if (_tittel != null)
+            {
+                jp.Tittel = _tittel;
+            }
+
+            if (_journalposttype != null)
+            {
+                jp.Journalposttype = new Journalposttype()
                 {
-                    Dokumenttype = new Dokumenttype()
-                    {
-                        KodeProperty= "SØKNAD"
-                    },
-                    Dokumentstatus = new Dokumentstatus()
-                    {
-                        KodeProperty= "F"
-                    },
-                    Tittel = "Rekvisisjon av oppmålingsforretning",
-                    TilknyttetRegistreringSom = new TilknyttetRegistreringSom()
-                    {
-                        KodeProperty= "H"
-                    },
-                    Dokumentobjekt =
-                    {
-                        new Dokumentobjekt()
-                        {
-                            Versjonsnummer = 1,
-                            Variantformat = new Variantformat()
-                            {
-                                KodeProperty= "P"
-                            },
-                            Format = new Format()
-                            {
-                                KodeProperty= "PDF"
-                            },
-                            Filnavn = "rekvisjon.pdf",
-                            ReferanseDokumentfil = "rekvisisjon.pdf"
-                        }
-                    }
+                    KodeProperty = _journalposttype
                 };
-            return dokumentbeskrivelse;
+            }
+
+            if (_journalstatus != null)
+            {
+                jp.Journalstatus = new Journalstatus()
+                {
+                    KodeProperty = _journalstatus
+                };
+            }
+
+            return jp;
         }
 
         private Journalpost CreateJournalpost(
@@ -148,6 +131,18 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
                 DokumentetsDato = DateTime.Now.Date,
                 MottattDato = DateTime.Now,
             };
+        }
+
+        public JournalpostBuilder WithJournalposttype(string journalposttype)
+        {
+            _journalposttype = journalposttype;
+            return this;
+        }
+
+        public JournalpostBuilder WithJournalstatus(string journalstatus)
+        {
+            _journalstatus = journalstatus;
+            return this;
         }
     }
 }
