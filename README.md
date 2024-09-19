@@ -51,11 +51,17 @@ Den nye filen skal man da putte inn sine konfigurasjonsdetaljer for Fiks-Protoko
 
 #### Forklaring
 - `TestConfig:ArkivAccountId`: Fiks Protokoll kontoen for arkivet som skal motta meldingene.
-- `TestConfig:FagsystemName`: Verdien her brukes som standard i `system` i arkivmelding
+- `TestConfig:FagsystemName`: Verdien her brukes som standard i `system` i arkivmelding i testene
+- `TestConfig:SaksbehandlerName`: Verdien her brukes som standard for `saksbehandler` i arkivmelding i testene
 
 For å forenkle test-oppsett kan man la være å oppgi `AsiceSigningPublicKey` og
 `AsiceSigningPrivateKey` hvor den da vil forsøke å benytte sertifikatet oppgitt
 for MaskinPorten. Merk at dette ikke er anbefalt i produksjon.
+
+#### Tilpasninger
+Det kan være det må gjøres tilpasninger i verdier i testene for å få de til å kjøre mot et arkiv.
+
+Det kan også være at arkivet må sette opp `regel` og/eller systemet ditt i sitt arkiv.
 
 
 ### Test oppsett
@@ -63,14 +69,29 @@ Hver test sender inn en unik id som header på Fiks-IO meldingen med navnet **te
 
 ### Testene
 
-Selve testene ligger under **Tests** mappen. De er gruppert på typer tester i mappene **ArkivmeldingOppdateringTests** og **InnsynTests**.
+Selve testene ligger under **Tests** mappen. De er gruppert på typer tester i undermappene for **Brukstilfeller** og **Meldingstyper**.
 
-#### ArkivmeldingOppdateringTests
+- **Brukstilfeller** mappen inneholder tester basert på eksempler fra brukstilfellene for Fiks Arkiv, som f.eks. **_Elevmappe_**
+- **Meldingstyper** mappen inneholder tester basert på meldingstypene for å kunne arkivere, oppdatere, hente og søk.
+
+
+#### Brukstilfeller - Elevmappe
+Tester som arkiverer ut i fra brukstilfellet **_Elevmappe_**.
+
+#### Meldingstyper - Arkivering
+Tester som først oppretter en ressurs i arkivet for så å hente den igjen for å sjekke at opprettelsen har blitt gjennomført.
+
+#### Meldingstyper - ArkivmeldingOppdatering
 Tester som først oppretter en ressurs i arkivet for så å oppdatere den og så til slutt hente den igjen for å sjekke at oppdatering har blitt gjennomført. 
 
-#### InnsynTests
+#### Meldingstyper - Feilmelding
+Tester som framprovoserer feil og sjekker at man får feilmelding. 
+
+#### Meldingstyper - Innsyn
 Tester som først oppretter en ressurs i arkivet for å så å hente dem. 
-Testing av søk vil komme her etter hvert. 
+
+#### Meldingstyper - Sok
+Tester som først oppretter en ressurs i arkivet for å så å søke etter dem.
 
 ### Flere tester?
 Vi jobber med å utvide med flere tester, men det er ingenting i veien for å skrive noen selv og komme med pull-requests på dette repoet. Jo flere tester vi får jo bedre blir dette :)
