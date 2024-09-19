@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using KS.Fiks.Arkiv.Integration.Tests.Helpers;
 using KS.Fiks.Arkiv.Integration.Tests.Library;
@@ -146,7 +148,14 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Brukstilfeller.Elevmappe
             validator.Validate(nyJournalpostSerialized);
 
             // Send melding
-            var nyJournalpostMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOpprett, nyJournalpostSerialized, null, testSessionId);
+            // Send melding
+            var meldingAttachment = new MeldingAttachment
+            {
+                Filename = "rekvisisjon.pdf",
+                Filestream = new FileStream("rekvisisjon.pdf", FileMode.Open, FileAccess.Read, FileShare.None)
+            };
+            var attachments = new List<MeldingAttachment> { meldingAttachment };
+            var nyJournalpostMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOpprett, nyJournalpostSerialized, attachments, testSessionId);
             
             // Vent på 2 første response meldinger (mottatt og kvittering)
             VentPaSvar(2, 10);
@@ -322,7 +331,13 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Brukstilfeller.Elevmappe
             validator.Validate(nyJournalpostSerialized);
 
             // Send melding
-            var nyJournalpostMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOpprett, nyJournalpostSerialized, null, testSessionId);
+            var meldingAttachment = new MeldingAttachment
+            {
+                Filename = "rekvisisjon.pdf",
+                Filestream = new FileStream("rekvisisjon.pdf", FileMode.Open, FileAccess.Read, FileShare.None)
+            };
+            var attachments = new List<MeldingAttachment> { meldingAttachment };
+            var nyJournalpostMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOpprett, nyJournalpostSerialized, attachments, testSessionId);
             
             // Vent på 2 første response meldinger (mottatt og kvittering)
             VentPaSvar(2, 10);
