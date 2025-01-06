@@ -18,9 +18,10 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Brukstilfeller.Elevmappe
 {
     /**
      * Disse testene er til eksempel for brukstilfelle for elevmapper: https://github.com/ks-no/fiks-arkiv-specification/wiki/Brukstilfelle-Elevmappe
+     * Conexus sine eksempler er brukt som utgangspunkt
      * ArkivmeldingRegel: Denne bør endres til en regel som passer til ditt behov for testing
      */
-    public class ElevmappeTests : IntegrationTestsBase
+    public class ElevmappeFagsystemTests : IntegrationTestsBase
     {
         private const string SaksmappeEksternNoekkelNoekkel = "4950bac7-79f2-4ec4-90bf-0c41e8d9ce78";
         private const string ArkivmeldingRegel = "FiksArkiv-Elevmappe-1";

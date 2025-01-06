@@ -19,14 +19,15 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Brukstilfeller.Rekruttering
 {
     /**
      * Disse testene er til eksempel for brukstilfelle for rekruttering: https://github.com/ks-no/fiks-arkiv-specification/wiki/Brukstilfelle-Rekruttering
+     * EasyCruit sine eksempler er brukt som utgangsupnkt
      * ArkivmeldingRegel: Denne bør endres til en regel som passer til ditt behov for testing. Kan være forskjellig pr test!
      * OBS: Alle testene må kjøres og i riktig rekkefølge for at saksmappe skal først opprettes, og så legges det til journalposter
      */
-    public class RekrutteringTests : IntegrationTestsBase
+    public class RekrutteringFagsystemTests : IntegrationTestsBase
     {
         // SaksmappeEksternNoekkelNoekkel er nøkkelen for saksmappen
         private const string SaksmappeEksternNoekkelNoekkel = "4950bac7-79f2-4ec4-90bf-0c41e8d9ce78";
-        private static string ArkivmeldingRegel = "FiksArkiv-Rekruttering-1";
+        private static string ArkivmeldingRegel;
         private string _saksansvarligInitialer;
         private EksternNoekkel _saksmappeEksternNoekkel;
 
