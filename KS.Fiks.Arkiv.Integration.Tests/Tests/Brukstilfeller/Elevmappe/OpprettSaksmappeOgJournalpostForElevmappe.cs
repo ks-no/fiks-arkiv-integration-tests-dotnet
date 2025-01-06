@@ -18,11 +18,12 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Brukstilfeller.Elevmappe
 {
     /**
      * Disse testene er til eksempel for brukstilfelle for elevmapper: https://github.com/ks-no/fiks-arkiv-specification/wiki/Brukstilfelle-Elevmappe
+     * ArkivmeldingRegel: Denne bør endres til en regel som passer til ditt behov for testing
      */
     public class ElevmappeTests : IntegrationTestsBase
     {
         private const string SaksmappeEksternNoekkelNoekkel = "4950bac7-79f2-4ec4-90bf-0c41e8d9ce78";
-        private string ArkivmeldingRegel = "FiksArkiv Integrasjonstest regel";
+        private const string ArkivmeldingRegel = "FiksArkiv-Elevmappe-1";
         private string _saksansvarligInitialer;
         private EksternNoekkel _saksmappeEksternNoekkel;
 
@@ -33,9 +34,6 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Brukstilfeller.Elevmappe
             
             validator = new SimpleXsdValidator();
 
-            // Sett regel man ønsker å bruke. Default er Fagsystemnavn som kommer fra appsettings.
-            ArkivmeldingRegel = FagsystemNavn;
-            
             _saksansvarligInitialer = FagsystemNavn.ToUpper();
             _saksmappeEksternNoekkel = GenererEksternNoekkel(SaksmappeEksternNoekkelNoekkel);
         }
@@ -142,12 +140,11 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Brukstilfeller.Elevmappe
             var nyJournalpostSerialized = SerializeHelper.Serialize(arkivmelding);
             
             // Utkommenter dette hvis man vil å skrive til fil for å sjekke resultat manuelt
-            // File.WriteAllText("ArkivmeldingMedRegelNyJournalpostOgDokument.xml", nyJournalpostSerialized);
+            File.WriteAllText("ElevmappeArkivmeldingMedRegelNyJournalpostOgDokument.xml", nyJournalpostSerialized);
             
             // Valider arkivmelding
             validator.Validate(nyJournalpostSerialized);
 
-            // Send melding
             // Send melding
             var meldingAttachment = new MeldingAttachment
             {

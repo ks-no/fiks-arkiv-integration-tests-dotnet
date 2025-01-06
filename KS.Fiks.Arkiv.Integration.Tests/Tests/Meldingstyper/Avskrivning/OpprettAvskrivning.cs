@@ -17,7 +17,7 @@ using NUnit.Framework;
 namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Avskrivning
 {
     /**
-     * Disse testene er for å opprette saksmappe og journalposter.
+     * Disse testene er for å opprette saksmappe og journalpost med avskrivning.
      */
     public class OpprettAvskrivning : IntegrationTestsBase
     {

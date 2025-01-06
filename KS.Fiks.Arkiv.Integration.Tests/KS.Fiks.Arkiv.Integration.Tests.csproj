@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="KS.Fiks.Arkiv.Models.V1" Version="1.0.1" />
+        <PackageReference Include="KS.Fiks.Arkiv.Models.V1" Version="1.0.4" />
         <PackageReference Include="KS.Fiks.IO.Client" Version="4.0.6" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
@@ -30,6 +30,16 @@
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
       <None Remove="Tests\Arkivering\arkivmelding.xml" />
+      <!--Content Update="appsettings.Test.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="appsettings.Test.json" />
+      <Content Include="appsettings.Test.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <Content Update="appsettings.Development.json">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content-->
     </ItemGroup>
 
     <ItemGroup>
@@ -37,14 +47,13 @@
     </ItemGroup>
 
     <ItemGroup>
+      <EmbeddedResource Include="test-vedlegg.pdf">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </EmbeddedResource>
       <None Remove="rekvisisjon.pdf" />
       <EmbeddedResource Include="rekvisisjon.pdf">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </EmbeddedResource>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Tests\Meldingstyper\" />
     </ItemGroup>
 
 </Project>

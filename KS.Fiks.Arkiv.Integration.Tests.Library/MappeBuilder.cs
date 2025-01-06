@@ -9,6 +9,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
     public class MappeBuilder
     {
         private string _tittel = "En ny saksmappe fra integrasjonstest";
+        private string _offentligTittel;
         private AdministrativEnhet _administrativEnhet;
         private Saksansvarlig _saksansvarlig;
         private static List<Klassifikasjon> SaksmappeKlassifikasjoner;
@@ -29,6 +30,11 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
                 ReferanseEksternNoekkel = referanseEksternNoekkelNoekkel
             };
 
+            if (!string.IsNullOrEmpty(_offentligTittel))
+            {
+                saksmappe.OffentligTittel = _offentligTittel;
+            }
+
             foreach (var klassifikasjon in SaksmappeKlassifikasjoner)
             {
                 saksmappe.Klassifikasjon.Add(klassifikasjon);
@@ -44,6 +50,12 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
         }
 
         public MappeBuilder WithTittel(string tittel)
+        {
+            _tittel = tittel;
+            return this;
+        }
+        
+        public MappeBuilder WithOffentligTittel(string tittel)
         {
             _tittel = tittel;
             return this;

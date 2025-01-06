@@ -9,8 +9,11 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
     {
         private string _tittel;
         private string _dokumenttype = "SØKNAD";
+        private string? _dokumenttypebeskrivelse;
         private string _dokumentstatus = "F";
+        private string? _dokumentstatusbeskrivelse;
         private string _tilknyttetRegistreringSom = "F";
+        private string? _tilknyttetRegistreringSomBeskrivelse;
         private static List<Dokumentobjekt>? _dokumentobjekter;
 
         public static DokumentbeskrivelseBuilder Init()
@@ -25,21 +28,24 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
             return this;
         }
 
-        public DokumentbeskrivelseBuilder WithDokumenttype(string dokumenttype)
+        public DokumentbeskrivelseBuilder WithDokumenttype(string dokumenttype, string? beskrivelse = "")
         {
             _dokumenttype = dokumenttype;
+            _dokumenttypebeskrivelse = beskrivelse;
             return this;
         }
 
-        public DokumentbeskrivelseBuilder WithDokumentstatus(string dokumentstatus)
+        public DokumentbeskrivelseBuilder WithDokumentstatus(string dokumentstatus, string? beskrivelse = "")
         {
             _dokumentstatus = dokumentstatus;
+            _dokumentstatusbeskrivelse = beskrivelse;
             return this;
         }
 
-        public DokumentbeskrivelseBuilder WithTilknyttetRegistreringSom(string tilknyttetRegistreringSom)
+        public DokumentbeskrivelseBuilder WithTilknyttetRegistreringSom(string tilknyttetRegistreringSom, string beskrivelse = "")
         {
             _tilknyttetRegistreringSom = tilknyttetRegistreringSom;
+            _tilknyttetRegistreringSomBeskrivelse = beskrivelse;
             return this;
         }
 
@@ -50,15 +56,18 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
                 Tittel = _tittel,
                 Dokumenttype = new Dokumenttype()
                 {
-                    KodeProperty = _dokumenttype
+                    KodeProperty = _dokumenttype,
+                    Beskrivelse = _dokumenttypebeskrivelse
                 },
                 Dokumentstatus = new Dokumentstatus()
                 {
-                    KodeProperty = _dokumentstatus
+                    KodeProperty = _dokumentstatus,
+                    Beskrivelse = _dokumentstatusbeskrivelse
                 },
                 TilknyttetRegistreringSom = new TilknyttetRegistreringSom()
                 {
-                    KodeProperty = _tilknyttetRegistreringSom
+                    KodeProperty = _tilknyttetRegistreringSom,
+                    Beskrivelse = _tilknyttetRegistreringSomBeskrivelse
                 }
             };
 

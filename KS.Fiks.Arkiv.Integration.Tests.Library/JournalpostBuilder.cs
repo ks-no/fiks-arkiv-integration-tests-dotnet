@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding;
 using KS.Fiks.Arkiv.Models.V1.Metadatakatalog;
 
@@ -12,11 +14,15 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
         public const string ArkivdelDefault = "Arkiv validatortester";
 
         private ReferanseTilMappe _referanseTilMappe;
+        private EksternNoekkel _eksternNoekkel;
         private string _tittel;
         private string _arkivdel;
-        private Dokumentbeskrivelse _dokumentbeskrivelse;
+        private List<Dokumentbeskrivelse> _dokumentbeskrivelser = new List<Dokumentbeskrivelse>();
         private string _journalposttype;
+        private string _journalposttypeBeskrivelse;
         private string _journalstatus;
+        private string _offentligTittel;
+        private List<Korrespondansepart> _korrespondanseparter = new List<Korrespondansepart>();
 
         public static JournalpostBuilder Init()
         {
@@ -40,10 +46,16 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
             _arkivdel = arkivdel;
             return this;
         }
+        
+        public JournalpostBuilder WithEksternNoekkel(EksternNoekkel eksternNoekkel)
+        {
+            _eksternNoekkel = eksternNoekkel;
+            return this;
+        }
 
         public JournalpostBuilder WithDokumentbeskrivelse(Dokumentbeskrivelse dokumentbeskrivelse)
         {
-            _dokumentbeskrivelse = dokumentbeskrivelse;
+            _dokumentbeskrivelser.Add(dokumentbeskrivelse);
             return this;
         }
 
@@ -56,32 +68,42 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
                 saksbehandlerNavn: saksbehandlerNavn,
                 fagsystem: fagsystem
                 );
-            jp.Dokumentbeskrivelse.Add(_dokumentbeskrivelse);
+
+            if (_dokumentbeskrivelser.Count > 0)
+            {
+                foreach (var dokumentbeskrivelse in _dokumentbeskrivelser)
+                {
+                    jp.Dokumentbeskrivelse.Add(dokumentbeskrivelse);
+                }
+            }
+
+            if (_korrespondanseparter.Count > 0)
+            {
+                foreach (var korrespondansepart in _korrespondanseparter)
+                {
+                    jp.Korrespondansepart.Add(korrespondansepart);
+                }
+            }
+
             if (_arkivdel != null)
             {
-                jp.Arkivdel = new Kode() {KodeProperty = _arkivdel};
+                jp.Arkivdel = new Kode() { KodeProperty = _arkivdel };
             }
+
             jp.ReferanseForelderMappe = _referanseTilMappe;
-            if (_tittel != null)
+            jp.Tittel = _tittel;
+            jp.OffentligTittel = _offentligTittel;
+            jp.Journalposttype = new Journalposttype()
             {
-                jp.Tittel = _tittel;
-            }
+                KodeProperty = _journalposttype
+            };
 
-            if (_journalposttype != null)
+            jp.Journalstatus = new Journalstatus()
             {
-                jp.Journalposttype = new Journalposttype()
-                {
-                    KodeProperty = _journalposttype
-                };
-            }
-
-            if (_journalstatus != null)
-            {
-                jp.Journalstatus = new Journalstatus()
-                {
-                    KodeProperty = _journalstatus
-                };
-            }
+                KodeProperty = _journalstatus,
+                Beskrivelse = _journalposttypeBeskrivelse
+            };
+            jp.ReferanseEksternNoekkel = _eksternNoekkel;
 
             return jp;
         }
@@ -133,15 +155,28 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
             };
         }
 
-        public JournalpostBuilder WithJournalposttype(string journalposttype)
+        public JournalpostBuilder WithJournalposttype(string journalposttype, string beskrivelse = "")
         {
             _journalposttype = journalposttype;
+            _journalposttypeBeskrivelse = beskrivelse;
             return this;
         }
 
         public JournalpostBuilder WithJournalstatus(string journalstatus)
         {
             _journalstatus = journalstatus;
+            return this;
+        }
+
+        public JournalpostBuilder WithOffentligTittel(string offentligTittel)
+        {
+            _offentligTittel = offentligTittel;
+            return this;
+        }
+
+        public JournalpostBuilder WithKorrespondansepart(Korrespondansepart korrespondansepart)
+        {
+            _korrespondanseparter.Add(korrespondansepart);
             return this;
         }
     }
