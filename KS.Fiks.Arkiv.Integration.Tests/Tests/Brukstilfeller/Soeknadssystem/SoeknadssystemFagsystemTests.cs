@@ -15,15 +15,15 @@ using KS.FiksProtokollValidator.Tests.IntegrationTests.Models;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Validation;
 using NUnit.Framework;
 
-namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Brukstilfeller.Rekruttering
+namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Brukstilfeller.Soeknadssystem
 {
     /**
-     * Disse testene er til eksempel for brukstilfelle for rekruttering: https://github.com/ks-no/fiks-arkiv-specification/wiki/Brukstilfelle-Rekruttering
+     * Disse testene er til eksempel for brukstilfelle for søknadssystemer: https://github.com/ks-no/fiks-arkiv-specification/wiki/Brukstilfelle-S%C3%B8knadssystem-med-s%C3%B8knadsfrist
      * EasyCruit sine eksempler er brukt som utgangsupnkt
      * ArkivmeldingRegel: Denne bør endres til en regel som passer til ditt behov for testing. Kan være forskjellig pr test!
      * OBS: Alle testene må kjøres og i riktig rekkefølge for at saksmappe skal først opprettes, og så legges det til journalposter
      */
-    public class RekrutteringFagsystemTests : IntegrationTestsBase
+    public class SoeknadssystemFagsystemTests : IntegrationTestsBase
     {
         // SaksmappeEksternNoekkelNoekkel er nøkkelen for saksmappen
         private const string SaksmappeEksternNoekkelNoekkel = "4950bac7-79f2-4ec4-90bf-0c41e8d9ce78";
