@@ -10,7 +10,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Helpers
 {
     public class MeldingHelper
     {
-        public static async Task<PayloadFile> GetDecryptedMessagePayload(MottattMeldingArgs? mottattMeldingArgs)
+        public static async Task<PayloadFile> GetDecryptedMessagePayloadAsync(MottattMeldingArgs? mottattMeldingArgs)
         {
             var result = await GetDecryptedPayloads(mottattMeldingArgs);
             var firstPayloadFile = result[0];

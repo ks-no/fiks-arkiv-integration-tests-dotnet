@@ -1,5 +1,6 @@
 using KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding;
 using KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding.Oppdatering;
+using KS.Fiks.Arkiv.Models.V1.Arkivstruktur;
 using KS.Fiks.Arkiv.Models.V1.Innsyn.Hent.Mappe;
 using KS.Fiks.Arkiv.Models.V1.Metadatakatalog;
 
@@ -23,7 +24,10 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
         }
 
         public static Arkivmelding CreateArkivmeldingMedNyJournalpost(
-            string fagsystem, 
+            string fagsystem,
+            string arkivdel,
+            string classSystemId,
+            string classId,
             string? tittel = null,
             string? saksbehandlerNavn = null
             )
@@ -32,10 +36,13 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
              {
                  System = fagsystem,
                  AntallFiler = 1,
-                 Registrering = JournalpostBuilder.Init().WithArkivdel(JournalpostBuilder.ArkivdelDefault).WithTittel(tittel).Build(
-                     fagsystem: fagsystem,
-                     saksbehandlerNavn: saksbehandlerNavn
-                     ),
+                 Registrering = JournalpostBuilder.Init()
+                     .WithArkivdel(arkivdel, classSystemId, classId)
+                     .WithTittel(tittel)
+                     .Build(
+                         fagsystem: fagsystem,
+                         saksbehandlerNavn: saksbehandlerNavn
+                         )
              };
              
              return arkivmelding;
@@ -100,21 +107,21 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
             };
         }
 
-        public static Arkivmelding CreateArkivmeldingMedNyJournalpost(EksternNoekkel referanseEksternNoekkelNoekkel, string fagsystem)
+        public static Arkivmelding CreateArkivmeldingMedNyJournalpost(EksternNoekkel referanseEksternNoekkelNoekkel,
+            string arkivdel,
+            string classSystemId,
+            string classId)
         {
             var journalpost = JournalpostBuilder
                 .Init()
                 .WithTittel("Test tittel")
-                .WithArkivdel(JournalpostBuilder.ArkivdelDefault).Build();
-            journalpost.ReferanseEksternNoekkel = new EksternNoekkel()
-            {
-                Fagsystem = referanseEksternNoekkelNoekkel.Fagsystem,
-                Noekkel = referanseEksternNoekkelNoekkel.Noekkel
-            };
+                .WithArkivdel(arkivdel, classSystemId, classId)
+                .WithEksternNoekkel(referanseEksternNoekkelNoekkel)
+                .Build();
             
             var arkivmelding = new Arkivmelding()
             {
-                System = fagsystem,
+                System = referanseEksternNoekkelNoekkel.Fagsystem,
                 AntallFiler = 1,
                 Registrering = journalpost
             };

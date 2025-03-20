@@ -50,7 +50,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.ArkivmeldingOppdat
             validator.Validate(nySaksmappeAsSerialized);
 
             // Send melding
-            var nySaksmappeMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOpprett, nySaksmappeAsSerialized, null, testSessionId);
+            var nySaksmappeMeldingId = await FiksRequestService.SendAsync(MottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOpprett, nySaksmappeAsSerialized, null, testSessionId);
             
             // Vent på 2 første response meldinger (mottatt og kvittering)
             VentPaSvar(2, 10);
@@ -65,7 +65,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.ArkivmeldingOppdat
             // Hent meldingen
             var arkivmeldingKvitteringMelding = GetMottattMelding(MottatMeldingArgsList, nySaksmappeMeldingId, FiksArkivMeldingtype.ArkivmeldingOpprettKvittering);
             
-            var arkivmeldingKvitteringPayload = MeldingHelper.GetDecryptedMessagePayload(arkivmeldingKvitteringMelding).Result;
+            var arkivmeldingKvitteringPayload = await MeldingHelper.GetDecryptedMessagePayloadAsync(arkivmeldingKvitteringMelding);
             Assert.That(arkivmeldingKvitteringPayload.Filename == "arkivmelding-kvittering.xml", "Filnavn ikke som forventet arkivmelding-kvittering.xml");
     
             // Valider innhold (xml)
@@ -84,7 +84,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.ArkivmeldingOppdat
             MottatMeldingArgsList.Clear();
             
             // Send oppdater melding
-            var arkivmeldingOppdaterMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOppdater, arkivmeldingOppdateringSerialized, null, testSessionId);
+            var arkivmeldingOppdaterMeldingId = await FiksRequestService.SendAsync(MottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOppdater, arkivmeldingOppdateringSerialized, null, testSessionId);
 
             // Vent på 2 respons meldinger. Mottat og kvittering 
             VentPaSvar(2, 10);
@@ -116,7 +116,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.ArkivmeldingOppdat
             MottatMeldingArgsList.Clear();
             
             // Send hent melding
-            var mappeHentMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.MappeHent, mappeHentSerialized, null, testSessionId);
+            var mappeHentMeldingId = await FiksRequestService.SendAsync(MottakerKontoId, FiksArkivMeldingtype.MappeHent, mappeHentSerialized, null, testSessionId);
 
             // Vent på 1 respons meldinger 
             VentPaSvar(1, 10);
@@ -131,7 +131,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.ArkivmeldingOppdat
 
             Assert.That(mappeHentResultatMelding != null);
             
-            var mappeHentResultatPayload = MeldingHelper.GetDecryptedMessagePayload(mappeHentResultatMelding).Result;
+            var mappeHentResultatPayload = await MeldingHelper.GetDecryptedMessagePayloadAsync(mappeHentResultatMelding);
             
             // Valider innhold (xml)
             validator.Validate(mappeHentResultatPayload.PayloadAsString);

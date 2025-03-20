@@ -53,7 +53,7 @@ using OnSendCallback = Action<Guid, Guid,  string>;
         
         private Task Initialization { get; set; }
 
-        public async Task<Guid> Send(Guid mottakerKontoId, string meldingsType, string payloadContent, List<MeldingAttachment>? attachments, string testSessionId, string payloadFilename = null)
+        public async Task<Guid> SendAsync(Guid mottakerKontoId, string meldingsType, string payloadContent, List<MeldingAttachment>? attachments, string testSessionId, string payloadFilename = null)
         {
             var stackTrace = new StackTrace();
             await Initialization;

@@ -32,9 +32,10 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
         protected Guid MottakerKontoId;
         protected static string FagsystemNavn;
         protected static string SaksbehandlerNavn;
+        protected static string ArkivdelID;
         protected static string KlassifikasjonKlasseID;
         protected static string KlassifikasjonssystemID;
-        protected SimpleXsdValidator validator;
+        protected SimpleXsdValidator validator = new SimpleXsdValidator();
         // Tidsavbrudd message is received when a message sent from these tests has not been consumed and the TTL has been reached
         protected const string TidsavbruddMelding = "no.ks.fiks.kvittering.tidsavbrudd";
 
@@ -51,8 +52,9 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
             MottakerKontoId = Guid.Parse(GetTestConfig("ArkivAccountId"));
             FagsystemNavn = GetTestConfig("FagsystemName");
             SaksbehandlerNavn = GetTestConfig("SaksbehandlerName");
-            KlassifikasjonKlasseID = GetRequiredTestConfig("KlassifikasjonKlasseID") ;
-            KlassifikasjonssystemID = GetRequiredTestConfig("KlassifikasjonssystemID") ;
+            ArkivdelID = GetRequiredTestConfig("Arkivdel");
+            KlassifikasjonKlasseID = GetRequiredTestConfig("KlassifikasjonKlasseID");
+            KlassifikasjonssystemID = GetRequiredTestConfig("KlassifikasjonssystemID");
         }
         
         private string GetTestConfig(string key) => config[$"TestConfig:{key}"] ;
@@ -146,7 +148,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
 
         protected static FeilmeldingBase HentUtFeilMelding(MottattMeldingArgs mottatMeldingArgs)
         {
-            var melding = MeldingHelper.GetDecryptedMessagePayload(mottatMeldingArgs).Result;
+            var melding = MeldingHelper.GetDecryptedMessagePayloadAsync(mottatMeldingArgs).Result;
             var xml = melding.PayloadAsString;
             FeilmeldingBase feilmelding;
             switch (mottatMeldingArgs.Melding.MeldingType)
@@ -218,7 +220,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
             return false;
         }
 
-        protected async Task<Saksmappe?> HentSaksmappe(string testSessionId, EksternNoekkel referanseEksternNoekkel)
+        protected async Task<Mappe?> HentMappe(string testSessionId, EksternNoekkel referanseEksternNoekkel)
         {
             var mappeHent = MeldingGenerator.CreateMappeHent(referanseEksternNoekkel, FagsystemNavn);
             
@@ -234,14 +236,14 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
             MottatMeldingArgsList.Clear();
             
             // Send hent melding
-            var mappeHentMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.MappeHent, mappeHentSerialized, null, testSessionId);
+            var mappeHentMeldingId = await FiksRequestService.SendAsync(MottakerKontoId, FiksArkivMeldingtype.MappeHent, mappeHentSerialized, null, testSessionId);
 
             // Vent på 1 respons meldinger 
             VentPaSvar(1, 10);
 
             Assert.That(MottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
 
-            if( Ikkfunnet(MottatMeldingArgsList, mappeHentMeldingId) )
+            if (Ikkfunnet(MottatMeldingArgsList, mappeHentMeldingId))
             {
                 return null; 
             }
@@ -251,14 +253,14 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
 
             Assert.That(mappeHentResultatMelding != null);
             
-            var mappeHentResultatPayload = await MeldingHelper.GetDecryptedMessagePayload(mappeHentResultatMelding);
+            var mappeHentResultatPayload = await MeldingHelper.GetDecryptedMessagePayloadAsync(mappeHentResultatMelding);
             
             // Valider innhold (xml)
             validator.Validate(mappeHentResultatPayload.PayloadAsString);
 
             var mappeHentResultat = SerializeHelper.DeserializeXml<MappeHentResultat>(mappeHentResultatPayload.PayloadAsString);
 
-            return (Saksmappe)mappeHentResultat.Mappe;
+            return mappeHentResultat.Mappe;
         }
         
         protected async Task<ArkivmeldingKvittering> OpprettSaksmappe(string testSessionId, EksternNoekkel referanseEksternNoekkel)
@@ -276,7 +278,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
             //File.WriteAllText("ArkivmeldingMedNySaksmappe2.xml", nySaksmappeSerialized);
 
             // Send melding
-            var nySaksmappeMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOpprett,
+            var nySaksmappeMeldingId = await FiksRequestService.SendAsync(MottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOpprett,
                 nySaksmappeSerialized, null, testSessionId);
 
             // Vent på 2 første response meldinger (mottatt og kvittering)
@@ -290,7 +292,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
             var arkivmeldingKvitteringMelding = GetMottattMelding(MottatMeldingArgsList, nySaksmappeMeldingId,
                 FiksArkivMeldingtype.ArkivmeldingOpprettKvittering);
 
-            var arkivmeldingKvitteringPayload = MeldingHelper.GetDecryptedMessagePayload(arkivmeldingKvitteringMelding).Result;
+            var arkivmeldingKvitteringPayload = await MeldingHelper.GetDecryptedMessagePayloadAsync(arkivmeldingKvitteringMelding);
             Assert.That(arkivmeldingKvitteringPayload.Filename == "arkivmelding-kvittering.xml",
                 "Filnavn ikke som forventet arkivmelding-kvittering.xml");
 
