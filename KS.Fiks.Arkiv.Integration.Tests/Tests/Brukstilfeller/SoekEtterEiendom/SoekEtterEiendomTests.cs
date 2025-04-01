@@ -65,7 +65,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Brukstilfeller.SoekEtterEiendom
             MottatMeldingArgsList.Clear();
 
             // Send sok-melding
-            var sokMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.Sok, sokMeldingAsString, null, testSessionId);
+            var sokMeldingId = await FiksRequestService.SendAsync(MottakerKontoId, FiksArkivMeldingtype.Sok, sokMeldingAsString, null, testSessionId);
 
             // Vent på 1 respons meldinger 
             VentPaSvar(1, 10);
@@ -80,7 +80,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Brukstilfeller.SoekEtterEiendom
 
             Assert.That(sokResultatMelding != null);
             
-            var sokResultatPayload = MeldingHelper.GetDecryptedMessagePayload(sokResultatMelding).Result;
+            var sokResultatPayload = await MeldingHelper.GetDecryptedMessagePayloadAsync(sokResultatMelding);
             
             // Valider innhold (xml)
             validator.Validate(sokResultatPayload.PayloadAsString);
@@ -107,7 +107,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Brukstilfeller.SoekEtterEiendom
             MottatMeldingArgsList.Clear();
             
             // Send hent melding
-            var mappeHentMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.MappeHent, mappeHentAsString, null, testSessionId);
+            var mappeHentMeldingId = await FiksRequestService.SendAsync(MottakerKontoId, FiksArkivMeldingtype.MappeHent, mappeHentAsString, null, testSessionId);
 
             // Vent på 1 respons meldinger 
             VentPaSvar(1, 10);
@@ -122,7 +122,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Brukstilfeller.SoekEtterEiendom
 
             Assert.That(hentSaksmappeResultatMelding != null);
             
-            var mappeHentResultatPayload = MeldingHelper.GetDecryptedMessagePayload(hentSaksmappeResultatMelding).Result;
+            var mappeHentResultatPayload = await MeldingHelper.GetDecryptedMessagePayloadAsync(hentSaksmappeResultatMelding);
             
             // Valider innhold (xml)
             validator.Validate(mappeHentResultatPayload.PayloadAsString);
