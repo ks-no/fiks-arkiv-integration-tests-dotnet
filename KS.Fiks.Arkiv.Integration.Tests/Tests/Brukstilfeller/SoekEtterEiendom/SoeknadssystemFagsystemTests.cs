@@ -1,8 +1,11 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using KS.Fiks.Arkiv.Integration.Tests.Helpers;
 using KS.Fiks.Arkiv.Integration.Tests.Library;
+using KS.Fiks.Arkiv.Models.V1.Arkivstruktur;
 using KS.Fiks.Arkiv.Models.V1.Innsyn.Hent.Mappe;
+using KS.Fiks.Arkiv.Models.V1.Innsyn.Sok;
 using KS.Fiks.Arkiv.Models.V1.Meldingstyper;
 using KS.Fiks.IO.Client.Models;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers;
@@ -28,7 +31,8 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Brukstilfeller.SoekEtterEiendom
         }
         
         /*
-         * OBS: Denne testen søker etter eiendom
+         * Denne testen søker etter saksmapper vha matrikkel
+         * og deretter henter saksmappe basert på resultat av søket
          */
         [Test, Order(1)]
         public async Task A_Soek_Etter_Eiendom()
@@ -36,55 +40,61 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Brukstilfeller.SoekEtterEiendom
             // Denne id'en gjør at Arkiv-simulatoren ser hvilke meldinger som henger sammen. Har ingen funksjon ellers.  
             var testSessionId = Guid.NewGuid().ToString();
             
+            // Change these values for searching on matrikkel
+            var gnr = 1;
+            var bnr = 2;
+            var snr = 3;
+            var fnr = 4;
+            var knr = 5;
 
             /*
              * STEG 1:
-             * Opprett arkivmelding med saksmappe og send til arkiv
+             * Søk etter saksmapper på matrikkel med responstype noekler (bare nøkler)
              */
+            var sokMelding = SokBuilder.Init()
+                .WithSaksmappeMatrikkelSok(gnr, bnr, snr, fnr, knr )
+                .WithResponstype(Responstype.Noekler)
+                .Build();
 
-            var mappe = MappeBuilder.Init()
-                .WithTittel($"Test fra {FagsystemNavn} - Ledig stilling!")
-                .WithOffentligTittel($"Test fra {FagsystemNavn} - Ledig stilling!")
-                .BuildSaksmappe("");
+            var sokMeldingAsString = SerializeHelper.Serialize(sokMelding);
             
-            MottattMeldingArgs? arkivmeldingKvitteringMelding;
-            PayloadFile arkivmeldingKvitteringPayload;
-
-
-            var arkivmelding = MeldingGenerator.CreateArkivmelding(FagsystemNavn);
-            arkivmelding.Mappe = mappe;
-
-            var nySaksmappe = SerializeHelper.Serialize(arkivmelding);
-            
-            // Utkommenter dette hvis man vil å skrive til fil for å sjekke resultat manuelt
-            // File.WriteAllText("RekrutteringMedSaksmappeOgRegel.xml", nySaksmappe);
-            
-            // Valider arkivmelding
-            validator.Validate(nySaksmappe);
-
-            // Send melding
-            var nySaksmappeMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOpprett, nySaksmappe, null, testSessionId);
-            
-            // Vent på 2 første response meldinger (mottatt og kvittering)
-            VentPaSvar(2, 10);
-            Assert.That(MottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
-
-            // Verifiser at man får mottatt og arkivmelding kvittering meldinger tilbake
-            SjekkForventetMeldinger(MottatMeldingArgsList, nySaksmappeMeldingId, new []{FiksArkivMeldingtype.ArkivmeldingOpprettMottatt, FiksArkivMeldingtype.ArkivmeldingOpprettKvittering});
-
-            // Hent meldingen
-            arkivmeldingKvitteringMelding = GetMottattMelding(MottatMeldingArgsList, nySaksmappeMeldingId, FiksArkivMeldingtype.ArkivmeldingOpprettKvittering);
-            
-            arkivmeldingKvitteringPayload = MeldingHelper.GetDecryptedMessagePayload(arkivmeldingKvitteringMelding).Result;
-            Assert.That(arkivmeldingKvitteringPayload.Filename == "arkivmelding-kvittering.xml", "Filnavn ikke som forventet arkivmelding-kvittering.xml");
-    
             // Valider innhold (xml)
-            validator.Validate(arkivmeldingKvitteringPayload.PayloadAsString);
+            validator.Validate(sokMeldingAsString);
+            
+            // Nullstill meldingsliste
+            MottatMeldingArgsList.Clear();
 
+            // Send sok-melding
+            var sokMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.Sok, sokMeldingAsString, null, testSessionId);
+
+            // Vent på 1 respons meldinger 
+            VentPaSvar(1, 10);
+
+            Assert.That(MottatMeldingArgsList.Count > 0, "Fikk ikke noen meldinger innen timeout");
+            
+            // Verifiser at man får SokResultatNoekler melding
+            SjekkForventetMelding(MottatMeldingArgsList, sokMeldingId, FiksArkivMeldingtype.SokResultatNoekler);
+            
+            // Hent meldingen
+            var sokResultatMelding = GetMottattMelding(MottatMeldingArgsList, sokMeldingId, FiksArkivMeldingtype.SokResultatNoekler);
+
+            Assert.That(sokResultatMelding != null);
+            
+            var sokResultatPayload = MeldingHelper.GetDecryptedMessagePayload(sokResultatMelding).Result;
+            
+            // Valider innhold (xml)
+            validator.Validate(sokResultatPayload.PayloadAsString);
+
+            var sokResultat = SerializeHelper.DeserializeXml<SokeresultatNoekler>(sokResultatPayload.PayloadAsString);
+
+            Assert.That(sokResultat.Count > 0);
+
+            var _saksmappeEksternNoekkel = sokResultat.ResultatListe.First().Saksmappe.ReferanseEksternNoekkel;
+            
             /*
              * STEG 2:
-             * Hent oppprettet saksmappe igjen og valider
-             * 
+             * Hent første saksmappe fra søkeresultat og valider
+             * TODO Denne kan utvides til å hente alle mapper som kom tilbake fra søket
              */
             var mappeHent = MappeHentBuilder.Init().WithEksternNoekkel(_saksmappeEksternNoekkel).Build();
             
@@ -108,20 +118,17 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Brukstilfeller.SoekEtterEiendom
             SjekkForventetMelding(MottatMeldingArgsList, mappeHentMeldingId, FiksArkivMeldingtype.MappeHentResultat);
             
             // Hent meldingen
-            var mappeHentResultatMelding = GetMottattMelding(MottatMeldingArgsList, mappeHentMeldingId, FiksArkivMeldingtype.MappeHentResultat);
+            var hentSaksmappeResultatMelding = GetMottattMelding(MottatMeldingArgsList, mappeHentMeldingId, FiksArkivMeldingtype.MappeHentResultat);
 
-            Assert.That(mappeHentResultatMelding != null);
+            Assert.That(hentSaksmappeResultatMelding != null);
             
-            var mappeHentResultatPayload = MeldingHelper.GetDecryptedMessagePayload(mappeHentResultatMelding).Result;
+            var mappeHentResultatPayload = MeldingHelper.GetDecryptedMessagePayload(hentSaksmappeResultatMelding).Result;
             
             // Valider innhold (xml)
             validator.Validate(mappeHentResultatPayload.PayloadAsString);
 
             var mappeHentResultat = SerializeHelper.DeserializeXml<MappeHentResultat>(mappeHentResultatPayload.PayloadAsString);
 
-            Assert.That(mappeHentResultat.Mappe.ReferanseEksternNoekkel.Fagsystem == arkivmelding.Mappe.ReferanseEksternNoekkel.Fagsystem);
-            Assert.That(mappeHentResultat.Mappe.ReferanseEksternNoekkel.Noekkel == arkivmelding.Mappe.ReferanseEksternNoekkel.Noekkel);
         }
-    
     }
 }
