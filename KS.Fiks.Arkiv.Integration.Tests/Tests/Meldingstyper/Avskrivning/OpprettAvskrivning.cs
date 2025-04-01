@@ -109,7 +109,9 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Avskrivning
                         new Models.V1.Arkivering.Arkivmelding.Avskrivning()
                         {
                             Avskrivningsdato = DateTime.Now,
-                            AvskrevetAv = "Test Testesen",
+                            AvskrevetAv = new Saksbehandler() { 
+                                Navn = "Test Testesen"
+                            },
                             Avskrivningsmaate = new Avskrivningsmaate()
                             {
                                 Beskrivelse = "Besvart med brev",
