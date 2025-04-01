@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding;
 using KS.Fiks.Arkiv.Models.V1.Metadatakatalog;

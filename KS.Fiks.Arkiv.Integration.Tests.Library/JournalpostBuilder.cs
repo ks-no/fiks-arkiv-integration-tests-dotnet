@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding;
 using KS.Fiks.Arkiv.Models.V1.Metadatakatalog;
 
@@ -11,12 +10,13 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
         public const string SaksansvarligDefault = "Sara Saksansvarlig";
         public const string SaksmappeTittelDefault = "En ny saksmappe fra integrasjonstest";
         public const string FagsystemDefault = "Fagsystem validatortester";
-        public const string ArkivdelDefault = "Arkiv validatortester";
 
         private ReferanseTilMappe _referanseTilMappe;
         private EksternNoekkel _eksternNoekkel;
         private string _tittel;
         private string _arkivdel;
+        private string _classSystem;
+        private string _class;
         private List<Dokumentbeskrivelse> _dokumentbeskrivelser = new List<Dokumentbeskrivelse>();
         private string _journalposttype;
         private string _journalposttypeBeskrivelse;
@@ -41,9 +41,12 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
             return this;
         }
         
-        public JournalpostBuilder WithArkivdel(string arkivdel)
+        public JournalpostBuilder WithArkivdel(string arkivdel, string classSystemId, string classId)
         {
             _arkivdel = arkivdel;
+            _classSystem = classSystemId;
+            _class = classId;
+
             return this;
         }
         
@@ -88,22 +91,50 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
             if (_arkivdel != null)
             {
                 jp.Arkivdel = new Kode() { KodeProperty = _arkivdel };
+                jp.Klassifikasjon.Add(
+                    new Klassifikasjon()
+                    {
+                        KlassifikasjonssystemID = _classSystem,
+                        KlasseID = _class
+                    });
             }
 
-            jp.ReferanseForelderMappe = _referanseTilMappe;
-            jp.Tittel = _tittel;
-            jp.OffentligTittel = _offentligTittel;
-            jp.Journalposttype = new Journalposttype()
+            if (_referanseTilMappe != null)
             {
-                KodeProperty = _journalposttype
-            };
+                jp.ReferanseForelderMappe = _referanseTilMappe;
+            }
 
-            jp.Journalstatus = new Journalstatus()
+            if (!string.IsNullOrEmpty(_tittel))
             {
-                KodeProperty = _journalstatus,
-                Beskrivelse = _journalposttypeBeskrivelse
-            };
-            jp.ReferanseEksternNoekkel = _eksternNoekkel;
+                jp.Tittel = _tittel;
+            }
+
+            if (!string.IsNullOrEmpty(_offentligTittel))
+            {
+                jp.OffentligTittel = _offentligTittel;
+            }
+
+            if (_journalposttype != null)
+            {
+                jp.Journalposttype = new Journalposttype()
+                {
+                    KodeProperty = _journalposttype,
+                    Beskrivelse = _journalposttypeBeskrivelse
+                };
+            }
+
+            if (_journalstatus != null)
+            {
+                jp.Journalstatus = new Journalstatus()
+                {
+                    KodeProperty = _journalstatus
+                };
+            }
+
+            if (_eksternNoekkel != null)
+            {
+                jp.ReferanseEksternNoekkel = _eksternNoekkel;
+            }
 
             return jp;
         }

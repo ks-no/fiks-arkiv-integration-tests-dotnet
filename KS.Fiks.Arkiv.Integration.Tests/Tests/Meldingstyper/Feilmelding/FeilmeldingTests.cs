@@ -51,7 +51,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Feilmelding
             MottatMeldingArgsList.Clear();
             
             // Send hent melding
-            var journalpostHentMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.RegistreringHent, journalpostHentSerialized, null, testSessionId);
+            var journalpostHentMeldingId = await FiksRequestService.SendAsync(MottakerKontoId, FiksArkivMeldingtype.RegistreringHent, journalpostHentSerialized, null, testSessionId);
 
             // Vent på 1 respons meldinger 
             VentPaSvar(1, 10);

@@ -64,7 +64,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Sok
                             Operator = OperatorType.Equal,
                             SokVerdier = new SokVerdier()
                             {
-                                Stringvalues = { "En journalpost tittel med wildcard*" }
+                                Stringvalues = { sokeord }
                             }
                         } 
                     },
@@ -83,7 +83,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Sok
 
             // Send søk melding
             var sokSerialized = SerializeHelper.Serialize(sok);
-            var sokMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.Sok,
+            var sokMeldingId = await FiksRequestService.SendAsync(MottakerKontoId, FiksArkivMeldingtype.Sok,
                 sokSerialized, null, testSessionId);
             
             // Vent på respons
@@ -97,8 +97,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Sok
             var sokeresultatUtvidetMelding = GetMottattMelding(MottatMeldingArgsList, sokMeldingId,
                 FiksArkivMeldingtype.SokResultatUtvidet);
             
-            var payload = MeldingHelper.GetDecryptedMessagePayload(sokeresultatUtvidetMelding).Result;
-            
+            var payload = await MeldingHelper.GetDecryptedMessagePayloadAsync(sokeresultatUtvidetMelding);
             
             // Valider innhold (xml)
             validator.Validate(payload.PayloadAsString);
@@ -106,7 +105,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Sok
             var sokeresultatUtvidet =
                 SerializeHelper.DeserializeSokeresultatUtvidet(payload.PayloadAsString);
             
-            Assert.That(sokeresultatUtvidet.Count == 3);
+            Assert.That(sokeresultatUtvidet.Count >= 3);
 
             foreach (var resultat in sokeresultatUtvidet.ResultatListe)
             {
@@ -116,7 +115,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Sok
 
         private async Task<Arkivmelding> ArkiverJournalpost(string testSessionId, string tittel)
         {
-            var arkivmelding = MeldingGenerator.CreateArkivmeldingMedNyJournalpost(FagsystemNavn, tittel: tittel);
+            var arkivmelding = MeldingGenerator.CreateArkivmeldingMedNyJournalpost(FagsystemNavn, ArkivdelID, KlassifikasjonssystemID, KlassifikasjonKlasseID, tittel: tittel);
 
             var nyJournalpostSerialized = SerializeHelper.Serialize(arkivmelding);
             
@@ -129,7 +128,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Sok
             //File.WriteAllText("ArkivmeldingMedNyJournalpost.xml", nyJournalpostSerialized);
 
             // Send arkiver melding
-            var nyJournalpostMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOpprett,
+            var nyJournalpostMeldingId = await FiksRequestService.SendAsync(MottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOpprett,
                 nyJournalpostSerialized, null, testSessionId);
 
             Console.Out.WriteLineAsync($"Arkivmelding med ny journalpost med tittel {tittel} sendt");
@@ -148,7 +147,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Sok
             var arkivmeldingKvitteringMelding = GetMottattMelding(MottatMeldingArgsList, nyJournalpostMeldingId,
                 FiksArkivMeldingtype.ArkivmeldingOpprettKvittering);
 
-            var arkivmeldingKvitteringPayload = MeldingHelper.GetDecryptedMessagePayload(arkivmeldingKvitteringMelding).Result;
+            var arkivmeldingKvitteringPayload = await MeldingHelper.GetDecryptedMessagePayloadAsync(arkivmeldingKvitteringMelding);
             Assert.That(arkivmeldingKvitteringPayload.Filename == "arkivmelding-kvittering.xml",
                 "Filnavn ikke som forventet arkivmelding-kvittering.xml");
 

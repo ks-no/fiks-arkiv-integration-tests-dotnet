@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
 using KS.Fiks.Arkiv.Integration.Tests.Helpers;
 using KS.Fiks.Arkiv.Integration.Tests.Library;
 using KS.Fiks.Arkiv.Models.V1.Arkivering.Arkivmelding;
@@ -11,8 +7,11 @@ using KS.Fiks.Arkiv.Models.V1.Metadatakatalog;
 using KS.Fiks.IO.Client.Models;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Helpers;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Models;
-using KS.FiksProtokollValidator.Tests.IntegrationTests.Validation;
 using NUnit.Framework;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Arkivering
 {
@@ -29,8 +28,6 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Arkivering
         {
             await Init();
             
-            validator = new SimpleXsdValidator();
-
             _saksmappeEksternNoekkel = GenererEksternNoekkel(SaksmappeEksternNoekkelNoekkel);
         }
         
@@ -53,7 +50,9 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Arkivering
              */
 
             // Lag saksmappe
-            var saksmappe = MappeBuilder.Init().WithKlassifikasjon(GenererKlassifikasjon()).BuildSaksmappe(_saksmappeEksternNoekkel);
+            var saksmappe = MappeBuilder.Init()
+                .WithKlassifikasjon(GenererKlassifikasjon())
+                .BuildSaksmappe(_saksmappeEksternNoekkel);
             var referanseTilSaksmappe = new ReferanseTilMappe()
             {
                 ReferanseEksternNoekkel = _saksmappeEksternNoekkel
@@ -76,25 +75,28 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Arkivering
             journalpost.ReferanseEksternNoekkel = referanseEksternNoekkelNyJournalpost;
 
             journalpost.Dokumentbeskrivelse.Add(
-                new Dokumentbeskrivelse()
-                {
-                    Tittel = "Tittel på dokumentbeskrivelsen",
-                    TilknyttetRegistreringSom = new TilknyttetRegistreringSom()
+                DokumentbeskrivelseBuilder.Init()
+                    .WithTittel("Tittel på dokumentbeskrivelsen")
+                    .WithDokumenttype("VEDTAK", "Vedtak")
+                    .WithDokumentstatus("F", "Dokumentet er ferdigstilt")
+                    .WithTilknyttetRegistreringSom("H", "Hoveddokument")
+                    .WithDokumentobjekt(new Dokumentobjekt()
                     {
-                        Beskrivelse = "En KODE beskrivelse",
-                        KodeProperty = "En KODE property"
-                        
-                    },
-                    Dokumentobjekt =
-                    {
-                        new Dokumentobjekt()
+                        Versjonsnummer = 1,
+                        Variantformat = new Variantformat()
                         {
-                            Filnavn = "rekvisisjon.pdf",
-                            ReferanseDokumentfil = "rekvisisjon.pdf"
-                        }
-                    }
-                });
-        
+                            KodeProperty = "P",
+                            Beskrivelse = "Produksjonsformat"
+                        },
+                        Format = new Format()
+                        {
+                            KodeProperty = "RA-PDF"
+                        },
+                        Filnavn = "rekvisisjon.pdf",
+                        ReferanseDokumentfil = "rekvisisjon.pdf"
+                    })
+                    .Build());
+
             var arkivmelding = MeldingGenerator.CreateArkivmelding(FagsystemNavn);
             arkivmelding.Registrering = journalpost;
             arkivmelding.Mappe = saksmappe;
@@ -108,13 +110,13 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Arkivering
             validator.Validate(nyJournalpostSerialized);
 
             // Send melding
-            var meldingAttachment = new MeldingAttachment
+            using var meldingAttachment = new MeldingAttachment
             {
                 Filename = "rekvisisjon.pdf",
                 Filestream = new FileStream("rekvisisjon.pdf", FileMode.Open, FileAccess.Read, FileShare.None)
             };
             var attachments = new List<MeldingAttachment> { meldingAttachment };
-            var nyJournalpostMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOpprett, nyJournalpostSerialized, attachments, testSessionId);
+            var nyJournalpostMeldingId = await FiksRequestService.SendAsync(MottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOpprett, nyJournalpostSerialized, attachments, testSessionId);
             
             // Vent på 2 første response meldinger (mottatt og kvittering)
             VentPaSvar(2, 10);
@@ -126,7 +128,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Arkivering
             // Hent meldingen
             arkivmeldingKvitteringMelding = GetMottattMelding(MottatMeldingArgsList, nyJournalpostMeldingId, FiksArkivMeldingtype.ArkivmeldingOpprettKvittering);
             
-            arkivmeldingKvitteringPayload = MeldingHelper.GetDecryptedMessagePayload(arkivmeldingKvitteringMelding).Result;
+            arkivmeldingKvitteringPayload = await MeldingHelper.GetDecryptedMessagePayloadAsync(arkivmeldingKvitteringMelding);
             Assert.That(arkivmeldingKvitteringPayload.Filename == "arkivmelding-kvittering.xml", "Filnavn ikke som forventet arkivmelding-kvittering.xml");
     
             // Valider innhold (xml)
@@ -148,7 +150,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Arkivering
             MottatMeldingArgsList.Clear();
             
             // Send hent melding
-            var journalpostHentMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.RegistreringHent, journalpostHentAsString, null, testSessionId);
+            var journalpostHentMeldingId = await FiksRequestService.SendAsync(MottakerKontoId, FiksArkivMeldingtype.RegistreringHent, journalpostHentAsString, null, testSessionId);
 
             // Vent på 1 respons meldinger 
             VentPaSvar(1, 10);
@@ -163,7 +165,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Arkivering
 
             Assert.That(registreringHentResultatMelding != null);
             
-            var registreringHentResultatPayload = MeldingHelper.GetDecryptedMessagePayload(registreringHentResultatMelding).Result;
+            var registreringHentResultatPayload = await MeldingHelper.GetDecryptedMessagePayloadAsync(registreringHentResultatMelding);
             
             // Valider innhold (xml)
             validator.Validate(registreringHentResultatPayload.PayloadAsString);
@@ -193,7 +195,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Arkivering
              * 
              */
 
-            var saksmappeSystemID = await OpprettEllerHentSaksmappe(testSessionId);
+            var mappeSystemID = await OpprettEllerHentMappeAsync(testSessionId);
 
             /*
              * STEG 2:
@@ -209,7 +211,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Arkivering
 
             var referanseForelderMappe = new ReferanseTilMappe()
             {
-                SystemID = saksmappeSystemID
+                SystemID = mappeSystemID
             };
 
             var journalpost = JournalpostBuilder
@@ -233,7 +235,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Arkivering
             validator.Validate(nyJournalpostSerialized);
 
             // Send melding
-            var nyJournalpostMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOpprett, nyJournalpostSerialized, null, testSessionId);
+            var nyJournalpostMeldingId = await FiksRequestService.SendAsync(MottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOpprett, nyJournalpostSerialized, null, testSessionId);
             
             // Vent på 2 første response meldinger (mottatt og kvittering)
             VentPaSvar(2, 10);
@@ -248,7 +250,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Arkivering
             // Hent meldingen
             arkivmeldingKvitteringMelding = GetMottattMelding(MottatMeldingArgsList, nyJournalpostMeldingId, FiksArkivMeldingtype.ArkivmeldingOpprettKvittering);
             
-            arkivmeldingKvitteringPayload = MeldingHelper.GetDecryptedMessagePayload(arkivmeldingKvitteringMelding).Result;
+            arkivmeldingKvitteringPayload = await MeldingHelper.GetDecryptedMessagePayloadAsync(arkivmeldingKvitteringMelding);
             Assert.That(arkivmeldingKvitteringPayload.Filename == "arkivmelding-kvittering.xml", "Filnavn ikke som forventet arkivmelding-kvittering.xml");
     
             // Valider innhold (xml)
@@ -270,7 +272,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Arkivering
             MottatMeldingArgsList.Clear();
             
             // Send hent melding
-            var journalpostHentMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.RegistreringHent, journalpostHentAsString, null, testSessionId);
+            var journalpostHentMeldingId = await FiksRequestService.SendAsync(MottakerKontoId, FiksArkivMeldingtype.RegistreringHent, journalpostHentAsString, null, testSessionId);
 
             // Vent på 1 respons meldinger 
             VentPaSvar(1, 10);
@@ -285,7 +287,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Arkivering
 
             Assert.That(registreringHentResultatMelding != null);
             
-            var registreringHentResultatPayload = MeldingHelper.GetDecryptedMessagePayload(registreringHentResultatMelding).Result;
+            var registreringHentResultatPayload = await MeldingHelper.GetDecryptedMessagePayloadAsync(registreringHentResultatMelding);
             
             // Valider innhold (xml)
             validator.Validate(registreringHentResultatPayload.PayloadAsString);
@@ -314,7 +316,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Arkivering
              * 
              */
 
-            var saksmappeSystemID = await OpprettEllerHentSaksmappe(testSessionId);
+            var mappeSystemID = await OpprettEllerHentMappeAsync(testSessionId);
 
             /*
              * STEG 2:
@@ -353,7 +355,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Arkivering
             validator.Validate(nyJournalpostSerialized);
 
             // Send melding
-            var nyJournalpostMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOpprett, nyJournalpostSerialized, null, testSessionId);
+            var nyJournalpostMeldingId = await FiksRequestService.SendAsync(MottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOpprett, nyJournalpostSerialized, null, testSessionId);
             
             // Vent på 2 første response meldinger (mottatt og kvittering)
             VentPaSvar(2, 10);
@@ -368,7 +370,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Arkivering
             // Hent melding
             arkivmeldingKvitteringMelding = GetMottattMelding(MottatMeldingArgsList, nyJournalpostMeldingId, FiksArkivMeldingtype.ArkivmeldingOpprettKvittering);
             
-            arkivmeldingKvitteringPayload = MeldingHelper.GetDecryptedMessagePayload(arkivmeldingKvitteringMelding).Result;
+            arkivmeldingKvitteringPayload = await MeldingHelper.GetDecryptedMessagePayloadAsync(arkivmeldingKvitteringMelding);
             Assert.That(arkivmeldingKvitteringPayload.Filename == "arkivmelding-kvittering.xml", "Filnavn ikke som forventet arkivmelding-kvittering.xml");
     
             // Valider innhold (xml)
@@ -390,7 +392,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Arkivering
             MottatMeldingArgsList.Clear();
             
             // Send hent melding
-            var journalpostHentMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.RegistreringHent, journalpostHentAsString, null, testSessionId);
+            var journalpostHentMeldingId = await FiksRequestService.SendAsync(MottakerKontoId, FiksArkivMeldingtype.RegistreringHent, journalpostHentAsString, null, testSessionId);
 
             // Vent på 1 respons meldinger 
             VentPaSvar(1, 10);
@@ -405,7 +407,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Arkivering
 
             Assert.That(registreringHentResultatMelding != null);
             
-            var registreringHentResultatPayload = MeldingHelper.GetDecryptedMessagePayload(registreringHentResultatMelding).Result;
+            var registreringHentResultatPayload = await MeldingHelper.GetDecryptedMessagePayloadAsync(registreringHentResultatMelding);
             
             // Valider innhold (xml)
             validator.Validate(registreringHentResultatPayload.PayloadAsString);
@@ -416,21 +418,21 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Arkivering
             Assert.That(registreringHentResultat.Journalpost.ReferanseEksternNoekkel.Noekkel == arkivmelding.Registrering.ReferanseEksternNoekkel.Noekkel);
         }
 
-        private async Task<SystemID> OpprettEllerHentSaksmappe(string testSessionId)
+        private async Task<SystemID> OpprettEllerHentMappeAsync(string testSessionId)
         {
             Console.Out.WriteLine(
                 $"Forsøker hente saksmappe med referanseEksternNoekkel Fagsystem {FagsystemNavn} og Noekkel {SaksmappeEksternNoekkelNoekkel}");
 
-            var saksmappe = await HentSaksmappe(testSessionId, _saksmappeEksternNoekkel);
+            var mappe = await HentMappe(testSessionId, _saksmappeEksternNoekkel);
 
-            SystemID saksmappeSystemId;
+            SystemID mappeSystemId;
 
-            if (saksmappe == null)
+            if (mappe == null)
             {
                 Console.Out.WriteLine(
                     $"Fant ikke noen saksmappe med referanseEksternNoekkel Fagsystem {FagsystemNavn} og Noekkel {SaksmappeEksternNoekkelNoekkel}. Oppretter ny i stedet.");
                 var arkivmeldingKvittering = await OpprettSaksmappe(testSessionId, _saksmappeEksternNoekkel);
-                saksmappeSystemId = new SystemID()
+                mappeSystemId = new SystemID()
                 {
                     Value = arkivmeldingKvittering.MappeKvittering.SystemID.Value,
                     Label = arkivmeldingKvittering.MappeKvittering.SystemID.Label
@@ -438,10 +440,10 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.Arkivering
             }
             else
             {
-                saksmappeSystemId = saksmappe.SystemID;
+                mappeSystemId = mappe.SystemID;
             }
 
-            return saksmappeSystemId;
+            return mappeSystemId;
         }
     }
 }

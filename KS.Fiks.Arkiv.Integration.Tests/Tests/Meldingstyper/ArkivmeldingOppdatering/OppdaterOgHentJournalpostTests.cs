@@ -43,7 +43,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.ArkivmeldingOppdat
              * STEG 1:
              * Opprett arkivmelding og send inn
              */
-            var arkivmelding = MeldingGenerator.CreateArkivmeldingMedNyJournalpost(referanseEksternNoekkel, FagsystemNavn);
+            var arkivmelding = MeldingGenerator.CreateArkivmeldingMedNyJournalpost(referanseEksternNoekkel, ArkivdelID, KlassifikasjonssystemID, KlassifikasjonKlasseID);
 
             var nyJournalpostSerialized = SerializeHelper.Serialize(arkivmelding);
             
@@ -53,7 +53,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.ArkivmeldingOppdat
             validator.Validate(nyJournalpostSerialized);
 
             // Send melding
-            var nyJournalpostMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOpprett, nyJournalpostSerialized,  null, testSessionId);
+            var nyJournalpostMeldingId = await FiksRequestService.SendAsync(MottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOpprett, nyJournalpostSerialized,  null, testSessionId);
             
             // Vent på 2 første response meldinger (mottatt og kvittering)
             VentPaSvar(2, 10);
@@ -68,7 +68,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.ArkivmeldingOppdat
             // Hent melding
             var arkivmeldingKvitteringMelding = GetMottattMelding(MottatMeldingArgsList, nyJournalpostMeldingId, FiksArkivMeldingtype.ArkivmeldingOpprettKvittering);
             
-            var arkivmeldingKvitteringPayload = MeldingHelper.GetDecryptedMessagePayload(arkivmeldingKvitteringMelding).Result;
+            var arkivmeldingKvitteringPayload = await MeldingHelper.GetDecryptedMessagePayloadAsync(arkivmeldingKvitteringMelding);
             Assert.That(arkivmeldingKvitteringPayload.Filename == "arkivmelding-kvittering.xml", "Filnavn ikke som forventet arkivmelding-kvittering.xml");
     
             // Valider innhold (xml)
@@ -99,7 +99,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.ArkivmeldingOppdat
             MottatMeldingArgsList.Clear();
             
             // Send oppdater melding
-            var arkivmeldingOppdaterMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOppdater, arkivmeldingOppdateringSerialized, null, testSessionId);
+            var arkivmeldingOppdaterMeldingId = await FiksRequestService.SendAsync(MottakerKontoId, FiksArkivMeldingtype.ArkivmeldingOppdater, arkivmeldingOppdateringSerialized, null, testSessionId);
 
             // Vent på 2 respons meldinger. Mottat og kvittering 
             VentPaSvar(2, 10);
@@ -132,7 +132,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.ArkivmeldingOppdat
             MottatMeldingArgsList.Clear();
             
             // Send hent melding
-            var journalpostHentMeldingId = await FiksRequestService.Send(MottakerKontoId, FiksArkivMeldingtype.RegistreringHent, journalpostHentAsString, null, testSessionId);
+            var journalpostHentMeldingId = await FiksRequestService.SendAsync(MottakerKontoId, FiksArkivMeldingtype.RegistreringHent, journalpostHentAsString, null, testSessionId);
 
             // Vent på 1 respons meldinger 
             VentPaSvar(1, 10);
@@ -147,7 +147,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests.Meldingstyper.ArkivmeldingOppdat
 
             Assert.That(journalpostHentResultatMelding != null);
             
-            var journalpostHentResultatPayload = MeldingHelper.GetDecryptedMessagePayload(journalpostHentResultatMelding).Result;
+            var journalpostHentResultatPayload = await MeldingHelper.GetDecryptedMessagePayloadAsync(journalpostHentResultatMelding);
             
             // Valider innhold (xml)
             validator.Validate(journalpostHentResultatPayload.PayloadAsString);
