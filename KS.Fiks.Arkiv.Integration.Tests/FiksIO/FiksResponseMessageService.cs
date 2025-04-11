@@ -36,7 +36,6 @@ namespace KS.Fiks.Arkiv.Integration.Tests.FiksIO
             await Console.Out.WriteLineAsync("Starter subscription - ExectueAsync");
             stoppingToken.ThrowIfCancellationRequested();
             await _client.NewSubscriptionAsync(OnMottattMelding);   
-            await Task.CompletedTask;
         }
 
         private static async Task OnMottattMelding(MottattMeldingArgs meldingArgs)
