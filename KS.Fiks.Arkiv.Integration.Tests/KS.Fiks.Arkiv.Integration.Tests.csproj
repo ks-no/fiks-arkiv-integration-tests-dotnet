@@ -9,7 +9,7 @@
 
     <ItemGroup>
         <PackageReference Include="KS.Fiks.Arkiv.Models.V1" Version="1.0.5" />
-        <PackageReference Include="KS.Fiks.IO.Client" Version="4.0.6" />
+        <PackageReference Include="KS.Fiks.IO.Client" Version="6.0.2" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />

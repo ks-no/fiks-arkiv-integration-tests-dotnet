@@ -35,19 +35,18 @@ namespace KS.Fiks.Arkiv.Integration.Tests.FiksIO
         {
             await Console.Out.WriteLineAsync("Starter subscription - ExectueAsync");
             stoppingToken.ThrowIfCancellationRequested();
-            _client.NewSubscription(OnMottattMelding);   
-            await Task.CompletedTask;
+            await _client.NewSubscriptionAsync(OnMottattMelding);   
         }
 
-        private static async void OnMottattMelding(object sender, MottattMeldingArgs mottattMeldingArgs)
+        private static async Task OnMottattMelding(MottattMeldingArgs meldingArgs)
         {
-            await Console.Out.WriteLineAsync($"Henter melding med MeldingId: {mottattMeldingArgs.Melding.MeldingId}, SvarPaMeldingId: {mottattMeldingArgs.Melding.SvarPaMelding}, MeldingType: {mottattMeldingArgs.Melding.MeldingType}");
+            await Console.Out.WriteLineAsync($"Henter melding med MeldingId: {meldingArgs.Melding.MeldingId}, SvarPaMeldingId: {meldingArgs.Melding.SvarPaMelding}, MeldingType: {meldingArgs.Melding.MeldingType}");
 
-            await Console.Out.WriteLineAsync($"MeldingType: {mottattMeldingArgs.Melding.MeldingType}");
+            await Console.Out.WriteLineAsync($"MeldingType: {meldingArgs.Melding.MeldingType}");
             
-            MottatMeldingArgsList.Add(mottattMeldingArgs);
+            MottatMeldingArgsList.Add(meldingArgs);
             
-            mottattMeldingArgs.SvarSender?.Ack();
+            await meldingArgs.SvarSender.AckAsync();
         }
 
         public List<MottattMeldingArgs> GetMottatMeldingArgsList()
