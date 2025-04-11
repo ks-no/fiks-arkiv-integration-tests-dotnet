@@ -47,7 +47,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
                 .AddJsonFile("appsettings.Local.json")
                 .Build();
             Client = await FiksIOClient.CreateAsync(FiksIOConfigurationBuilder.CreateFiksIOConfiguration(config));
-            Client.NewSubscription(OnMottattMelding);
+            await Client.NewSubscriptionAsync(OnMottattMelding);
             FiksRequestService = new FiksRequestMessageService(config);
             MottakerKontoId = Guid.Parse(GetTestConfig("ArkivAccountId"));
             FagsystemNavn = GetTestConfig("FagsystemName");
@@ -79,17 +79,17 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Tests
             }
         }
 
-        protected static async void OnMottattMelding(object sender, MottattMeldingArgs mottattMeldingArgs)
+        protected static async Task OnMottattMelding(MottattMeldingArgs meldingArgs)
         {
-            var shortMsgType = MeldingHelper.ShortenMessageType(mottattMeldingArgs);
+            var shortMsgType = MeldingHelper.ShortenMessageType(meldingArgs);
             // Log Tidsavbrudd messages and discard them
-            if (mottattMeldingArgs.Melding.MeldingType == TidsavbruddMelding)
+            if (meldingArgs.Melding.MeldingType == TidsavbruddMelding)
             {
-                await Console.Out.WriteLineAsync($"Mottatt {TidsavbruddMelding}. SvarPaMeldingId: {mottattMeldingArgs.Melding.SvarPaMelding}. Ignorerer denne meldingen.");
+                await Console.Out.WriteLineAsync($"Mottatt {TidsavbruddMelding}. SvarPaMeldingId: {meldingArgs.Melding.SvarPaMelding}. Ignorerer denne meldingen.");
             }
-            await Console.Out.WriteLineAsync($"📨 Mottatt {shortMsgType}-melding med MeldingId: {mottattMeldingArgs.Melding.MeldingId}, SvarPaMeldingId: {mottattMeldingArgs.Melding.SvarPaMelding}, MeldingType: {mottattMeldingArgs.Melding.MeldingType} og lagrer i listen");
-            MottatMeldingArgsList?.Add(mottattMeldingArgs);
-            mottattMeldingArgs.SvarSender?.Ack();
+            await Console.Out.WriteLineAsync($"📨 Mottatt {shortMsgType}-melding med MeldingId: {meldingArgs.Melding.MeldingId}, SvarPaMeldingId: {meldingArgs.Melding.SvarPaMelding}, MeldingType: {meldingArgs.Melding.MeldingType} og lagrer i listen");
+            MottatMeldingArgsList?.Add(meldingArgs);
+            await meldingArgs.SvarSender.AckAsync();
         }
 
         protected static void SjekkForventetMelding(IEnumerable<MottattMeldingArgs>? mottattMeldingArgsList, Guid sendtMeldingsid, string forventetMeldingstype)

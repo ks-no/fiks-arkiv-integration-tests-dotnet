@@ -9,6 +9,7 @@ using KS.Fiks.Arkiv.Models.V1.Meldingstyper;
 using KS.Fiks.IO.Client;
 using KS.Fiks.IO.Client.Configuration;
 using KS.Fiks.IO.Client.Models;
+using KS.Fiks.IO.Crypto.Models;
 using KS.FiksProtokollValidator.Tests.IntegrationTests.Models;
 using Microsoft.Extensions.Configuration;
 

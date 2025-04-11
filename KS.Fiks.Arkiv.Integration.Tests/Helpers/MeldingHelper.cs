@@ -42,7 +42,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Helpers
                 catch (Exception e)
                 {
                     await Console.Out.WriteLineAsync($"Klarte ikke hente payload og melding blir dermed ikke parset. MeldingId: {mottattMeldingArgs.Melding?.MeldingId}, Error: {e.Message}");
-                    mottattMeldingArgs.SvarSender?.Ack();
+                    await mottattMeldingArgs.SvarSender.AckAsync();
                 }
             }
 
