@@ -13,6 +13,7 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
         private AdministrativEnhet _administrativEnhet;
         private Saksansvarlig _saksansvarlig;
         private static List<Klassifikasjon> SaksmappeKlassifikasjoner;
+        private Skjerming _skjerming;
 
         public static MappeBuilder Init()
         {
@@ -27,7 +28,8 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
                 Tittel = _tittel,
                 Saksansvarlig = _saksansvarlig,
                 AdministrativEnhet = _administrativEnhet,
-                ReferanseEksternNoekkel = referanseEksternNoekkelNoekkel
+                ReferanseEksternNoekkel = referanseEksternNoekkelNoekkel,
+                Skjerming = _skjerming
             };
 
             if (!string.IsNullOrEmpty(_offentligTittel))
@@ -58,6 +60,12 @@ namespace KS.Fiks.Arkiv.Integration.Tests.Library
         public MappeBuilder WithOffentligTittel(string tittel)
         {
             _tittel = tittel;
+            return this;
+        }
+        
+        public MappeBuilder WithSkjerming(Skjerming skjerming)
+        {
+            _skjerming = skjerming;
             return this;
         }
 
